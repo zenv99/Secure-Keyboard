@@ -7,9 +7,18 @@
 - No user text or audio transmitted off-device.
 - Password fields: no suggestions, voice capture or personalization.
 - Honor `IME_FLAG_NO_PERSONALIZED_LEARNING`.
-- Backup/device-transfer rules exclude learned words, clipboard contents and audio.
+- Android backup disabled, with explicit empty cloud-backup and device-transfer rules.
 - No typed text, recognized speech, dictionary entries or audio metadata in release logs.
 - Model artifacts and native dependencies are version-pinned and hash-verified.
+
+## Implemented in the current development branch
+
+- The app manifest now sets `android:allowBackup="false"`.
+- Android 12+ data extraction rules exclude all app data from cloud backup and device-to-device transfer.
+- Legacy full-backup rules exclude all app data.
+- CI inspects the built APK manifest and fails if INTERNET permission is present or backup protections are missing.
+
+These controls are an initial privacy hardening step. They do not yet prove every dependency or code path is free of network behavior; a full dependency and source audit remains required.
 
 ## Data handling
 
