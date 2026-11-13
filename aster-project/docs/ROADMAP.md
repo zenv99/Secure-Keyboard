@@ -18,7 +18,8 @@ Exit: reproducible baseline build on a configured Android runner/device.
 Exit: CI passes with a produced APK and all privacy checks green.
 
 ## Gate 2 — autocorrect measurement
-- Adapt a host CLI to the actual HeliBoard correction engine.
+- [x] Review the existing HeliBoard correction policy and regression tests; see [autocorrect baseline](AUTOCORRECT_BASELINE.md).
+- Adapt a host CLI or Android test adapter to the actual HeliBoard correction engine.
 - Use a rights-cleared, versioned corpus and calibrated touch-noise profiles.
 - Measure noisy-word restoration separately from false corrections on clean words.
 - Track language and field-type regressions.
