@@ -1,6 +1,7 @@
 name: Aster quality gates
 
 on:
+  workflow_dispatch:
   push:
     branches: [aster-development]
     paths:
@@ -8,6 +9,7 @@ on:
       - 'app/**'
       - 'build.gradle.kts'
       - 'settings.gradle'
+      - 'gradle/**'
       - '.github/workflows/aster-quality.yml'
   pull_request:
     branches: [main]
@@ -16,10 +18,15 @@ on:
       - 'app/**'
       - 'build.gradle.kts'
       - 'settings.gradle'
+      - 'gradle/**'
       - '.github/workflows/aster-quality.yml'
 
 permissions:
   contents: read
+
+concurrency:
+  group: aster-quality-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   python-tests:
@@ -29,6 +36,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+          cache: pip
+          cache-dependency-path: aster-project/requirements-dev.txt
       - run: python -m pip install -r aster-project/requirements-dev.txt
       - run: PYTHONPATH=aster-project python -m unittest discover -s aster-project/tests -v
       - run: python aster-project/eval/autocorrect_eval.py aster-project/eval/sample_sentences.txt --seed 1
@@ -41,11 +50,16 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
+          cache: gradle
       - uses: android-actions/setup-android@v3
-      - name: Build and lint existing HeliBoard app
+      - name: Install pinned Android SDK and NDK components
+        run: |
+          sdkmanager --install "platforms;android-37" "build-tools;37.0.0" "ndk;28.0.13004108"
+          yes | sdkmanager --licenses >/dev/null
+      - name: Build, lint and run unit tests
         run: |
           chmod +x ./gradlew
-          ./gradlew :app:lintDebug :app:assembleDebug
+          ./gradlew --no-daemon :app:lintDebug :app:testDebugUnitTest :app:assembleDebug
       - name: Enforce no-INTERNET permission in produced APK
         shell: bash
         run: |
