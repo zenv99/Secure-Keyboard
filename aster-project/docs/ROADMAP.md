@@ -8,11 +8,14 @@
 Exit: reproducible baseline build on a configured Android runner/device.
 
 ## Gate 1 — privacy and CI
-- Add no-INTERNET merged-APK check.
-- Add deterministic evaluation harness tests.
-- Review backup, exported components, logs, dependencies and merged manifests.
+- [x] Add no-INTERNET merged-APK check.
+- [x] Add deterministic evaluation harness tests.
+- [x] Disable Android backup and device-to-device data extraction.
+- [x] Add source-level checks for privacy manifest and backup declarations.
+- [ ] Confirm CI build, lint, unit tests and merged-APK privacy checks pass.
+- [ ] Review exported components, logs, dependencies and merged manifests.
 
-Exit: CI fails if INTERNET permission appears or APK is absent.
+Exit: CI passes with a produced APK and all privacy checks green.
 
 ## Gate 2 — autocorrect measurement
 - Adapt a host CLI to the actual HeliBoard correction engine.
