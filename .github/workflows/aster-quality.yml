@@ -30,7 +30,7 @@ jobs:
         with:
           python-version: '3.12'
       - run: python -m pip install -r aster-project/requirements-dev.txt
-      - run: python -m unittest discover -s aster-project/tests -v
+      - run: PYTHONPATH=aster-project python -m unittest discover -s aster-project/tests -v
       - run: python aster-project/eval/autocorrect_eval.py aster-project/eval/sample_sentences.txt --seed 1
 
   android-build-and-privacy:
