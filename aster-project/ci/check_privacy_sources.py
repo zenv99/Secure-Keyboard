@@ -6,8 +6,8 @@ import xml.etree.ElementTree as ET
 
 ROOT = Path(__file__).resolve().parents[2]
 ANDROID = "{http://schemas.android.com/apk/res/android}"
-REQUIRED_DOMAINS = {
-    "root", "file", "database", "sharedpref", "external",
+LEGACY_DOMAINS = {"root", "file", "database", "sharedpref", "external"}
+MODERN_DOMAINS = LEGACY_DOMAINS | {
     "device_root", "device_file", "device_database", "device_sharedpref",
 }
 
@@ -38,8 +38,8 @@ legacy_excluded = {
     item.get("domain") for item in legacy.findall("exclude")
     if item.get("path") == "."
 }
-if not REQUIRED_DOMAINS.issubset(legacy_excluded):
-    fail(f"legacy backup exclusions incomplete: {sorted(REQUIRED_DOMAINS - legacy_excluded)}")
+if not LEGACY_DOMAINS.issubset(legacy_excluded):
+    fail(f"legacy backup exclusions incomplete: {sorted(LEGACY_DOMAINS - legacy_excluded)}")
 
 modern_path = ROOT / "app/src/main/res/xml/data_extraction_rules.xml"
 modern = ET.parse(modern_path).getroot()
@@ -53,7 +53,7 @@ for section_name in ("cloud-backup", "device-transfer"):
         item.get("domain") for item in section.findall("exclude")
         if item.get("path") == "."
     }
-    if not REQUIRED_DOMAINS.issubset(excluded):
-        fail(f"{section_name} exclusions incomplete: {sorted(REQUIRED_DOMAINS - excluded)}")
+    if not MODERN_DOMAINS.issubset(excluded):
+        fail(f"{section_name} exclusions incomplete: {sorted(MODERN_DOMAINS - excluded)}")
 
 print("PASS: source manifest declares no INTERNET permission and disables backup/device transfer")
