@@ -53,11 +53,22 @@ jobs:
           distribution: temurin
           java-version: '17'
           cache: gradle
-      - uses: android-actions/setup-android@v3
-      - name: Install pinned Android SDK and NDK components
+      - name: Configure runner-provided Android SDK
+        env:
+          ANDROID_HOME: /usr/local/lib/android/sdk
+          ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
         run: |
-          yes | sdkmanager --licenses >/dev/null
-          sdkmanager --install "platforms;android-37" "ndk;28.0.13004108"
+          set -euo pipefail
+          SDKMANAGER="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
+          if [[ ! -x "$SDKMANAGER" ]]; then
+            echo "Android SDK command-line tools not found at $SDKMANAGER" >&2
+            find /usr/local/lib/android -maxdepth 5 -name sdkmanager -type f -print >&2 || true
+            exit 1
+          fi
+          echo "$ANDROID_HOME/cmdline-tools/latest/bin" >> "$GITHUB_PATH"
+          echo "$ANDROID_HOME/platform-tools" >> "$GITHUB_PATH"
+          yes | "$SDKMANAGER" --licenses >/dev/null
+          "$SDKMANAGER" --install "platforms;android-37" "ndk;28.0.13004108"
       - name: Build, lint and run unit tests
         run: |
           chmod +x ./gradlew
