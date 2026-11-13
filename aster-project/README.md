@@ -32,7 +32,7 @@ This folder is an engineering plan and integration scaffold. It is not yet a com
 
 ## Work order
 
-See [roadmap](docs/ROADMAP.md), [architecture](docs/ARCHITECTURE.md), [privacy requirements](docs/PRIVACY.md), and [third-party notices](THIRD_PARTY_NOTICES.md).
+See [roadmap](docs/ROADMAP.md), [architecture](docs/ARCHITECTURE.md), [autocorrect baseline review](docs/AUTOCORRECT_BASELINE.md), [privacy requirements](docs/PRIVACY.md), and [third-party notices](THIRD_PARTY_NOTICES.md).
 
 ## Local validation
 
