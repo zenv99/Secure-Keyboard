@@ -58,7 +58,7 @@ jobs:
         with:
           cmdline-tools-version: 12266719
           accept-android-sdk-licenses: true
-          packages: platforms;android-37
+          packages: '"platforms;android-37"'
       - name: Install required Android NDK
         run: sdkmanager "ndk;28.0.13004108"
       - name: Build, lint and run unit tests
