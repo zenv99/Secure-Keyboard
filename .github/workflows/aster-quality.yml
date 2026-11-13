@@ -58,9 +58,8 @@ jobs:
         with:
           cmdline-tools-version: 12266719
           accept-android-sdk-licenses: true
-          packages: |
-            platforms;android-37
-            ndk;28.0.13004108
+      - name: Install required Android SDK packages
+        run: sdkmanager "platforms;android-37" "ndk;28.0.13004108"
       - name: Build, lint and run unit tests
         run: |
           chmod +x ./gradlew
