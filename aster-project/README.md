@@ -26,6 +26,8 @@ These are observations from the fork's current Gradle and manifest files, not a 
 
 ## Current implementation status
 
+The development branch now disables Android app backup and device-to-device data extraction, and CI checks those source declarations plus the built APK's merged manifest. The app still needs a successful CI build and device verification.
+
 This folder is an engineering plan and integration scaffold. It is not yet a completed feature implementation or APK. The ASR service sample is deliberately isolated until the exact Android service lifecycle, manifest, native toolchain, model licensing, and device performance have been validated.
 
 ## Work order
