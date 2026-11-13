@@ -1,10 +1,12 @@
-# HeliBoard — Aster development fork
+# Secure Keyboard — private Android keyboard
 
-This repository is a personal development fork of [HeliBoard](https://github.com/HeliBorg/HeliBoard), a privacy-conscious, customizable Android keyboard. **Aster** is the working name for the planned enhancement track described below. The upstream HeliBoard application remains the current app; Aster is not yet a separate released keyboard.
+This repository is a personal development fork of [HeliBoard](https://github.com/HeliBorg/HeliBoard), a privacy-conscious, customizable Android keyboard. **Secure Keyboard** is the product name for this privacy-first development track, built on the HeliBoard open-source keyboard foundation. The upstream HeliBoard application remains the current working app while Secure Keyboard-specific enhancements are developed and validated.
 
-[View the Aster engineering plan](aster-project/README.md) · [Development roadmap](aster-project/docs/ROADMAP.md) · [Architecture](aster-project/docs/ARCHITECTURE.md) · [Privacy requirements](aster-project/docs/PRIVACY.md) · [Open development PR](https://github.com/zenv99/HeliBoard/pull/1)
+![Secure Keyboard — Type Freely. Privately.](assets/secure-keyboard-banner.svg)
 
-## Aster project status
+[View the Secure Keyboard engineering plan](aster-project/README.md) · [Development roadmap](aster-project/docs/ROADMAP.md) · [Architecture](aster-project/docs/ARCHITECTURE.md) · [Privacy requirements](aster-project/docs/PRIVACY.md) · [Open development PR](https://github.com/zenv99/HeliBoard/pull/1)
+
+## Secure Keyboard project status
 
 | Area | Current status |
 |---|---|
@@ -13,7 +15,7 @@ This repository is a personal development fork of [HeliBoard](https://github.com
 | Offline voice dictation | Process-isolated service scaffold only; microphone capture and Whisper inference are not implemented |
 | Local personalization | Requirements documented; implementation remains |
 | Privacy | Backup exclusions and source checks added; APK-level CI verification remains pending |
-| Installable Aster build | Not yet released |
+| Installable Secure Keyboard build | Not yet released |
 
 **Project priorities**
 - Improve correction quality while avoiding changes to correctly typed words, names and technical vocabulary.
@@ -21,7 +23,7 @@ This repository is a personal development fork of [HeliBoard](https://github.com
 - Integrate [whisper.cpp](https://github.com/ggml-org/whisper.cpp) only after pinning and reviewing its source, dependencies, model licence and hashes.
 - Preserve HeliBoard's upstream history, GPL-3.0 obligations and existing offline posture.
 
-**Build and test:** use the repository's Gradle wrapper and follow the [Aster development guide](aster-project/README.md). CI results are shown in the [Actions tab](https://github.com/zenv99/HeliBoard/actions). Do not treat this branch as a production release until the Android build, APK privacy checks and device tests pass.
+**Build and test:** use the repository's Gradle wrapper and follow the [Secure Keyboard development guide](aster-project/README.md). CI results are shown in the [Actions tab](https://github.com/zenv99/HeliBoard/actions). Do not treat this branch as a production release until the Android build, APK privacy checks and device tests pass.
 
 ---
 
