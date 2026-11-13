@@ -1,0 +1,63 @@
+name: Aster quality gates
+
+on:
+  push:
+    branches: [aster-development]
+    paths:
+      - 'aster-project/**'
+      - 'app/**'
+      - 'build.gradle.kts'
+      - 'settings.gradle'
+      - '.github/workflows/aster-quality.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'aster-project/**'
+      - 'app/**'
+      - 'build.gradle.kts'
+      - 'settings.gradle'
+      - '.github/workflows/aster-quality.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  python-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -r aster-project/requirements-dev.txt
+      - run: python -m unittest discover -s aster-project/tests -v
+      - run: python aster-project/eval/autocorrect_eval.py aster-project/eval/sample_sentences.txt --seed 1
+
+  android-build-and-privacy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v3
+      - name: Build and lint existing HeliBoard app
+        run: |
+          chmod +x ./gradlew
+          ./gradlew :app:lintDebug :app:assembleDebug
+      - name: Enforce no-INTERNET permission in produced APK
+        shell: bash
+        run: |
+          shopt -s nullglob
+          apks=(app/build/outputs/apk/debug/*.apk)
+          if (( ${#apks[@]} == 0 )); then
+            echo 'No debug APK produced; refusing to skip privacy gate.' >&2
+            exit 1
+          fi
+          bash aster-project/ci/check_no_internet.sh "${apks[@]}"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: aster-development-debug-apk
+          path: app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
