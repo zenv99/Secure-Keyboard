@@ -1,4 +1,34 @@
-# HeliBoard
+# HeliBoard — Aster development fork
+
+This repository is a personal development fork of [HeliBoard](https://github.com/HeliBorg/HeliBoard), a privacy-conscious, customizable Android keyboard. **Aster** is the working name for the planned enhancement track described below. The upstream HeliBoard application remains the current app; Aster is not yet a separate released keyboard.
+
+[View the Aster engineering plan](aster-project/README.md) · [Development roadmap](aster-project/docs/ROADMAP.md) · [Architecture](aster-project/docs/ARCHITECTURE.md) · [Privacy requirements](aster-project/docs/PRIVACY.md) · [Open development PR](https://github.com/zenv99/HeliBoard/pull/1)
+
+## Aster project status
+
+| Area | Current status |
+|---|---|
+| HeliBoard base | Existing upstream Android keyboard source |
+| Conservative autocorrect | Existing HeliBoard logic reviewed; evaluation harness added; tuning and real-engine measurement remain |
+| Offline voice dictation | Process-isolated service scaffold only; microphone capture and Whisper inference are not implemented |
+| Local personalization | Requirements documented; implementation remains |
+| Privacy | Backup exclusions and source checks added; APK-level CI verification remains pending |
+| Installable Aster build | Not yet released |
+
+**Project priorities**
+- Improve correction quality while avoiding changes to correctly typed words, names and technical vocabulary.
+- Keep all typing, personalization and future speech recognition on-device.
+- Integrate [whisper.cpp](https://github.com/ggml-org/whisper.cpp) only after pinning and reviewing its source, dependencies, model licence and hashes.
+- Preserve HeliBoard's upstream history, GPL-3.0 obligations and existing offline posture.
+
+**Build and test:** use the repository's Gradle wrapper and follow the [Aster development guide](aster-project/README.md). CI results are shown in the [Actions tab](https://github.com/zenv99/HeliBoard/actions). Do not treat this branch as a production release until the Android build, APK privacy checks and device tests pass.
+
+---
+
+## Original HeliBoard project
+
+The sections below preserve the upstream HeliBoard feature and contribution information. For the original project, see [HeliBorg/HeliBoard](https://github.com/HeliBorg/HeliBoard).
+
 HeliBoard is a privacy-conscious and customizable open-source keyboard, based on AOSP / OpenBoard.
 Does not use internet permission, and thus is 100% offline.
 
