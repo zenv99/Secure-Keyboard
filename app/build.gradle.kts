@@ -14,7 +14,7 @@ android {
         minSdk = 21
         targetSdk = 37
         versionCode = (System.getenv("SK_VERSION_CODE")?.toIntOrNull() ?: 4300)
-        versionName = "4.3-beta1"
+        versionName = "1.0"
         ndk {
             abiFilters.clear()
             abiFilters.add("arm64-v8a") // on-device Whisper (:asr) is built for arm64 only

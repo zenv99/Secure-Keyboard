@@ -123,7 +123,7 @@ jobs:
           cp app/build/outputs/apk/debug/*.apk release/SecureKeyboard-debug.apk
           (cd release && sha256sum SecureKeyboard-debug.apk > SHA256SUMS.txt)
           cat > release/notes.md <<EOF
-          Test build of Secure Keyboard (commit ${GITHUB_SHA:0:8}). Debug-signed, not yet independently audited.
+          Secure Keyboard v1.0 (commit ${GITHUB_SHA:0:8}). Not yet independently audited.
 
           This build passed the automated privacy gate: no INTERNET permission, backup disabled, only whitelisted permissions.
           Install: download SecureKeyboard-debug.apk, allow installs from your browser or Files app when asked, then enable Secure Keyboard in Settings > System > Keyboard.
@@ -131,11 +131,11 @@ jobs:
           EOF
           sed -i 's/^          //' release/notes.md
           if [ -n "${SK_KEYSTORE_B64:-}" ]; then
-            TAG="v0.1.${GITHUB_RUN_NUMBER}"
+            TAG="v1.0.${GITHUB_RUN_NUMBER}"
             cp release/SecureKeyboard-debug.apk "release/SecureKeyboard-${TAG}.apk"
             gh release create "$TAG" "release/SecureKeyboard-${TAG}.apk" release/SHA256SUMS.txt \
               --prerelease --target "$GITHUB_SHA" --title "Secure Keyboard ${TAG}" --notes-file release/notes.md
           fi
           gh release delete test-build --cleanup-tag --yes || true
           gh release create test-build release/SecureKeyboard-debug.apk release/SHA256SUMS.txt \
-            --prerelease --target "$GITHUB_SHA" --title "Secure Keyboard test build" --notes-file release/notes.md
+            --prerelease --target "$GITHUB_SHA" --title "Secure Keyboard v1.0" --notes-file release/notes.md
