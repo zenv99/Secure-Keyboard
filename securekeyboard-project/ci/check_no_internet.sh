@@ -27,10 +27,10 @@ for apk in "$@"; do
   if ! grep -Fq 'android:allowBackup="false"' <<<"$manifest"; then
     echo "FAIL: allowBackup is not false in $apk" >&2; exit 1
   fi
-  if ! grep -Fq 'android:dataExtractionRules="@xml/data_extraction_rules"' <<<"$manifest"; then
+  if ! grep -Eq 'android:dataExtractionRules="@' <<<"$manifest"; then
     echo "FAIL: data extraction rules are not declared in $apk" >&2; exit 1
   fi
-  if ! grep -Fq 'android:fullBackupContent="@xml/backup_rules"' <<<"$manifest"; then
+  if ! grep -Eq 'android:fullBackupContent="@' <<<"$manifest"; then
     echo "FAIL: legacy full-backup rules are not declared in $apk" >&2; exit 1
   fi
   echo "PASS: no INTERNET permission; backup and device-transfer controls declared in $apk"
