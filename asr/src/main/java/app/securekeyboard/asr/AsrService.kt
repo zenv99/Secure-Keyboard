@@ -143,11 +143,13 @@ class AsrService : Service() {
                     try {
                         val engine = ensureWhisper()
                         val silent = pcm.all { it.toInt() == 0 }
+                        // Whisper invents / repeats words when a clip is mostly silence: keep just the speech (+200 ms).
+                        val speech = trimSilence(pcm)
                         if (silent) {
                             reply(client, MSG_ERROR, code = ERR_SILENT)
                         } else {
-                            val floats = FloatArray(pcm.size) { pcm[it] / 32768f }
-                            text = clean(engine.transcribe(floats, LANGUAGE, threads()), pcm.size / SAMPLE_RATE.toDouble())
+                            val floats = FloatArray(speech.size) { speech[it] / 32768f }
+                            text = clean(engine.transcribe(floats, LANGUAGE, threads()), speech.size / SAMPLE_RATE.toDouble())
                             floats.fill(0f)
                             if (text.isBlank() && last) reply(client, MSG_ERROR, code = ERR_NO_SPEECH)
                         }
@@ -196,10 +198,34 @@ class AsrService : Service() {
             }
             words = out
         }
+        // The whole sentence said twice in a row ("A B C A B C"): keep one copy.
+        if (words.size >= 4 && words.size % 2 == 0) {
+            val half = words.size / 2
+            if ((0 until half).all { norm(words[it]) == norm(words[it + half]) }) words = words.take(half)
+        }
         // Final hard cap: nobody speaks faster than ~4 words per second.
         val maxWords = (seconds * 4.0).toInt() + 6
         if (words.size > maxWords) words = words.take(maxWords)
         return words.joinToString(" ").trim()
+    }
+
+    private fun trimSilence(pcm: ShortArray): ShortArray {
+        val win = SAMPLE_RATE / 50 // 20 ms
+        fun loud(start: Int): Boolean {
+            val end = minOf(pcm.size, start + win)
+            if (end <= start) return false
+            var sum = 0L
+            for (i in start until end) sum += kotlin.math.abs(pcm[i].toInt())
+            return sum / (end - start) > 300
+        }
+        var first = 0
+        while (first < pcm.size - win && !loud(first)) first += win
+        var last = pcm.size
+        while (last > first + win && !loud(last - win)) last -= win
+        val margin = SAMPLE_RATE / 5
+        val from = maxOf(0, first - margin)
+        val to = minOf(pcm.size, last + margin)
+        return if (to - from < MIN_SAMPLES) pcm else pcm.copyOfRange(from, to)
     }
 
     private fun norm(w: String) = w.lowercase().filter { it.isLetterOrDigit() }
