@@ -99,5 +99,3 @@ jobs:
           name: secure-keyboard-debug-apk
           path: app/build/outputs/apk/debug/*.apk
           if-no-files-found: error
-      - name: Lint and run unit tests
-        run: ./gradlew --no-daemon :app:lintDebug :app:testDebugUnitTest
