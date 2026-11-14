@@ -36,8 +36,8 @@ Java_app_securekeyboard_asr_WhisperBridge_nativeTranscribe(JNIEnv *env, jobject,
     params.translate = false;
     params.no_context = true;
     params.single_segment = false;
-    // Timestamps ON: with them off, greedy decoding is far more prone to endless repetition loops.
-    params.no_timestamps = false;
+    // Same decoding setup as the first version that worked (timestamps off: turning them on duplicated text).
+    params.no_timestamps = true;
     const double seconds = (double) n / 16000.0;
     // Default (full) audio context: shrinking it for speed caused "testing testing testing ..." loops.
     // Hard limit on output: about 6 tokens per second of speech at most.
