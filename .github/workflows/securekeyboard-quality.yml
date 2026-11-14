@@ -50,6 +50,8 @@ jobs:
 
   android-build-and-privacy:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write # only used to attach the APK to the 'test-build' pre-release on main
     steps:
       - uses: actions/checkout@v4
         with:
@@ -99,3 +101,23 @@ jobs:
           name: secure-keyboard-debug-apk
           path: app/build/outputs/apk/debug/*.apk
           if-no-files-found: error
+      - name: Publish test-build pre-release (main only)
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p release
+          cp app/build/outputs/apk/debug/*.apk release/SecureKeyboard-debug.apk
+          (cd release && sha256sum SecureKeyboard-debug.apk > SHA256SUMS.txt)
+          cat > release/notes.md <<EOF
+          Test build of Secure Keyboard (commit ${GITHUB_SHA:0:8}). Debug-signed, not yet independently audited.
+
+          This build passed the automated privacy gate: no INTERNET permission, backup disabled, only whitelisted permissions.
+          Install: download SecureKeyboard-debug.apk, allow installs from your browser or Files app when asked, then enable Secure Keyboard in Settings > System > Keyboard.
+          Check the file against SHA256SUMS.txt before installing.
+          EOF
+          sed -i 's/^          //' release/notes.md
+          gh release delete test-build --cleanup-tag --yes || true
+          gh release create test-build release/SecureKeyboard-debug.apk release/SHA256SUMS.txt \
+            --prerelease --target "$GITHUB_SHA" --title "Secure Keyboard test build" --notes-file release/notes.md
