@@ -554,8 +554,8 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
     @android.annotation.SuppressLint("ClickableViewAccessibility")
     private fun setupPushToTalkKey(view: ImageButton) {
         val density = resources.displayMetrics.density
-        view.layoutParams = LinearLayout.LayoutParams((110 * density).toInt(), LinearLayout.LayoutParams.MATCH_PARENT).apply {
-            setMargins((4 * density).toInt(), (3 * density).toInt(), (4 * density).toInt(), (3 * density).toInt())
+        view.layoutParams = LinearLayout.LayoutParams((82 * density).toInt(), LinearLayout.LayoutParams.MATCH_PARENT).apply {
+            setMargins((4 * density).toInt(), (10 * density).toInt(), (4 * density).toInt(), (10 * density).toInt())
         }
         view.setPadding((10 * density).toInt(), (4 * density).toInt(), (10 * density).toInt(), (4 * density).toInt())
         view.scaleType = ImageView.ScaleType.FIT_CENTER
