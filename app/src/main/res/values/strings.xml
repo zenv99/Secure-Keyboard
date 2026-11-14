@@ -1327,4 +1327,6 @@ New dictionary:
     <string name="voice_error_model_integrity" translatable="false">Voice model failed its integrity check</string>
     <string name="voice_error_unsupported" translatable="false">Voice input is not supported on this device</string>
     <string name="voice_error_generic" translatable="false">Voice input failed</string>
+    <string name="touch_adaptation" translatable="false">Learn how I type</string>
+    <string name="touch_adaptation_summary" translatable="false">Adjusts key detection to your tapping habits. Learned only on this device and wiped when turned off.</string>
 </resources>

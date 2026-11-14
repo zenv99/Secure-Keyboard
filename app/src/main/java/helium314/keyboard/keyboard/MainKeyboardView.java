@@ -149,6 +149,8 @@ public final class MainKeyboardView extends KeyboardView implements DrawingProxy
         final float keyHysteresisDistanceForSlidingModifier = mainKeyboardViewAttr.getDimension(
                 R.styleable.MainKeyboardView_keyHysteresisDistanceForSlidingModifier, 0.0f);
         mKeyDetector = new KeyDetector(keyHysteresisDistance, keyHysteresisDistanceForSlidingModifier);
+        TouchAdapter.init(context);
+        mKeyDetector.setAdaptive(true);
 
         PointerTracker.init(mainKeyboardViewAttr, mTimerHandler, this /* DrawingProxy */);
 

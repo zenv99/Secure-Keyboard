@@ -16,6 +16,7 @@ public class KeyDetector {
     private Keyboard mKeyboard;
     private int mCorrectionX;
     private int mCorrectionY;
+    private boolean mAdaptive;
 
     public KeyDetector() {
         this(0.0f /* keyHysteresisDistance */, 0.0f /* keyHysteresisDistanceForSlidingModifier */);
@@ -51,13 +52,20 @@ public class KeyDetector {
                 ? mKeyHysteresisDistanceForSlidingModifierSquared : mKeyHysteresisDistanceSquared;
     }
 
+    /** If set, the on-device learned tap offset (see {@link TouchAdapter}) is added to touches. */
+    public void setAdaptive(final boolean adaptive) {
+        mAdaptive = adaptive;
+    }
+
     public int getTouchX(final int x) {
-        return x + mCorrectionX;
+        final int learned = (mAdaptive && mKeyboard != null) ? TouchAdapter.offsetX(mKeyboard.mMostCommonKeyWidth) : 0;
+        return x + mCorrectionX + learned;
     }
 
     // TODO: Remove vertical correction.
     public int getTouchY(final int y) {
-        return y + mCorrectionY;
+        final int learned = (mAdaptive && mKeyboard != null) ? TouchAdapter.offsetY(mKeyboard.mMostCommonKeyHeight) : 0;
+        return y + mCorrectionY + learned;
     }
 
     public Keyboard getKeyboard() {

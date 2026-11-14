@@ -667,6 +667,10 @@ public final class PointerTracker implements PointerTrackerQueue.Element,
 
         final Key key = getKeyOn(x, y);
         mBogusMoveEventDetector.onActualDownEvent(x, y);
+        if (key != null && !key.isModifier() && mKeyboard != null && mKeyboard.mId.getElement().isAlphabet()
+                && key.getCode() > 0 && Character.isLetter(key.getCode())) {
+            TouchAdapter.learn(key, x, y);
+        }
         if (key != null && key.isModifier()) {
             if (sInGesture) {
                 // Make sure not to interrupt an active gesture

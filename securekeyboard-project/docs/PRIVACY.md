@@ -29,3 +29,12 @@ Treat typed text, recognized speech, clipboard contents and learned vocabulary a
 Review accidental INTERNET permission from transitive manifest merging, plaintext logs/backups, unsafe exported components, compromised model/dependency artifacts and accidental learning from sensitive fields.
 
 A missing INTERNET permission is a strong control, not a complete security audit. Review the complete build, dependencies, exported components, backup rules, signing and distribution pipeline.
+
+## Learning how you type (on device)
+
+"Learn how I type" (Settings > Text correction) measures where your taps land relative to the centre
+of the key you hit and stores three numbers on this phone: average horizontal offset, average vertical
+offset, and a tap count. No typed text, key sequences or timestamps are stored. The numbers live in a
+private app file, are excluded from backups, never leave the device, and are wiped when you turn the
+setting off. The correction is capped at 12% of a key's size and is not applied until 300 taps have
+been seen.
