@@ -24,6 +24,7 @@ import android.view.View.OnLongClickListener
 import android.view.ViewGroup
 import android.view.accessibility.AccessibilityEvent
 import android.widget.ImageButton
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.TextView
@@ -79,6 +80,8 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
         fun removeSuggestion(word: String?)
         fun removeExternalSuggestions()
         fun onSwipeDownOnToolbar()
+        fun onPushToTalkPress()
+        fun onPushToTalkRelease()
     }
 
     private val moreSuggestionsContainer: View
@@ -499,7 +502,7 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
     }
 
     fun updateVoiceKey() {
-        val show = Settings.getValues().mShowsVoiceInputKey
+        val show = true // built-in on-device voice: always available
         toolbar.findViewWithTag<View>(ToolbarKey.VOICE)?.isVisible = show
         pinnedKeys.findViewWithTag<View>(ToolbarKey.VOICE)?.isVisible = show
     }
@@ -544,6 +547,41 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
         (view.layoutParams as LinearLayout.LayoutParams).weight = 1f
         colors.setColor(view, ColorType.TOOL_BAR_KEY)
         colors.setBackground(view, ColorType.STRIP_BACKGROUND)
+        if (view.tag == ToolbarKey.VOICE) setupPushToTalkKey(view)
+    }
+
+    /** Big hold-to-talk mic: press starts recording, release transcribes. */
+    @android.annotation.SuppressLint("ClickableViewAccessibility")
+    private fun setupPushToTalkKey(view: ImageButton) {
+        val density = resources.displayMetrics.density
+        view.layoutParams = LinearLayout.LayoutParams((88 * density).toInt(), LinearLayout.LayoutParams.MATCH_PARENT).apply {
+            setMargins((4 * density).toInt(), (3 * density).toInt(), (4 * density).toInt(), (3 * density).toInt())
+        }
+        view.setPadding((10 * density).toInt(), (4 * density).toInt(), (10 * density).toInt(), (4 * density).toInt())
+        view.scaleType = ImageView.ScaleType.FIT_CENTER
+        view.scaleX = 1f
+        view.scaleY = 1f
+        view.background = GradientDrawable().apply {
+            cornerRadius = 22 * density
+            setColor(Settings.getValues().mColors.get(ColorType.ACTION_KEY_BACKGROUND))
+        }
+        view.setOnClickListener(null)
+        view.setOnLongClickListener(null)
+        view.setOnTouchListener { v, event ->
+            when (event.actionMasked) {
+                MotionEvent.ACTION_DOWN -> {
+                    v.isPressed = true
+                    v.parent?.requestDisallowInterceptTouchEvent(true)
+                    AudioAndHapticFeedbackManager.getInstance().performHapticAndAudioFeedback(KeyCode.NOT_SPECIFIED, this, HapticEvent.KEY_PRESS)
+                    listener.onPushToTalkPress()
+                }
+                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                    v.isPressed = false
+                    listener.onPushToTalkRelease()
+                }
+            }
+            true
+        }
     }
 
     companion object {
