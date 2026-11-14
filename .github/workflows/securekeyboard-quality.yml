@@ -3,9 +3,9 @@ name: Secure Keyboard quality gates
 on:
   workflow_dispatch:
   push:
-    branches: [aster-development, 'aster-*']
+    branches: [aster-development, 'securekeyboard-*', 'aster-*']
     paths:
-      - 'aster-project/**'
+      - 'securekeyboard-project/**'
       - 'app/**'
       - 'asr/**'
       - 'third_party/**'
@@ -13,11 +13,11 @@ on:
       - 'build.gradle.kts'
       - 'settings.gradle'
       - 'gradle/**'
-      - '.github/workflows/aster-quality.yml'
+      - '.github/workflows/securekeyboard-quality.yml'
   pull_request:
     branches: [main]
     paths:
-      - 'aster-project/**'
+      - 'securekeyboard-project/**'
       - 'app/**'
       - 'asr/**'
       - 'third_party/**'
@@ -25,13 +25,13 @@ on:
       - 'build.gradle.kts'
       - 'settings.gradle'
       - 'gradle/**'
-      - '.github/workflows/aster-quality.yml'
+      - '.github/workflows/securekeyboard-quality.yml'
 
 permissions:
   contents: read
 
 concurrency:
-  group: aster-quality-${{ github.workflow }}-${{ github.ref }}
+  group: securekeyboard-quality-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -43,10 +43,10 @@ jobs:
         with:
           python-version: '3.12'
           cache: pip
-          cache-dependency-path: aster-project/requirements-dev.txt
-      - run: python -m pip install -r aster-project/requirements-dev.txt
-      - run: PYTHONPATH=aster-project python -m unittest discover -s aster-project/tests -v
-      - run: python aster-project/eval/autocorrect_eval.py aster-project/eval/sample_sentences.txt --seed 1
+          cache-dependency-path: securekeyboard-project/requirements-dev.txt
+      - run: python -m pip install -r securekeyboard-project/requirements-dev.txt
+      - run: PYTHONPATH=securekeyboard-project python -m unittest discover -s securekeyboard-project/tests -v
+      - run: python securekeyboard-project/eval/autocorrect_eval.py securekeyboard-project/eval/sample_sentences.txt --seed 1
 
   android-build-and-privacy:
     runs-on: ubuntu-latest
@@ -55,7 +55,7 @@ jobs:
         with:
           submodules: recursive
       - name: Verify source privacy and backup declarations
-        run: python3 aster-project/ci/check_privacy_sources.py
+        run: python3 securekeyboard-project/ci/check_privacy_sources.py
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -75,11 +75,11 @@ jobs:
         uses: actions/cache@v4
         with:
           path: app/src/main/assets/asr
-          key: asr-model-${{ hashFiles('aster-project/asr/MODEL_SHA256', 'aster-project/ci/fetch_model.sh') }}
+          key: asr-model-${{ hashFiles('securekeyboard-project/asr/MODEL_SHA256', 'securekeyboard-project/ci/fetch_model.sh') }}
       - name: Fetch and verify on-device voice model
         env:
-          ALLOW_UNPINNED: '0' # the pin in aster-project/asr/MODEL_SHA256 is enforced
-        run: bash aster-project/ci/fetch_model.sh
+          ALLOW_UNPINNED: '0' # the pin in securekeyboard-project/asr/MODEL_SHA256 is enforced
+        run: bash securekeyboard-project/ci/fetch_model.sh
       - name: Build, lint and run unit tests
         run: |
           chmod +x ./gradlew
@@ -93,7 +93,7 @@ jobs:
             echo 'No debug APK produced; refusing to skip privacy gate.' >&2
             exit 1
           fi
-          bash aster-project/ci/check_no_internet.sh "${apks[@]}"
+          bash securekeyboard-project/ci/check_no_internet.sh "${apks[@]}"
       - uses: actions/upload-artifact@v4
         with:
           name: secure-keyboard-debug-apk

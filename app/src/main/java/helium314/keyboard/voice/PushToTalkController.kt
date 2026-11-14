@@ -13,7 +13,7 @@ import android.os.Looper
 import android.os.Message
 import android.os.Messenger
 import android.widget.Toast
-import dev.aster.keyboard.asr.AsrService
+import app.securekeyboard.asr.AsrService
 import helium314.keyboard.latin.R
 
 /**

@@ -1,4 +1,4 @@
-package dev.aster.keyboard.asr
+package app.securekeyboard.asr
 
 import android.content.Context
 import java.io.File

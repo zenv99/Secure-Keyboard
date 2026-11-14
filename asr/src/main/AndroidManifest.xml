@@ -6,7 +6,7 @@
     <application>
         <!-- Separate process: a model/native crash or OOM can never take the keyboard down. -->
         <service
-            android:name="dev.aster.keyboard.asr.AsrService"
+            android:name="app.securekeyboard.asr.AsrService"
             android:process=":asr"
             android:exported="false" />
     </application>

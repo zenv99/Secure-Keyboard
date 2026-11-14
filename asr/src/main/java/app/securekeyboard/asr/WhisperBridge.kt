@@ -1,4 +1,4 @@
-package dev.aster.keyboard.asr
+package app.securekeyboard.asr
 
 /** Thin wrapper around the JNI bridge to the pinned whisper.cpp. Not thread-safe: use from one thread. */
 internal class WhisperBridge {
@@ -25,7 +25,7 @@ internal class WhisperBridge {
     companion object {
         /** False when the native library is missing (e.g. unsupported ABI); the service reports ERR_NATIVE. */
         val available: Boolean = try {
-            System.loadLibrary("aster_whisper")
+            System.loadLibrary("securekeyboard_whisper")
             true
         } catch (_: UnsatisfiedLinkError) {
             false

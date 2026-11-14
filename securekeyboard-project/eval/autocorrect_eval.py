@@ -47,7 +47,7 @@ class SymSpellBaseline:
             from symspellpy import SymSpell, Verbosity
             from importlib.resources import files
         except ImportError as exc:
-            raise SystemExit("Install aster-project/requirements-dev.txt") from exc
+            raise SystemExit("Install securekeyboard-project/requirements-dev.txt") from exc
         self.verbosity = Verbosity
         self.sym = SymSpell(max_dictionary_edit_distance=2, prefix_length=7)
         dictionary = files("symspellpy").joinpath("frequency_dictionary_en_82_765.txt")

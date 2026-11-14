@@ -4,7 +4,7 @@ This repository is a personal development fork of [HeliBoard](https://github.com
 
 ![Secure Keyboard — Type Freely. Privately.](assets/secure-keyboard-banner.svg)
 
-[View the Secure Keyboard engineering plan](aster-project/README.md) · [Development roadmap](aster-project/docs/ROADMAP.md) · [Architecture](aster-project/docs/ARCHITECTURE.md) · [Privacy requirements](aster-project/docs/PRIVACY.md) · [Open development PR](https://github.com/zenv99/HeliBoard/pull/1)
+[View the Secure Keyboard engineering plan](securekeyboard-project/README.md) · [Development roadmap](securekeyboard-project/docs/ROADMAP.md) · [Architecture](securekeyboard-project/docs/ARCHITECTURE.md) · [Privacy requirements](securekeyboard-project/docs/PRIVACY.md) · [Open development PR](https://github.com/zenv99/HeliBoard/pull/1)
 
 ## Secure Keyboard project status
 
@@ -23,7 +23,7 @@ This repository is a personal development fork of [HeliBoard](https://github.com
 - Integrate [whisper.cpp](https://github.com/ggml-org/whisper.cpp) only after pinning and reviewing its source, dependencies, model licence and hashes.
 - Preserve HeliBoard's upstream history, GPL-3.0 obligations and existing offline posture.
 
-**Build and test:** use the repository's Gradle wrapper and follow the [Secure Keyboard development guide](aster-project/README.md). CI results are shown in the [Actions tab](https://github.com/zenv99/HeliBoard/actions). Do not treat this branch as a production release until the Android build, APK privacy checks and device tests pass.
+**Build and test:** use the repository's Gradle wrapper and follow the [Secure Keyboard development guide](securekeyboard-project/README.md). CI results are shown in the [Actions tab](https://github.com/zenv99/HeliBoard/actions). Do not treat this branch as a production release until the Android build, APK privacy checks and device tests pass.
 
 ---
 

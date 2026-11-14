@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.22.1)
-project(aster_asr LANGUAGES C CXX)
+project(securekeyboard_asr LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -18,7 +18,7 @@ set(CMAKE_BUILD_TYPE Release CACHE STRING "" FORCE)
 
 add_subdirectory(${WHISPER_DIR} ${CMAKE_CURRENT_BINARY_DIR}/whisper)
 
-add_library(aster_whisper SHARED whisper_jni.cpp)
-target_include_directories(aster_whisper PRIVATE ${WHISPER_DIR}/include ${WHISPER_DIR}/ggml/include)
-target_link_libraries(aster_whisper whisper)
-target_link_options(aster_whisper PRIVATE -Wl,--gc-sections -Wl,-z,max-page-size=16384)
+add_library(securekeyboard_whisper SHARED whisper_jni.cpp)
+target_include_directories(securekeyboard_whisper PRIVATE ${WHISPER_DIR}/include ${WHISPER_DIR}/ggml/include)
+target_link_libraries(securekeyboard_whisper whisper)
+target_link_options(securekeyboard_whisper PRIVATE -Wl,--gc-sections -Wl,-z,max-page-size=16384)

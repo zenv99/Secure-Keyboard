@@ -7,7 +7,7 @@
 extern "C" {
 
 JNIEXPORT jlong JNICALL
-Java_dev_aster_keyboard_asr_WhisperBridge_nativeInit(JNIEnv *env, jobject, jstring path) {
+Java_app_securekeyboard_asr_WhisperBridge_nativeInit(JNIEnv *env, jobject, jstring path) {
     const char *p = env->GetStringUTFChars(path, nullptr);
     whisper_context_params cp = whisper_context_default_params();
     cp.use_gpu = false; // CPU only: deterministic, no vendor driver code in the privacy surface
@@ -17,7 +17,7 @@ Java_dev_aster_keyboard_asr_WhisperBridge_nativeInit(JNIEnv *env, jobject, jstri
 }
 
 JNIEXPORT jstring JNICALL
-Java_dev_aster_keyboard_asr_WhisperBridge_nativeTranscribe(JNIEnv *env, jobject, jlong handle,
+Java_app_securekeyboard_asr_WhisperBridge_nativeTranscribe(JNIEnv *env, jobject, jlong handle,
                                                            jfloatArray pcm, jstring lang,
                                                            jint threads) {
     auto *ctx = reinterpret_cast<whisper_context *>(handle);
@@ -54,7 +54,7 @@ Java_dev_aster_keyboard_asr_WhisperBridge_nativeTranscribe(JNIEnv *env, jobject,
 }
 
 JNIEXPORT void JNICALL
-Java_dev_aster_keyboard_asr_WhisperBridge_nativeFree(JNIEnv *, jobject, jlong handle) {
+Java_app_securekeyboard_asr_WhisperBridge_nativeFree(JNIEnv *, jobject, jlong handle) {
     if (handle != 0) whisper_free(reinterpret_cast<whisper_context *>(handle));
 }
 

@@ -16,5 +16,5 @@ tools/*.txt
 *.diff
 *.sh
 
-# On-device voice model (fetched at build time by aster-project/ci/fetch_model.sh, never committed)
+# On-device voice model (fetched at build time by securekeyboard-project/ci/fetch_model.sh, never committed)
 app/src/main/assets/asr/

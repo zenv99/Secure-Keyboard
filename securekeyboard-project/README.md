@@ -1,6 +1,6 @@
-# Aster Keyboard — HeliBoard development track
+# Secure Keyboard — HeliBoard development track
 
-Aster is the working product name for an Android keyboard derived from this HeliBoard repository. The engineering goals are conservative, context-aware autocorrection; fully offline dictation using whisper.cpp; and local-only personalization.
+Secure Keyboard is the product name for an Android keyboard derived from this HeliBoard repository. The engineering goals are conservative, context-aware autocorrection; fully offline dictation using whisper.cpp; and local-only personalization.
 
 ## Repository baseline confirmed
 
@@ -40,8 +40,8 @@ From the repository root, with the required Android SDK/NDK and JDK installed:
 
 ```bash
 ./gradlew :app:lintDebug :app:testDebugUnitTest :app:assembleDebug
-python3 -m unittest discover -s aster-project/tests -v
-python3 aster-project/eval/autocorrect_eval.py aster-project/eval/sample_sentences.txt --seed 1
+python3 -m unittest discover -s securekeyboard-project/tests -v
+python3 securekeyboard-project/eval/autocorrect_eval.py securekeyboard-project/eval/sample_sentences.txt --seed 1
 ```
 
 Do not report a successful Android build until those Gradle tasks have actually completed in CI or on a configured Android build machine.

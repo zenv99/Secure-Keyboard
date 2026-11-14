@@ -3,7 +3,7 @@ plugins {
 }
 
 android {
-    namespace = "dev.aster.keyboard.asr"
+    namespace = "app.securekeyboard.asr"
     compileSdk = 37
     ndkVersion = "28.0.13004108"
 
