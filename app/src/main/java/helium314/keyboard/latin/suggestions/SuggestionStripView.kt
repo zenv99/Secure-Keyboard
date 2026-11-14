@@ -157,6 +157,7 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
 
         // toolbar keys setup (no need to hide them any more when locked, because then suggestion strip is gone anyway
         for (key in getEnabledToolbarKeys(context.prefs())) {
+            if (key == ToolbarKey.VOICE) continue // the one big hold-to-talk mic lives in the top bar (below)
             val button = createToolbarKey(context, key)
             button.layoutParams = toolbarKeyLayoutParams
             setupKey(button, colors)
@@ -170,6 +171,13 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
             val pinnedKeyInToolbar = toolbar.findViewWithTag<View>(pinnedKey)
             if (pinnedKeyInToolbar != null && Settings.getValues().mQuickPinToolbarKeys)
                 pinnedKeyInToolbar.background = enabledToolKeyBackground
+        }
+        // The big mic is always there, even when restored settings / an old backup say otherwise.
+        if (pinnedKeys.findViewWithTag<View>(ToolbarKey.VOICE) == null) {
+            val mic = createToolbarKey(context, ToolbarKey.VOICE)
+            mic.layoutParams = toolbarKeyLayoutParams
+            setupKey(mic, colors)
+            pinnedKeys.addView(mic)
         }
         toolbarContainer.doOnNextLayout {
             // set min with of the toolbar so the weight of the toolbar keys actually does something
