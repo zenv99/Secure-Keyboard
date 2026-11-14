@@ -37,6 +37,12 @@ Java_app_securekeyboard_asr_WhisperBridge_nativeTranscribe(JNIEnv *env, jobject,
     params.no_context = true;
     params.single_segment = false;
     params.no_timestamps = true;
+    // Speed: the encoder normally processes a fixed 30 s window even for a 3 s clip. Shrink it to the
+    // clip length (+ margin) -- the biggest single speedup -- and skip temperature-fallback retries.
+    const int ctxFrames = (int) (((double) n / 16000.0) * 50.0) + 100;
+    params.audio_ctx = std::min(1500, std::max(256, ctxFrames));
+    params.temperature_inc = 0.0f;
+    params.greedy.best_of = 1;
     params.print_progress = false;
     params.print_realtime = false;
     params.print_timestamps = false;
