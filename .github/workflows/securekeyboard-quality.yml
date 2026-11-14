@@ -3,7 +3,7 @@ name: Secure Keyboard quality gates
 on:
   workflow_dispatch:
   push:
-    branches: [aster-development, 'securekeyboard-*', 'aster-*']
+    branches: [main, 'securekeyboard-*']
     paths:
       - 'securekeyboard-project/**'
       - 'app/**'
