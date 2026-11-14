@@ -33,14 +33,18 @@ class PushToTalkController(
     private var pendingWarm = false
     private var lastText = ""
     private var lastTextTime = 0L
+    private var awaiting = false // a dictation session is open: only then is incoming text accepted
 
     private val replyTo = Messenger(Handler(Looper.getMainLooper()) { message ->
         when (message.what) {
             AsrService.MSG_FINAL -> {
                 val text = message.data.getString(AsrService.KEY_TEXT).orEmpty()
+                val isLast = message.data.getBoolean(AsrService.KEY_LAST)
                 val now = System.currentTimeMillis()
+                val accept = awaiting // stray/duplicate deliveries outside a session are dropped
+                if (isLast) awaiting = false
                 // never insert the same text twice in a row within a few seconds (duplicate delivery guard)
-                if (text.isNotBlank() && !(text == lastText && now - lastTextTime < 3000)) {
+                if (accept && text.isNotBlank() && !(text == lastText && now - lastTextTime < 10_000)) {
                     lastText = text
                     lastTextTime = now
                     onText(text)
@@ -48,6 +52,7 @@ class PushToTalkController(
                 true
             }
             AsrService.MSG_ERROR -> {
+                awaiting = false
                 held = false
                 sessionStarted = false
                 showError(message.data.getInt(AsrService.KEY_CODE))
@@ -80,10 +85,15 @@ class PushToTalkController(
             )
             return false
         }
+        if (held) return true // repeated down events must not start a second session
         held = true
         if (service != null) startSession() else bind()
         if (!bound && service == null) Toast.makeText(context, R.string.voice_error_generic, Toast.LENGTH_SHORT).show()
-        else Toast.makeText(context, R.string.voice_listening, Toast.LENGTH_SHORT).show()
+        else Toast.makeText(
+            context,
+            context.getString(R.string.voice_listening) + " (build " + (helium314.keyboard.latin.BuildConfig.VERSION_CODE - 4300) + ")",
+            Toast.LENGTH_SHORT
+        ).show()
         return true
     }
 
@@ -124,6 +134,7 @@ class PushToTalkController(
 
     private fun startSession() {
         sessionStarted = send(AsrService.MSG_START)
+        awaiting = sessionStarted
     }
 
     private fun send(what: Int): Boolean {

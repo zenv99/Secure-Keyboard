@@ -180,7 +180,8 @@ class AsrService : Service() {
     private fun clean(raw: String, seconds: Double): String {
         val noTags = raw.replace(Regex("\\[[^\\]]*\\]|\\([^)]*\\)"), " ")
         var words: List<String> = noTags.split(Regex("\\s+")).filter { it.isNotEmpty() }
-        for (n in 1..6) {
+        for (n in 1..40) {
+            if (n * 2 > words.size) break
             val out = ArrayList<String>()
             var i = 0
             while (i < words.size) {
