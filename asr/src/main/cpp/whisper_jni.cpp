@@ -37,11 +37,19 @@ Java_app_securekeyboard_asr_WhisperBridge_nativeTranscribe(JNIEnv *env, jobject,
     params.no_context = true;
     params.single_segment = false;
     params.no_timestamps = true;
-    // Speed: the encoder normally processes a fixed 30 s window even for a 3 s clip. Shrink it to the
-    // clip length (+ margin) -- the biggest single speedup -- and skip temperature-fallback retries.
-    const int ctxFrames = (int) (((double) n / 16000.0) * 50.0) + 100;
-    params.audio_ctx = std::min(1500, std::max(256, ctxFrames));
-    params.temperature_inc = 0.0f;
+    // Speed: shrink the encoder window for short clips, but never below ~15 s of audio context:
+    // smaller windows make Whisper fall into repetition loops ("testing testing testing ...").
+    const double seconds = (double) n / 16000.0;
+    const int ctxFrames = (int) (seconds * 50.0) + 250;
+    params.audio_ctx = std::min(1500, std::max(768, ctxFrames));
+    // Hard limits against runaway output: about 6 tokens per second of speech at most.
+    params.max_tokens = std::min(220, std::max(16, (int) (seconds * 6.0) + 8));
+    params.temperature_inc = 0.2f;      // allow the standard fallback when output looks degenerate
+    params.entropy_thold = 2.4f;
+    params.logprob_thold = -1.0f;
+    params.no_speech_thold = 0.6f;
+    params.suppress_blank = true;
+    params.suppress_nst = true;
     params.greedy.best_of = 1;
     params.print_progress = false;
     params.print_realtime = false;

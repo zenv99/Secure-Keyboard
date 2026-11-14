@@ -146,7 +146,7 @@ class AsrService : Service() {
                             reply(client, MSG_ERROR, code = ERR_SILENT)
                         } else {
                             val floats = FloatArray(pcm.size) { pcm[it] / 32768f }
-                            text = engine.transcribe(floats, LANGUAGE, threads()).trim()
+                            text = clean(engine.transcribe(floats, LANGUAGE, threads()))
                             floats.fill(0f)
                             if (text.isBlank() && last) reply(client, MSG_ERROR, code = ERR_NO_SPEECH)
                         }
@@ -171,6 +171,31 @@ class AsrService : Service() {
         if (!engine.load(file.path)) throw AsrException(ERR_MODEL_LOAD)
         whisper = engine
         return engine
+    }
+
+    /** Drops bracketed noise tags and collapses runaway repetition ("a a a a a ..."), keeping real doubles. */
+    private fun clean(raw: String): String {
+        val noTags = raw.replace(Regex("\\[[^\\]]*\\]|\\([^)]*\\)"), " ")
+        var words: List<String> = noTags.split(Regex("\\s+")).filter { it.isNotEmpty() }
+        for (n in 1..6) {
+            val out = ArrayList<String>()
+            var i = 0
+            while (i < words.size) {
+                var reps = 1
+                if (i + n <= words.size) {
+                    while (i + (reps + 1) * n <= words.size &&
+                        (0 until n).all { words[i + it].equals(words[i + reps * n + it], ignoreCase = true) }) reps++
+                }
+                if (reps > 3) {
+                    repeat(2) { r -> for (k in 0 until n) out.add(words[i + r * n + k]) }
+                    i += reps * n
+                } else {
+                    out.add(words[i]); i++
+                }
+            }
+            words = out
+        }
+        return words.joinToString(" ").trim()
     }
 
     // worker thread only
