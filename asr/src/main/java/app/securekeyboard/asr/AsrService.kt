@@ -141,9 +141,15 @@ class AsrService : Service() {
                 if (pcm.size >= MIN_SAMPLES) {
                     try {
                         val engine = ensureWhisper()
-                        val floats = FloatArray(pcm.size) { pcm[it] / 32768f }
-                        text = engine.transcribe(floats, LANGUAGE, threads()).trim()
-                        floats.fill(0f)
+                        val silent = pcm.all { it.toInt() == 0 }
+                        if (silent) {
+                            reply(client, MSG_ERROR, code = ERR_SILENT)
+                        } else {
+                            val floats = FloatArray(pcm.size) { pcm[it] / 32768f }
+                            text = engine.transcribe(floats, LANGUAGE, threads()).trim()
+                            floats.fill(0f)
+                            if (text.isBlank() && last) reply(client, MSG_ERROR, code = ERR_NO_SPEECH)
+                        }
                     } catch (e: AsrException) {
                         reply(client, MSG_ERROR, code = e.code)
                     }
@@ -212,6 +218,8 @@ class AsrService : Service() {
         const val ERR_AUDIO = 4
         const val ERR_NATIVE = 5
         const val ERR_MODEL_INTEGRITY = 6
+        const val ERR_SILENT = 7 // microphone delivered only silence (blocked by the OS)
+        const val ERR_NO_SPEECH = 8 // audio was fine but nothing was recognised
 
         private const val SAMPLE_RATE = 16_000
         private const val MAX_CHUNK_SECONDS = 28

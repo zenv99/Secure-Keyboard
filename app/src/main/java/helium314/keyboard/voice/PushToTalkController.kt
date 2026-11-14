@@ -72,6 +72,8 @@ class PushToTalkController(
         }
         held = true
         if (service != null) startSession() else bind()
+        if (!bound && service == null) Toast.makeText(context, R.string.voice_error_generic, Toast.LENGTH_SHORT).show()
+        else Toast.makeText(context, R.string.voice_listening, Toast.LENGTH_SHORT).show()
         return true
     }
 
@@ -124,6 +126,8 @@ class PushToTalkController(
                     AsrService.ERR_NO_MODEL -> R.string.voice_error_no_model
                     AsrService.ERR_MODEL_INTEGRITY -> R.string.voice_error_model_integrity
                     AsrService.ERR_NATIVE -> R.string.voice_error_unsupported
+                    AsrService.ERR_SILENT -> R.string.voice_error_silent
+                    AsrService.ERR_NO_SPEECH -> R.string.voice_error_no_speech
                     else -> R.string.voice_error_generic
                 }
                 Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
