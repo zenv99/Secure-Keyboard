@@ -147,7 +147,7 @@ class AsrService : Service() {
                             reply(client, MSG_ERROR, code = ERR_SILENT)
                         } else {
                             val floats = FloatArray(pcm.size) { pcm[it] / 32768f }
-                            text = clean(engine.transcribe(floats, LANGUAGE, threads()))
+                            text = clean(engine.transcribe(floats, LANGUAGE, threads()), pcm.size / SAMPLE_RATE.toDouble())
                             floats.fill(0f)
                             if (text.isBlank() && last) reply(client, MSG_ERROR, code = ERR_NO_SPEECH)
                         }
@@ -175,7 +175,7 @@ class AsrService : Service() {
     }
 
     /** Drops bracketed noise tags and collapses runaway repetition ("a a a a a ..."), keeping real doubles. */
-    private fun clean(raw: String): String {
+    private fun clean(raw: String, seconds: Double): String {
         val noTags = raw.replace(Regex("\\[[^\\]]*\\]|\\([^)]*\\)"), " ")
         var words: List<String> = noTags.split(Regex("\\s+")).filter { it.isNotEmpty() }
         for (n in 1..6) {
@@ -185,7 +185,7 @@ class AsrService : Service() {
                 var reps = 1
                 if (i + n <= words.size) {
                     while (i + (reps + 1) * n <= words.size &&
-                        (0 until n).all { words[i + it].equals(words[i + reps * n + it], ignoreCase = true) }) reps++
+                        (0 until n).all { norm(words[i + it]) == norm(words[i + reps * n + it]) }) reps++
                 }
                 if (reps > 3) {
                     repeat(2) { r -> for (k in 0 until n) out.add(words[i + r * n + k]) }
@@ -196,8 +196,13 @@ class AsrService : Service() {
             }
             words = out
         }
+        // Final hard cap: nobody speaks faster than ~4 words per second.
+        val maxWords = (seconds * 4.0).toInt() + 6
+        if (words.size > maxWords) words = words.take(maxWords)
         return words.joinToString(" ").trim()
     }
+
+    private fun norm(w: String) = w.lowercase().filter { it.isLetterOrDigit() }
 
     // worker thread only
     private fun closeWhisper() {

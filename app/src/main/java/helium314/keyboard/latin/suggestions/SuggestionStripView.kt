@@ -118,6 +118,8 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
     private val toolbar: ViewGroup = findViewById(R.id.toolbar)
     private val toolbarContainer: View = findViewById(R.id.toolbar_container)
     private val pinnedKeys: ViewGroup = findViewById(R.id.pinned_keys)
+    private val leftKeys = LinearLayout(context).apply { orientation = LinearLayout.HORIZONTAL }
+    private val plusIcon: Drawable? = androidx.core.content.ContextCompat.getDrawable(context, R.drawable.ic_plus)
     private val suggestionsStrip: ViewGroup = findViewById(R.id.suggestions_strip)
     private val toolbarExpandKey = findViewById<ImageButton>(R.id.suggestions_strip_toolbar_key)
     private val incognitoIcon = KeyboardIconsSet.instance.getNewDrawable(ToolbarKey.INCOGNITO.name, context)
@@ -172,6 +174,13 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
             if (pinnedKeyInToolbar != null && Settings.getValues().mQuickPinToolbarKeys)
                 pinnedKeyInToolbar.background = enabledToolKeyBackground
         }
+        // Left side, WhatsApp-style: [+ (more tools)] [emoji] next to the suggestions.
+        val emojiKey = createToolbarKey(context, ToolbarKey.EMOJI)
+        emojiKey.layoutParams = toolbarKeyLayoutParams
+        setupKey(emojiKey, colors)
+        leftKeys.addView(emojiKey)
+        leftKeys.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.MATCH_PARENT)
+        (findViewById<ViewGroup>(R.id.suggestions_strip_wrapper)).addView(leftKeys, 1)
         // The big mic is always there, even when restored settings / an old backup say otherwise.
         if (pinnedKeys.findViewWithTag<View>(ToolbarKey.VOICE) == null) {
             val mic = createToolbarKey(context, ToolbarKey.VOICE)
@@ -238,6 +247,7 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
 
     fun setToolbarVisibility(toolbarVisible: Boolean) {
         pinnedKeys.isVisible = !toolbarVisible
+        leftKeys.isVisible = !toolbarVisible
         suggestionsStrip.isVisible = !toolbarVisible
         toolbarContainer.isVisible = toolbarVisible
 
@@ -524,12 +534,13 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
             toolbarExpandKey.setImageDrawable(incognitoIcon)
             toolbarExpandKey.isVisible = true
         } else {
-            toolbarExpandKey.setImageDrawable(toolbarArrowIcon)
+            toolbarExpandKey.setImageDrawable(plusIcon ?: toolbarArrowIcon)
             toolbarExpandKey.isVisible = toolbarIsExpandable
         }
 
         toolbarExpandKey.setOnClickListener(if (!toolbarIsExpandable) null else this)
         pinnedKeys.visibility = suggestionsStrip.visibility
+        leftKeys.visibility = suggestionsStrip.visibility
         isExternalSuggestionVisible = false
     }
 
