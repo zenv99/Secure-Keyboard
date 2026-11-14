@@ -569,10 +569,14 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
         view.scaleType = ImageView.ScaleType.FIT_CENTER
         view.scaleX = 1f
         view.scaleY = 1f
-        view.background = GradientDrawable().apply {
+        val idleRed = 0xFFC62828.toInt()
+        val recordingRed = 0xFFFF1744.toInt()
+        val micBackground = GradientDrawable().apply {
             cornerRadius = 22 * density
-            setColor(Settings.getValues().mColors.get(ColorType.ACTION_KEY_BACKGROUND))
+            setColor(idleRed)
         }
+        view.background = micBackground
+        view.setColorFilter(0xFFFFFFFF.toInt())
         view.setOnClickListener(null)
         view.setOnLongClickListener(null)
         view.setOnTouchListener { v, event ->
@@ -580,11 +584,17 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
                 MotionEvent.ACTION_DOWN -> {
                     v.isPressed = true
                     v.parent?.requestDisallowInterceptTouchEvent(true)
-                    AudioAndHapticFeedbackManager.getInstance().performHapticAndAudioFeedback(KeyCode.NOT_SPECIFIED, this, HapticEvent.KEY_PRESS)
+                    micBackground.setColor(recordingRed)
+                    v.performHapticFeedback(android.view.HapticFeedbackConstants.VIRTUAL_KEY, android.view.HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING)
                     listener.onPushToTalkPress()
                 }
                 MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
                     v.isPressed = false
+                    micBackground.setColor(idleRed)
+                    v.performHapticFeedback(
+                        if (android.os.Build.VERSION.SDK_INT >= 27) android.view.HapticFeedbackConstants.KEYBOARD_RELEASE
+                        else android.view.HapticFeedbackConstants.VIRTUAL_KEY,
+                        android.view.HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING)
                     listener.onPushToTalkRelease()
                 }
             }
