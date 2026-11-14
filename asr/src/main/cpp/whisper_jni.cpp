@@ -1,6 +1,7 @@
 // Narrow JNI bridge to the pinned whisper.cpp. Never logs audio or transcribed text.
 #include <jni.h>
 #include <string>
+#include <cstdlib>
 #include <algorithm>
 #include "whisper.h"
 
@@ -8,6 +9,8 @@ extern "C" {
 
 JNIEXPORT jlong JNICALL
 Java_app_securekeyboard_asr_WhisperBridge_nativeInit(JNIEnv *env, jobject, jstring path) {
+    // ggml can fork()/exec a debugger to print a backtrace when it aborts; never allow that.
+    setenv("GGML_NO_BACKTRACE", "1", 1);
     const char *p = env->GetStringUTFChars(path, nullptr);
     whisper_context_params cp = whisper_context_default_params();
     cp.use_gpu = false; // CPU only: deterministic, no vendor driver code in the privacy surface
