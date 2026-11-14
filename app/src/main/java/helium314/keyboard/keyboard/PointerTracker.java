@@ -1355,7 +1355,13 @@ public final class PointerTracker implements PointerTrackerQueue.Element,
     }
 
     private void startKeyRepeatTimer(final int repeatCount) {
-        final int delay = (repeatCount == 1) ? sParams.mKeyRepeatStartTimeout : sParams.mKeyRepeatInterval;
+        // Speeds up the longer the key is held (like iOS): full interval at first, then 2x, 3x, 5x faster.
+        final int interval = sParams.mKeyRepeatInterval;
+        final int accelerated = repeatCount < 8 ? interval
+                : repeatCount < 20 ? interval * 2 / 3
+                : repeatCount < 40 ? interval / 2
+                : Math.max(12, interval / 3);
+        final int delay = (repeatCount == 1) ? sParams.mKeyRepeatStartTimeout : accelerated;
         sTimerProxy.startKeyRepeatTimerOf(this, repeatCount, delay);
     }
 

@@ -65,12 +65,16 @@ private constructor(val themeId: Int, @JvmField val mStyleId: Int) {
         const val THEME_PINK = "pink"
         const val THEME_SAND = "sand"
         const val THEME_VIOLETTE = "violette"
+        const val THEME_MATRIX = "matrix"
+        const val THEME_RED_ALERT = "red_alert"
         fun getAvailableDefaultColors(prefs: SharedPreferences, isNight: Boolean) = listOfNotNull(
             if (!isNight) THEME_LIGHT else null, THEME_DARK,
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) THEME_DYNAMIC else null,
             if (prefs.getString(Settings.PREF_THEME_STYLE, Defaults.PREF_THEME_STYLE) == STYLE_HOLO) THEME_HOLO_WHITE else null,
             THEME_DARKER,
             THEME_BLACK,
+            THEME_MATRIX,
+            THEME_RED_ALERT,
             if (!isNight) THEME_BLUE_GRAY else null,
             if (!isNight) THEME_BROWN else null,
             THEME_CHOCOLATE,
@@ -212,6 +216,30 @@ private constructor(val themeId: Int, @JvmField val mStyleId: Int) {
                     ContextCompat.getColor(context, R.color.background_amoled_dark),
                     ContextCompat.getColor(context, R.color.key_text_color_lxx_dark),
                     ContextCompat.getColor(context, R.color.key_hint_letter_color_lxx_dark),
+                    keyboardBackground = backgroundImage
+                )
+                THEME_MATRIX -> DefaultColors(
+                    themeStyle,
+                    hasBorders,
+                    Color.rgb(0, 255, 65),
+                    Color.BLACK,
+                    Color.rgb(6, 26, 12),
+                    Color.rgb(0, 44, 14),
+                    Color.rgb(6, 26, 12),
+                    Color.rgb(0, 255, 65),
+                    Color.rgb(0, 160, 45),
+                    keyboardBackground = backgroundImage
+                )
+                THEME_RED_ALERT -> DefaultColors(
+                    themeStyle,
+                    hasBorders,
+                    Color.rgb(255, 23, 68),
+                    Color.BLACK,
+                    Color.rgb(30, 8, 10),
+                    Color.rgb(62, 10, 16),
+                    Color.rgb(30, 8, 10),
+                    Color.rgb(255, 205, 210),
+                    Color.rgb(200, 90, 100),
                     keyboardBackground = backgroundImage
                 )
                 THEME_BLUE_GRAY -> DefaultColors(

@@ -569,14 +569,26 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
         view.scaleType = ImageView.ScaleType.FIT_CENTER
         view.scaleX = 1f
         view.scaleY = 1f
-        val idleRed = 0xFFC62828.toInt()
-        val recordingRed = 0xFFFF1744.toInt()
+        val prefs = context.prefs()
+        fun pick(name: String): Int? = when (name) {
+            "red" -> 0xFFFF1744.toInt()
+            "orange" -> 0xFFFF9100.toInt()
+            "green" -> 0xFF00E676.toInt()
+            "blue" -> 0xFF2979FF.toInt()
+            "white" -> 0xFFF5F5F5.toInt()
+            "purple" -> 0xFFAA00FF.toInt()
+            else -> null // "match"
+        }
+        val themeAccent = Settings.getValues().mColors.get(ColorType.ACTION_KEY_BACKGROUND)
+        val idleRed = pick(prefs.getString(Settings.PREF_DICTATION_COLOR, Defaults.PREF_DICTATION_COLOR)!!) ?: themeAccent
+        val recordingRed = pick(prefs.getString(Settings.PREF_DICTATION_COLOR_RECORDING, Defaults.PREF_DICTATION_COLOR_RECORDING)!!)
+            ?: 0xFFFF1744.toInt()
         val micBackground = GradientDrawable().apply {
             cornerRadius = 22 * density
             setColor(idleRed)
         }
         view.background = micBackground
-        view.setColorFilter(0xFFFFFFFF.toInt())
+        view.setColorFilter(if (idleRed == 0xFFF5F5F5.toInt()) 0xFF000000.toInt() else 0xFFFFFFFF.toInt())
         view.setOnClickListener(null)
         view.setOnLongClickListener(null)
         view.setOnTouchListener { v, event ->

@@ -68,6 +68,8 @@ fun AppearanceScreen(
         Settings.PREF_THEME_COLORS,
         if (dayNightMode) Settings.PREF_THEME_COLORS_NIGHT else null,
         Settings.PREF_NAVBAR_COLOR,
+        Settings.PREF_DICTATION_COLOR,
+        Settings.PREF_DICTATION_COLOR_RECORDING,
         SettingsWithoutKey.BACKGROUND_IMAGE,
         SettingsWithoutKey.BACKGROUND_IMAGE_LANDSCAPE,
         R.string.settings_category_miscellaneous,
@@ -101,6 +103,11 @@ fun AppearanceScreen(
         settings = items
     )
 }
+
+private val dictationColorChoices = listOf(
+    "Match theme" to "match", "Red" to "red", "Orange" to "orange", "Green" to "green",
+    "Blue" to "blue", "White" to "white", "Purple" to "purple"
+)
 
 fun createAppearanceSettings(context: Context) = listOf(
     Setting(context, Settings.PREF_THEME_STYLE, R.string.theme_style) { setting ->
@@ -139,6 +146,14 @@ fun createAppearanceSettings(context: Context) = listOf(
             KeyboardIconsSet.needsReload = true // only relevant for Settings.PREF_CUSTOM_ICON_NAMES
             KeyboardSwitcher.getInstance().setThemeNeedsReload()
         }
+    },
+    Setting(context, Settings.PREF_DICTATION_COLOR, R.string.dictation_color) { setting ->
+        val items = dictationColorChoices.map { (name, value) -> name to value }
+        ListPreference(setting, items, Defaults.PREF_DICTATION_COLOR) { KeyboardSwitcher.getInstance().setThemeNeedsReload() }
+    },
+    Setting(context, Settings.PREF_DICTATION_COLOR_RECORDING, R.string.dictation_color_recording) { setting ->
+        val items = dictationColorChoices.filter { it.second != "match" }.map { (name, value) -> name to value }
+        ListPreference(setting, items, Defaults.PREF_DICTATION_COLOR_RECORDING) { KeyboardSwitcher.getInstance().setThemeNeedsReload() }
     },
     Setting(context, Settings.PREF_ACCENT_SHIFTED_ICON, R.string.accent_shifted_icon) {
         SwitchPreference(it, Defaults.PREF_ACCENT_SHIFTED_ICON) { KeyboardSwitcher.getInstance().setThemeNeedsReload() }

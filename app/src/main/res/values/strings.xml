@@ -749,6 +749,10 @@ New dictionary:
     <string name="theme_name_cloudy" tools:keep="@string/theme_name_cloudy">Cloudy</string>
     <!-- Theme name for forest theme -->
     <string name="theme_name_forest" tools:keep="@string/theme_name_forest">Forest</string>
+    <string name="dictation_color" translatable="false">Dictation button color</string>
+    <string name="dictation_color_recording" translatable="false">Dictation button color while recording</string>
+    <string name="theme_name_matrix" tools:keep="@string/theme_name_matrix">Matrix</string>
+    <string name="theme_name_red_alert" tools:keep="@string/theme_name_red_alert">Red Alert</string>
     <!-- Theme name for indigo theme -->
     <string name="theme_name_indigo" tools:keep="@string/theme_name_indigo">Indigo</string>
     <!-- Theme name for ocean theme -->
