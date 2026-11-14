@@ -12,3 +12,6 @@
 # after upgrading to gradle 8, stack traces contain "unknown source"
 -keepattributes SourceFile,LineNumberTable
 -dontobfuscate
+
+# On-device Whisper bridge (JNI): keep names so native registration works after minify
+-keep class app.securekeyboard.asr.** { *; }

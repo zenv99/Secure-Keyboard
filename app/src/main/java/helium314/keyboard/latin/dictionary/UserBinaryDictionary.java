@@ -75,8 +75,8 @@ public class UserBinaryDictionary extends ExpandableBinaryDictionary {
             cursor = mContext.getContentResolver().query(
                     Words.CONTENT_URI, PROJECTION_QUERY_WITH_SHORTCUT, request, requestArguments, null);
             addWordsLocked(cursor);
-        } catch (SQLiteException e) {
-            Log.e(TAG, "SQLiteException in the remote User dictionary process.", e);
+        } catch (SQLiteException | SecurityException e) {
+            Log.e(TAG, "cannot read the system user dictionary", e);
         } finally {
             try {
                 if (null != cursor) cursor.close();

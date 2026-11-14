@@ -100,21 +100,21 @@ jobs:
           else
             echo "::warning::Signing secrets missing or wrong (check SK_KEYSTORE_B64 / SK_KEYSTORE_PASSWORD). Building with the temporary debug key; updates will need uninstall."
           fi
-          ./gradlew --no-daemon :app:assembleDebug
+          ./gradlew --no-daemon :app:assembleRelease
       - name: Enforce no-INTERNET permission in produced APK
         shell: bash
         run: |
           shopt -s nullglob
-          apks=(app/build/outputs/apk/debug/*.apk)
+          apks=(app/build/outputs/apk/release/*.apk)
           if (( ${#apks[@]} == 0 )); then
-            echo 'No debug APK produced; refusing to skip privacy gate.' >&2
+            echo 'No release APK produced; refusing to skip privacy gate.' >&2
             exit 1
           fi
           bash securekeyboard-project/ci/check_no_internet.sh "${apks[@]}"
       - uses: actions/upload-artifact@v4
         with:
-          name: secure-keyboard-debug-apk
-          path: app/build/outputs/apk/debug/*.apk
+          name: secure-keyboard-release-apk
+          path: app/build/outputs/apk/release/*.apk
           if-no-files-found: error
       - name: Publish test-build pre-release (main only)
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -123,22 +123,22 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p release
-          cp app/build/outputs/apk/debug/*.apk release/SecureKeyboard-debug.apk
-          (cd release && sha256sum SecureKeyboard-debug.apk > SHA256SUMS.txt)
+          cp app/build/outputs/apk/release/*.apk release/SecureKeyboard.apk
+          (cd release && sha256sum SecureKeyboard.apk > SHA256SUMS.txt)
           cat > release/notes.md <<EOF
           Secure Keyboard v1.0 (commit ${GITHUB_SHA:0:8}). Not yet independently audited.
 
           This build passed the automated privacy gate: no INTERNET permission, backup disabled, only whitelisted permissions.
-          Install: download SecureKeyboard-debug.apk, allow installs from your browser or Files app when asked, then enable Secure Keyboard in Settings > System > Keyboard.
+          Install: download SecureKeyboard.apk, allow installs from your browser or Files app when asked, then enable Secure Keyboard in Settings > System > Keyboard.
           Check the file against SHA256SUMS.txt before installing.
           EOF
           sed -i 's/^          //' release/notes.md
           if [ "${SK_SIGNED:-}" = "1" ]; then
             TAG="v1.0.${GITHUB_RUN_NUMBER}"
-            cp release/SecureKeyboard-debug.apk "release/SecureKeyboard-${TAG}.apk"
+            cp release/SecureKeyboard.apk "release/SecureKeyboard-${TAG}.apk"
             gh release create "$TAG" "release/SecureKeyboard-${TAG}.apk" release/SHA256SUMS.txt \
               --prerelease --target "$GITHUB_SHA" --title "Secure Keyboard ${TAG}" --notes-file release/notes.md
           fi
           gh release delete test-build --cleanup-tag --yes || true
-          gh release create test-build release/SecureKeyboard-debug.apk release/SHA256SUMS.txt \
+          gh release create test-build release/SecureKeyboard.apk release/SHA256SUMS.txt \
             --prerelease --target "$GITHUB_SHA" --title "Secure Keyboard v1.0" --notes-file release/notes.md

@@ -50,7 +50,7 @@ abstract class AndroidWordLevelSpellCheckerSession(private val mService: Android
     }
 
     init {
-        mService.contentResolver.registerContentObserver(Words.CONTENT_URI, true, observer)
+        runCatching { mService.contentResolver.registerContentObserver(Words.CONTENT_URI, true, observer) }
     }
 
     private fun updateLocale() {

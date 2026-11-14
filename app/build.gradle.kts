@@ -39,6 +39,7 @@ android {
             isShrinkResources = false
             isDebuggable = false
             isJniDebuggable = false
+            if (skKeystore != null) signingConfig = signingConfigs.getByName("securekeyboard")
         }
         create("nouserlib") { // same as release, but does not allow the user to provide a library
             matchingFallbacks += listOf("release") // use the matching :asr variant

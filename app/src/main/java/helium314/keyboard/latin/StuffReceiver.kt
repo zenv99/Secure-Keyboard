@@ -129,7 +129,7 @@ class StuffReceiver(latinIME: LatinIME) {
     private fun registerPersonalDictObserver(context: Context) {
         if (personalDictObserver != null) return
         personalDictObserver = Companion.personalDictObserver
-        context.contentResolver.registerContentObserver(Words.CONTENT_URI, true, Companion.personalDictObserver)
+        runCatching { context.contentResolver.registerContentObserver(Words.CONTENT_URI, true, Companion.personalDictObserver) }
     }
 
     private fun unregisterPersonalDictObserver(context: Context) {
