@@ -147,6 +147,9 @@ class AsrService : Service() {
                         val speech = trimSilence(pcm)
                         if (silent) {
                             reply(client, MSG_ERROR, code = ERR_SILENT)
+                        } else if (speech == null) {
+                            // nothing but background noise: Whisper would invent words ("you"), so type nothing
+                            if (last) reply(client, MSG_ERROR, code = ERR_NO_SPEECH)
                         } else {
                             val floats = FloatArray(speech.size) { speech[it] / 32768f }
                             text = clean(engine.transcribe(floats, LANGUAGE, threads()), speech.size / SAMPLE_RATE.toDouble())
@@ -210,7 +213,8 @@ class AsrService : Service() {
         return words.joinToString(" ").trim()
     }
 
-    private fun trimSilence(pcm: ShortArray): ShortArray {
+    /** The speech part of the clip (+200 ms), or null when the clip contains no speech at all. */
+    private fun trimSilence(pcm: ShortArray): ShortArray? {
         val win = SAMPLE_RATE / 50 // 20 ms
         fun loud(start: Int): Boolean {
             val end = minOf(pcm.size, start + win)
@@ -221,6 +225,7 @@ class AsrService : Service() {
         }
         var first = 0
         while (first < pcm.size - win && !loud(first)) first += win
+        if (first >= pcm.size - win) return null
         var last = pcm.size
         while (last > first + win && !loud(last - win)) last -= win
         val margin = SAMPLE_RATE / 5
