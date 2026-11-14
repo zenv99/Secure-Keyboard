@@ -481,7 +481,10 @@ public class LatinIME extends InputMethodService implements
         mKeyboardSwitcher = KeyboardSwitcher.getInstance();
         mStatsUtilsManager = StatsUtilsManager.getInstance();
         mKeyboardActionListener = new KeyboardActionListenerImpl(this, mInputLogic);
-        mPushToTalk = new helium314.keyboard.voice.PushToTalkController(this, this::onDictatedText);
+        mPushToTalk = new helium314.keyboard.voice.PushToTalkController(this, text -> {
+            onDictatedText(text);
+            return kotlin.Unit.INSTANCE;
+        });
         mIsHardwareAcceleratedDrawingEnabled = this.enableHardwareAcceleration();
         Log.i(TAG, "Hardware accelerated drawing: " + mIsHardwareAcceleratedDrawingEnabled);
     }
