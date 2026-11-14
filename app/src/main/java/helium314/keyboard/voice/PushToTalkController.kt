@@ -96,7 +96,10 @@ class PushToTalkController(
     private fun bind() {
         if (bound) return
         bound = context.bindService(
-            Intent(context, AsrService::class.java), connection, Context.BIND_AUTO_CREATE
+            Intent(context, AsrService::class.java), connection,
+            // Android only lets a background process use the microphone if the visible client passes its
+            // "while-in-use" capability on; without this flag the :asr process records pure silence.
+            Context.BIND_AUTO_CREATE or Context.BIND_INCLUDE_CAPABILITIES
         )
     }
 
