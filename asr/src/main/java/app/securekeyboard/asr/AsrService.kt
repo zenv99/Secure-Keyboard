@@ -39,6 +39,7 @@ class AsrService : Service() {
         when (message.what) {
             MSG_START -> { handleStart(message.replyTo); true }
             MSG_STOP -> { recorder?.stop(); true }
+            MSG_WARM -> { worker.execute { try { ensureWhisper() } catch (_: AsrException) { } }; true }
             else -> false
         }
     }
@@ -230,6 +231,7 @@ class AsrService : Service() {
     companion object {
         const val MSG_START = 1
         const val MSG_STOP = 2
+        const val MSG_WARM = 3 // load the model now so the first dictation is not slow
         const val MSG_FINAL = 4
         const val MSG_ERROR = 5
 

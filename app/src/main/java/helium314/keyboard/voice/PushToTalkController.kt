@@ -30,12 +30,21 @@ class PushToTalkController(
     private var held = false // finger is currently down on the mic key
     private var sessionStarted = false // MSG_START was sent for the current hold
     private var lastErrorToast = 0L
+    private var pendingWarm = false
+    private var lastText = ""
+    private var lastTextTime = 0L
 
     private val replyTo = Messenger(Handler(Looper.getMainLooper()) { message ->
         when (message.what) {
             AsrService.MSG_FINAL -> {
                 val text = message.data.getString(AsrService.KEY_TEXT).orEmpty()
-                if (text.isNotBlank()) onText(text)
+                val now = System.currentTimeMillis()
+                // never insert the same text twice in a row within a few seconds (duplicate delivery guard)
+                if (text.isNotBlank() && !(text == lastText && now - lastTextTime < 3000)) {
+                    lastText = text
+                    lastTextTime = now
+                    onText(text)
+                }
                 true
             }
             AsrService.MSG_ERROR -> {
@@ -51,6 +60,7 @@ class PushToTalkController(
     private val connection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName, binder: IBinder) {
             service = Messenger(binder)
+            if (pendingWarm) { pendingWarm = false; send(AsrService.MSG_WARM) }
             if (held) startSession() // finger went down while we were still binding
         }
 
@@ -80,8 +90,17 @@ class PushToTalkController(
     /** Mic key went up (or the touch was cancelled). */
     fun onRelease() {
         held = false
-        if (sessionStarted) send(AsrService.MSG_STOP)
+        if (sessionStarted) {
+            send(AsrService.MSG_STOP)
+            Toast.makeText(context, R.string.voice_transcribing, Toast.LENGTH_SHORT).show()
+        }
         sessionStarted = false
+    }
+
+    /** Bind and load the model in the background when the keyboard opens, so the first press is instant. */
+    fun warmUp() {
+        if (context.checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) return
+        if (service != null) send(AsrService.MSG_WARM) else { pendingWarm = true; bind() }
     }
 
     fun release() {
