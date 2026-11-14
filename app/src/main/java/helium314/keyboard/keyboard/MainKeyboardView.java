@@ -657,7 +657,9 @@ public final class MainKeyboardView extends KeyboardView implements DrawingProxy
         if (shortcutKey == null) {
             return;
         }
-        shortcutKey.setEnabled(available);
+        // Secure Keyboard has built-in on-device voice input, so the mic key is always usable,
+        // even when no other voice-typing app is installed.
+        shortcutKey.setEnabled(true);
         invalidateKey(shortcutKey);
     }
 
