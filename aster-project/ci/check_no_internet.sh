@@ -11,6 +11,11 @@ for apk in "$@"; do
   if grep -Fq "android.permission.INTERNET" <<<"$permissions"; then
     echo "FAIL: INTERNET permission found in $apk" >&2; exit 1
   fi
+  # Only these permissions may ever ship. RECORD_AUDIO is for push-to-talk dictation (on device).
+  unexpected="$(grep -Ev '^(android\.permission\.(READ_USER_DICTIONARY|WRITE_USER_DICTIONARY|READ_CONTACTS|RECEIVE_BOOT_COMPLETED|VIBRATE|RECORD_AUDIO)|.*\.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION)$' <<<"$permissions" || true)"
+  if [[ -n "$unexpected" ]]; then
+    echo "FAIL: unexpected permissions in $apk:" >&2; echo "$unexpected" >&2; exit 1
+  fi
   manifest="$(apkanalyzer manifest print "$apk")"
   if ! grep -Fq 'android:allowBackup="false"' <<<"$manifest"; then
     echo "FAIL: allowBackup is not false in $apk" >&2; exit 1

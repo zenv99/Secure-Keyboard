@@ -5,12 +5,18 @@
 - License: GPL-3.0 (preserve exact upstream license and notices).
 - Distributed derivatives must comply with GPL-3.0 source and notice obligations.
 
-## whisper.cpp (planned; not yet vendored)
+## whisper.cpp
 - Upstream: https://github.com/ggml-org/whisper.cpp
-- License: MIT; retain copyright and permission notice.
-- Before integration, record an exact reviewed commit SHA and review all transitive/native dependencies.
+- License: MIT; copyright and permission notice retained in third_party/whisper.cpp/LICENSE.
+- Vendored as a git submodule pinned to release tag v1.9.5 (commit d1be6fde11ac6e0407606b4e42fe72d34add8037), built from source in the `:asr` module, CPU only.
+- Any bump of this pin needs a review of the upstream diff, including ggml and its transitive code.
 
 ## Models and datasets
 Model weights and evaluation corpora have independent terms. Record provenance, license, version and SHA-256 for every shipped artifact. Do not assume software licenses cover model weights or datasets.
 
 This is an initial inventory, not legal advice or a completed software bill of materials.
+
+## Voice model
+- File: ggml-base.en-q5_1.bin (OpenAI Whisper base.en, quantized by whisper.cpp), downloaded at build time from https://huggingface.co/ggerganov/whisper.cpp
+- Weights are published under the MIT license by OpenAI (Whisper); confirm the current terms before release.
+- SHA-256 pin: aster-project/asr/MODEL_SHA256 (currently UNPINNED: CI prints the computed hash; review it and commit it).

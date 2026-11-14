@@ -7,6 +7,9 @@ on:
     paths:
       - 'aster-project/**'
       - 'app/**'
+      - 'asr/**'
+      - 'third_party/**'
+      - '.gitmodules'
       - 'build.gradle.kts'
       - 'settings.gradle'
       - 'gradle/**'
@@ -16,6 +19,9 @@ on:
     paths:
       - 'aster-project/**'
       - 'app/**'
+      - 'asr/**'
+      - 'third_party/**'
+      - '.gitmodules'
       - 'build.gradle.kts'
       - 'settings.gradle'
       - 'gradle/**'
@@ -46,6 +52,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: recursive
       - name: Verify source privacy and backup declarations
         run: python3 aster-project/ci/check_privacy_sources.py
       - uses: actions/setup-java@v4
@@ -62,7 +70,16 @@ jobs:
           sdk_status=${PIPESTATUS[1]}
           set -e
           if [ "${sdk_status}" -ne 0 ]; then exit "${sdk_status}"; fi
-          "${SDKMANAGER}" --install 'platforms;android-37.0' 'build-tools;37.0.0' 'ndk;28.0.13004108'
+          "${SDKMANAGER}" --install 'platforms;android-37.0' 'build-tools;37.0.0' 'ndk;28.0.13004108' 'cmake;3.22.1'
+      - name: Cache on-device voice model
+        uses: actions/cache@v4
+        with:
+          path: app/src/main/assets/asr
+          key: asr-model-${{ hashFiles('aster-project/asr/MODEL_SHA256', 'aster-project/ci/fetch_model.sh') }}
+      - name: Fetch and verify on-device voice model
+        env:
+          ALLOW_UNPINNED: '1' # debug builds only; release builds must pin aster-project/asr/MODEL_SHA256
+        run: bash aster-project/ci/fetch_model.sh
       - name: Build, lint and run unit tests
         run: |
           chmod +x ./gradlew

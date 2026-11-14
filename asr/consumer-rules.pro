@@ -1,0 +1,1 @@
+-keepclassmembers class dev.aster.keyboard.asr.WhisperBridge { native <methods>; }
