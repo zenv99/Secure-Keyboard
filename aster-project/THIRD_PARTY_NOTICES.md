@@ -19,4 +19,4 @@ This is an initial inventory, not legal advice or a completed software bill of m
 ## Voice model
 - File: ggml-base.en-q5_1.bin (OpenAI Whisper base.en, quantized by whisper.cpp), downloaded at build time from https://huggingface.co/ggerganov/whisper.cpp
 - Weights are published under the MIT license by OpenAI (Whisper); confirm the current terms before release.
-- SHA-256 pin: aster-project/asr/MODEL_SHA256 (currently UNPINNED: CI prints the computed hash; review it and commit it).
+- SHA-256 pin: aster-project/asr/MODEL_SHA256 = 4baf70dd0d7c4247ba2b81fafd9c01005ac77c2f9ef064e00dcf195d0e2fdd2f, recorded from the first CI download of ggml-base.en-q5_1.bin (trust on first use: cross-check it against an independent source before release).

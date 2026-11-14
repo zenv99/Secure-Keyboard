@@ -8,7 +8,7 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 MODEL_NAME="ggml-base.en-q5_1.bin"
 URL="https://huggingface.co/ggerganov/whisper.cpp/resolve/main/${MODEL_NAME}"
-PIN="$(tr -d '[:space:]' < "$ROOT/aster-project/asr/MODEL_SHA256" | tr 'A-F' 'a-f')"
+PIN="$(tr -d '[:space:]' < "$ROOT/aster-project/asr/MODEL_SHA256" | tr '[:upper:]' '[:lower:]')"
 DEST="$ROOT/app/src/main/assets/asr"
 mkdir -p "$DEST"
 

@@ -78,7 +78,7 @@ jobs:
           key: asr-model-${{ hashFiles('aster-project/asr/MODEL_SHA256', 'aster-project/ci/fetch_model.sh') }}
       - name: Fetch and verify on-device voice model
         env:
-          ALLOW_UNPINNED: '1' # debug builds only; release builds must pin aster-project/asr/MODEL_SHA256
+          ALLOW_UNPINNED: '0' # the pin in aster-project/asr/MODEL_SHA256 is enforced
         run: bash aster-project/ci/fetch_model.sh
       - name: Build, lint and run unit tests
         run: |
