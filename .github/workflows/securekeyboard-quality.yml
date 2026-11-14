@@ -83,8 +83,19 @@ jobs:
           ALLOW_UNPINNED: '0' # the pin in securekeyboard-project/asr/MODEL_SHA256 is enforced
         run: bash securekeyboard-project/ci/fetch_model.sh
       - name: Build debug APK
+        env:
+          SK_KEYSTORE_B64: ${{ secrets.SK_KEYSTORE_B64 }}
+          SK_KEYSTORE_PASSWORD: ${{ secrets.SK_KEYSTORE_PASSWORD }}
         run: |
           chmod +x ./gradlew
+          if [ -n "${SK_KEYSTORE_B64:-}" ]; then
+            echo "$SK_KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/sk.jks"
+            export SK_KEYSTORE_FILE="$RUNNER_TEMP/sk.jks"
+            export SK_VERSION_CODE=$((4300 + GITHUB_RUN_NUMBER))
+            echo "Signing with the permanent Secure Keyboard key"
+          else
+            echo "No signing secrets: debug-signed build (updates will need uninstall)"
+          fi
           ./gradlew --no-daemon :app:assembleDebug
       - name: Enforce no-INTERNET permission in produced APK
         shell: bash
@@ -105,6 +116,7 @@ jobs:
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         env:
           GH_TOKEN: ${{ github.token }}
+          SK_KEYSTORE_B64: ${{ secrets.SK_KEYSTORE_B64 }}
         run: |
           set -euo pipefail
           mkdir -p release
@@ -118,6 +130,12 @@ jobs:
           Check the file against SHA256SUMS.txt before installing.
           EOF
           sed -i 's/^          //' release/notes.md
+          if [ -n "${SK_KEYSTORE_B64:-}" ]; then
+            TAG="v0.1.${GITHUB_RUN_NUMBER}"
+            cp release/SecureKeyboard-debug.apk "release/SecureKeyboard-${TAG}.apk"
+            gh release create "$TAG" "release/SecureKeyboard-${TAG}.apk" release/SHA256SUMS.txt \
+              --prerelease --target "$GITHUB_SHA" --title "Secure Keyboard ${TAG}" --notes-file release/notes.md
+          fi
           gh release delete test-build --cleanup-tag --yes || true
           gh release create test-build release/SecureKeyboard-debug.apk release/SHA256SUMS.txt \
             --prerelease --target "$GITHUB_SHA" --title "Secure Keyboard test build" --notes-file release/notes.md

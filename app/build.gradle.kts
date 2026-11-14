@@ -13,13 +13,24 @@ android {
         applicationId = "helium314.keyboard"
         minSdk = 21
         targetSdk = 37
-        versionCode = 4300
+        versionCode = (System.getenv("SK_VERSION_CODE")?.toIntOrNull() ?: 4300)
         versionName = "4.3-beta1"
         ndk {
             abiFilters.clear()
             abiFilters.add("arm64-v8a") // on-device Whisper (:asr) is built for arm64 only
         }
         proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+    }
+
+    // Permanent signing key (kept only in GitHub secrets) so every build can update the previous one.
+    val skKeystore = System.getenv("SK_KEYSTORE_FILE")
+    if (skKeystore != null) {
+        signingConfigs.create("securekeyboard") {
+            storeFile = file(skKeystore)
+            storePassword = System.getenv("SK_KEYSTORE_PASSWORD")
+            keyAlias = "securekeyboard"
+            keyPassword = System.getenv("SK_KEYSTORE_PASSWORD")
+        }
     }
 
     buildTypes {
@@ -42,6 +53,7 @@ android {
             isMinifyEnabled = true
             isJniDebuggable = false
             applicationIdSuffix = ".debug"
+            if (skKeystore != null) signingConfig = signingConfigs.getByName("securekeyboard")
         }
         create("runTests") { // build variant for running tests on CI that skips tests known to fail
             matchingFallbacks += listOf("debug") // use the matching :asr variant
