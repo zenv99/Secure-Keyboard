@@ -53,6 +53,7 @@ class KeyboardActionListenerImpl(private val latinIME: LatinIME, private val inp
 
     override fun onPressKey(primaryCode: Int, repeatCount: Int, pointerCount: Int, hapticEvent: HapticEvent) {
         metaOnPressKey(primaryCode)
+        if (primaryCode == KeyCode.VOICE_INPUT && repeatCount == 0) latinIME.onPushToTalkPress()
         keyboardSwitcher.onPressKey(primaryCode, pointerCount, latinIME.currentAutoCapsState, latinIME.currentRecapitalizeState)
         // we need to use LatinIME for handling of key-down audio and haptics
         latinIME.hapticAndAudioFeedback(primaryCode, repeatCount, hapticEvent)
@@ -65,6 +66,7 @@ class KeyboardActionListenerImpl(private val latinIME: LatinIME, private val inp
 
     override fun onReleaseKey(primaryCode: Int, withSliding: Boolean) {
         metaOnReleaseKey(primaryCode)
+        if (primaryCode == KeyCode.VOICE_INPUT) latinIME.onPushToTalkRelease()
         keyboardSwitcher.onReleaseKey(primaryCode, withSliding, latinIME.currentAutoCapsState, latinIME.currentRecapitalizeState)
     }
 
@@ -175,7 +177,7 @@ class KeyboardActionListenerImpl(private val latinIME: LatinIME, private val inp
     override fun onCancelBatchInput() = latinIME.onCancelBatchInput()
 
     // User released a finger outside any key
-    override fun onCancelInput() { }
+    override fun onCancelInput() { latinIME.onPushToTalkRelease() }
 
     override fun onFinishSlidingInput() =
         keyboardSwitcher.onFinishSlidingInput(latinIME.currentAutoCapsState, latinIME.currentRecapitalizeState)

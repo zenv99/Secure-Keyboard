@@ -105,6 +105,7 @@ public class LatinIME extends InputMethodService implements
 
     final Settings mSettings;
     public final KeyboardActionListener mKeyboardActionListener;
+    public final helium314.keyboard.voice.PushToTalkController mPushToTalk;
     private int mOriginalNavBarColor = 0;
     private int mOriginalNavBarFlags = 0;
 
@@ -480,6 +481,7 @@ public class LatinIME extends InputMethodService implements
         mKeyboardSwitcher = KeyboardSwitcher.getInstance();
         mStatsUtilsManager = StatsUtilsManager.getInstance();
         mKeyboardActionListener = new KeyboardActionListenerImpl(this, mInputLogic);
+        mPushToTalk = new helium314.keyboard.voice.PushToTalkController(this, this::onDictatedText);
         mIsHardwareAcceleratedDrawingEnabled = this.enableHardwareAcceleration();
         Log.i(TAG, "Hardware accelerated drawing: " + mIsHardwareAcceleratedDrawingEnabled);
     }
@@ -614,6 +616,7 @@ public class LatinIME extends InputMethodService implements
 
     @Override
     public void onDestroy() {
+        if (mPushToTalk != null) mPushToTalk.release();
         mClipboardHistoryManager.onDestroy();
         mDictionaryFacilitator.closeDictionaries();
         mSettings.onDestroy();
@@ -1243,13 +1246,40 @@ public class LatinIME extends InputMethodService implements
     // This method is public for testability of LatinIME, but also in the future it should
     // completely replace #onCodeInput.
     public void onEvent(@NonNull final Event event) {
-        if (KeyCode.VOICE_INPUT == event.getKeyCode()) {
-            mRichImm.switchToShortcutIme(this);
+        if (KeyCode.VOICE_INPUT == event.getKeyCode() && !mPushToTalkGesture) {
+            mRichImm.switchToShortcutIme(this); // toolbar mic (a tap, not a hold) keeps the old behaviour
         }
+        mPushToTalkGesture = false;
         InputTransaction completeInputTransaction =
                 mInputLogic.onCodeInput(mSettings.getCurrent(), event, mKeyboardSwitcher.getKeyboardCapsMode(), mHandler);
         updateStateAfterInputTransaction(completeInputTransaction);
         mKeyboardSwitcher.onEvent(event, getCurrentAutoCapsState(), getCurrentRecapitalizeState());
+    }
+
+    /** True between a press of the hold-to-talk mic key and the resulting key event, so it is not treated as a tap. */
+    private boolean mPushToTalkGesture = false;
+
+    public void onPushToTalkPress() {
+        mPushToTalk.onPress();
+        mPushToTalkGesture = true; // even when only the permission screen opened, never fall back to another IME
+    }
+
+    public void onPushToTalkRelease() {
+        mPushToTalk.onRelease();
+        mPushToTalkGesture = false; // also covers a slide off the key, which produces no key event
+    }
+
+    /** Inserts text recognised on device by the push-to-talk service. */
+    public void onDictatedText(@NonNull final String text) {
+        final android.view.inputmethod.InputConnection ic = getCurrentInputConnection();
+        String toInsert = text.trim();
+        if (toInsert.isEmpty()) return;
+        if (ic != null) {
+            final CharSequence before = ic.getTextBeforeCursor(1, 0);
+            if (before != null && before.length() == 1 && !Character.isWhitespace(before.charAt(0)))
+                toInsert = " " + toInsert;
+        }
+        onTextInput(toInsert);
     }
 
     public void onTextInput(@Nullable String rawText) {

@@ -1322,4 +1322,9 @@ New dictionary:
     <string name="gesture_data_swipe_o_scope">Tool for visualizing gesture data: &lt;a href=%s&gt;Swipe-O-Scope&lt;/a&gt;</string>
 
     <!-- new strings should go above the section for gesture data gathering -->
+    <!-- Push-to-talk dictation messages (not yet in Weblate) -->
+    <string name="voice_error_no_model" translatable="false">Voice model missing from this build</string>
+    <string name="voice_error_model_integrity" translatable="false">Voice model failed its integrity check</string>
+    <string name="voice_error_unsupported" translatable="false">Voice input is not supported on this device</string>
+    <string name="voice_error_generic" translatable="false">Voice input failed</string>
 </resources>

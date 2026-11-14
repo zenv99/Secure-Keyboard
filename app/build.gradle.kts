@@ -17,7 +17,7 @@ android {
         versionName = "4.3-beta1"
         ndk {
             abiFilters.clear()
-            abiFilters.addAll(listOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64"))
+            abiFilters.add("arm64-v8a") // on-device Whisper (:asr) is built for arm64 only
         }
         proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
     }
@@ -116,6 +116,8 @@ android {
 }
 
 dependencies {
+    implementation(project(":asr")) // on-device push-to-talk speech recognition
+
     // androidx
     implementation("androidx.core:core-ktx:1.17.0") // 1.18.0 requires minSdk 23
     implementation("androidx.recyclerview:recyclerview:1.4.0")
