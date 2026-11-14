@@ -1,6 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
 if [[ $# -lt 1 ]]; then echo "Usage: $0 <apk> [<apk> ...]" >&2; exit 2; fi
+if ! command -v apkanalyzer >/dev/null 2>&1; then
+  for d in "${ANDROID_HOME:-}" "${ANDROID_SDK_ROOT:-}"; do
+    if [ -n "$d" ] && [ -x "$d/cmdline-tools/latest/bin/apkanalyzer" ]; then
+      PATH="$d/cmdline-tools/latest/bin:$PATH"; break
+    fi
+  done
+fi
 command -v apkanalyzer >/dev/null 2>&1 || {
   echo "apkanalyzer is required to verify the merged APK manifest." >&2
   exit 2
