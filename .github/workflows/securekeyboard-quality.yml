@@ -94,6 +94,7 @@ jobs:
             export SK_KEYSTORE_FILE="$RUNNER_TEMP/sk.jks"
             export SK_KEYSTORE_PASSWORD="$PW"
             export SK_VERSION_CODE=$((4300 + GITHUB_RUN_NUMBER))
+            export SK_VERSION_NAME="1.0.${GITHUB_RUN_NUMBER}"
             echo "SK_SIGNED=1" >> "$GITHUB_ENV"
             echo "Signing with the permanent Secure Keyboard key"
           else
