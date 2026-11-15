@@ -152,8 +152,16 @@ class AsrService : Service() {
                             if (last) reply(client, MSG_ERROR, code = ERR_NO_SPEECH)
                         } else {
                             val floats = FloatArray(speech.size) { speech[it] / 32768f }
-                            text = clean(engine.transcribe(floats, LANGUAGE, threads()), speech.size / SAMPLE_RATE.toDouble())
+                            val seconds = speech.size / SAMPLE_RATE.toDouble()
+                            text = clean(engine.transcribe(floats, LANGUAGE, threads()), seconds)
                             floats.fill(0f)
+                            // Long clips occasionally come back far too short (the decoder stops after a few words).
+                            // Real speech has well over one word per second of voiced audio: if not, redo it in
+                            // pieces cut at the pauses, which short clips handle reliably, and keep the fuller result.
+                            if (seconds >= 6.0 && wordCount(text) < voicedSeconds(speech)) {
+                                val piecesText = transcribeInPieces(engine, speech)
+                                if (wordCount(piecesText) > wordCount(text)) text = piecesText
+                            }
                             if (text.isBlank() && last) reply(client, MSG_ERROR, code = ERR_NO_SPEECH)
                         }
                     } catch (e: AsrException) {
@@ -232,6 +240,58 @@ class AsrService : Service() {
         val from = maxOf(0, first - margin)
         val to = minOf(pcm.size, last + margin)
         return if (to - from < MIN_SAMPLES) pcm else pcm.copyOfRange(from, to)
+    }
+
+    private fun wordCount(t: String) = t.split(Regex("\\s+")).count { it.isNotEmpty() }
+
+    /** Seconds of the clip that are clearly louder than background noise. */
+    private fun voicedSeconds(pcm: ShortArray): Double {
+        val win = SAMPLE_RATE / 50
+        var loudWindows = 0
+        var i = 0
+        while (i + win <= pcm.size) {
+            var sum = 0L
+            for (k in i until i + win) sum += kotlin.math.abs(pcm[k].toInt())
+            if (sum / win > 300) loudWindows++
+            i += win
+        }
+        return loudWindows * 0.02
+    }
+
+    /** Transcribes the clip as pieces of at most ~10 s, each cut at the quietest moment (a pause). */
+    private fun transcribeInPieces(engine: WhisperBridge, pcm: ShortArray): String {
+        val win = SAMPLE_RATE / 50 // 20 ms
+        val windows = pcm.size / win
+        val energy = LongArray(windows) { w ->
+            var sum = 0L
+            for (k in w * win until (w + 1) * win) sum += kotlin.math.abs(pcm[k].toInt())
+            sum
+        }
+        val cuts = ArrayList<Int>()
+        var start = 0 // in windows
+        while (windows - start > 500) { // more than 10 s left
+            var bestAt = start + 350
+            var best = Long.MAX_VALUE
+            for (w in start + 200..start + 480) { // cut somewhere between 4 s and 9.6 s
+                var e = 0L
+                for (k in w until w + 5) e += energy[k] // ~100 ms of quiet
+                if (e < best) { best = e; bestAt = w + 2 }
+            }
+            cuts.add(bestAt * win)
+            start = bestAt
+        }
+        val bounds = listOf(0) + cuts + listOf(pcm.size)
+        val out = ArrayList<String>()
+        for (n in 0 until bounds.size - 1) {
+            val piece = pcm.copyOfRange(bounds[n], bounds[n + 1])
+            if (piece.size < MIN_SAMPLES) continue
+            val trimmed = trimSilence(piece) ?: continue
+            val floats = FloatArray(trimmed.size) { trimmed[it] / 32768f }
+            val t = clean(engine.transcribe(floats, LANGUAGE, threads()), trimmed.size / SAMPLE_RATE.toDouble())
+            floats.fill(0f)
+            if (t.isNotBlank()) out.add(t)
+        }
+        return out.joinToString(" ")
     }
 
     private fun norm(w: String) = w.lowercase().filter { it.isLetterOrDigit() }

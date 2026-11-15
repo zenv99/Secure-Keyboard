@@ -33,6 +33,7 @@ class PushToTalkController(
     private var pendingWarm = false
     private var lastText = ""
     private var lastTextTime = 0L
+    private var pressedAt = 0L
     private var awaiting = false // a dictation session is open: only then is incoming text accepted
 
     private val replyTo = Messenger(Handler(Looper.getMainLooper()) { message ->
@@ -87,6 +88,7 @@ class PushToTalkController(
         }
         if (held) return true // repeated down events must not start a second session
         held = true
+        pressedAt = System.currentTimeMillis()
         if (service != null) startSession() else bind()
         if (!bound && service == null) Toast.makeText(context, R.string.voice_error_generic, Toast.LENGTH_SHORT).show()
         else Toast.makeText(
@@ -102,7 +104,9 @@ class PushToTalkController(
         held = false
         if (sessionStarted) {
             send(AsrService.MSG_STOP)
-            Toast.makeText(context, R.string.voice_transcribing, Toast.LENGTH_SHORT).show()
+            // shows how long the key was actually held, so a hold cut short by the system is easy to spot
+            val heldSeconds = (System.currentTimeMillis() - pressedAt) / 1000
+            Toast.makeText(context, context.getString(R.string.voice_transcribing) + " (" + heldSeconds + " s)", Toast.LENGTH_SHORT).show()
         }
         sessionStarted = false
     }
