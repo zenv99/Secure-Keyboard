@@ -54,6 +54,14 @@ public abstract class Dictionary {
     // User history dictionary internal to LatinIME.
     public static final String TYPE_USER_HISTORY = "history";
     public static final String TYPE_EMOJI = "emoji";
+    /** Receives every word of a dictionary together with its probability (0-255). */
+    public interface WordVisitor {
+        void visit(String word, int probability);
+    }
+
+    /** Calls the visitor for every word in this dictionary. Dictionaries that cannot enumerate do nothing. */
+    public void forEachWord(final WordVisitor visitor) { }
+
     public final String mDictType;
     // The locale for this dictionary. May be null if unknown (phony dictionary for example).
     public final Locale mLocale;

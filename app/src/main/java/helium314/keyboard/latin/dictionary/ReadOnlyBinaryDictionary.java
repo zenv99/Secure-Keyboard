@@ -74,6 +74,27 @@ public final class ReadOnlyBinaryDictionary extends Dictionary {
     }
 
     @Override
+    public void forEachWord(final WordVisitor visitor) {
+        int token = 0;
+        do {
+            // lock per word, so closing the dictionary is never blocked for long
+            if (!mLock.readLock().tryLock()) return;
+            final BinaryDictionary.GetNextWordPropertyResult result;
+            try {
+                result = mBinaryDictionary.getNextWordProperty(token);
+            } finally {
+                mLock.readLock().unlock();
+            }
+            final WordProperty property = result.mWordProperty;
+            if (property != null && property.mWord != null && !property.mIsNotAWord
+                    && !property.mIsBeginningOfSentence && property.mProbabilityInfo != null) {
+                visitor.visit(property.mWord, property.mProbabilityInfo.mProbability);
+            }
+            token = result.mNextToken;
+        } while (token != 0);
+    }
+
+    @Override
     public boolean shouldAutoCommit(final SuggestedWordInfo candidate) {
         if (mLock.readLock().tryLock()) {
             try {

@@ -42,7 +42,6 @@ public class TouchpadHandler {
 
     public void disableTouchpadMode() {
         if (!mInTouchpadMode) return;
-        flushPending();
         stopEdgeScrolling();
         stopHapticRunnable();
         mInTouchpadMode = false;
@@ -112,75 +111,20 @@ public class TouchpadHandler {
         int moveThresholdX = Math.max(6, (int) base);
         int moveThresholdY = Math.max(10, (int) (base * 1.5f));
 
-        // Convert finger travel into pending cursor steps; they are played out smoothly (trailing caret).
+        // Convert finger travel into whole cursor steps and apply them right away, in ONE call per touch
+        // event (a single selection change for the horizontal part), so the caret follows the finger smoothly.
+        int stepsX = 0, stepsY = 0;
         while (Math.abs(mTouchpadAccX) >= moveThresholdX) {
             boolean positive = mTouchpadAccX > 0;
-            mPendingX += positive ? 1 : -1;
+            stepsX += positive ? 1 : -1;
             mTouchpadAccX -= (positive ? moveThresholdX : -moveThresholdX);
         }
         while (Math.abs(mTouchpadAccY) >= moveThresholdY) {
             boolean positive = mTouchpadAccY > 0;
-            mPendingY += positive ? 1 : -1;
+            stepsY += positive ? 1 : -1;
             mTouchpadAccY -= (positive ? moveThresholdY : -moveThresholdY);
         }
-        if ((mPendingX != 0 || mPendingY != 0) && !mPumping) {
-            mPumping = true;
-            mHandler.post(mPumpRunnable);
-        }
-    }
-
-    // Pending cursor steps (finger travel already converted) and the smooth playback of them.
-    private int mPendingX = 0, mPendingY = 0;
-    private boolean mPumping = false;
-    private static final int PUMP_INTERVAL_MS = 12;
-
-    private final Runnable mPumpRunnable = new Runnable() {
-        @Override
-        public void run() {
-            if (mListener == null) { mPumping = false; return; }
-            // catch up faster when the finger is far ahead of the caret
-            int perTick = Math.max(1, (Math.abs(mPendingX) + Math.abs(mPendingY)) / 6);
-            for (int i = 0; i < perTick; i++) {
-                if (mPendingX != 0) {
-                    boolean positive = mPendingX > 0;
-                    mListener.onCodeInput(positive ? KeyCode.ARROW_RIGHT : KeyCode.ARROW_LEFT,
-                            Constants.NOT_A_COORDINATE, Constants.NOT_A_COORDINATE, false);
-                    mPendingX += positive ? -1 : 1;
-                }
-                if (mPendingY != 0) {
-                    boolean positive = mPendingY > 0;
-                    mListener.onCodeInput(positive ? KeyCode.ARROW_DOWN : KeyCode.ARROW_UP,
-                            Constants.NOT_A_COORDINATE, Constants.NOT_A_COORDINATE, false);
-                    mPendingY += positive ? -1 : 1;
-                }
-            }
-            if (mPendingX != 0 || mPendingY != 0) mHandler.postDelayed(this, PUMP_INTERVAL_MS);
-            else mPumping = false;
-        }
-    };
-
-    /** Plays out any remaining steps immediately (finger lifted), so the caret ends where the finger left it. */
-    private void flushPending() {
-        mHandler.removeCallbacks(mPumpRunnable);
-        mPumping = false;
-        if (mListener != null) {
-            while (mPendingX != 0) {
-                boolean positive = mPendingX > 0;
-                mListener.onCodeInput(positive ? KeyCode.ARROW_RIGHT : KeyCode.ARROW_LEFT,
-                        Constants.NOT_A_COORDINATE, Constants.NOT_A_COORDINATE, false);
-                mPendingX += positive ? -1 : 1;
-            }
-            while (mPendingY != 0) {
-                boolean positive = mPendingY > 0;
-                mListener.onCodeInput(positive ? KeyCode.ARROW_DOWN : KeyCode.ARROW_UP,
-                        Constants.NOT_A_COORDINATE, Constants.NOT_A_COORDINATE, false);
-                mPendingY += positive ? -1 : 1;
-            }
-        }
-        mPendingX = 0;
-        mPendingY = 0;
-        mTouchpadAccX = 0;
-        mTouchpadAccY = 0;
+        if (stepsX != 0 || stepsY != 0) mListener.onTouchpadMove(stepsX, stepsY);
     }
 
     private final Runnable mHapticRunnable = () -> {

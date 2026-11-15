@@ -117,6 +117,9 @@ public interface KeyboardActionListener {
      */
     boolean onHorizontalSpaceSwipe(int steps);
     boolean onVerticalSpaceSwipe(int steps);
+
+    /** Touchpad (drag on the keyboard) cursor movement: whole characters horizontally, whole lines vertically. */
+    default boolean onTouchpadMove(int stepsX, int stepsY) { return false; }
     void onEndSpaceSwipe();
     void toggleLayout(LayoutDirective.Utility layout, int autoCapsFlags, @Nullable RecapitalizeMode recapitalizeMode);
     void onLongPressAlphaSymbolForNumpad();

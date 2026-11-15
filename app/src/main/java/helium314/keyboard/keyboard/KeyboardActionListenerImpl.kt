@@ -316,6 +316,17 @@ class KeyboardActionListenerImpl(private val latinIME: LatinIME, private val inp
         return true
     }
 
+    override fun onTouchpadMove(stepsX: Int, stepsY: Int): Boolean {
+        var moved = false
+        if (stepsX != 0) moved = onMoveCursorHorizontally(stepsX)
+        if (stepsY != 0) {
+            val code = if (stepsY < 0) KeyCode.ARROW_UP else KeyCode.ARROW_DOWN
+            repeat(abs(stepsY)) { onCodeInput(code, Constants.NOT_A_COORDINATE, Constants.NOT_A_COORDINATE, false) }
+            moved = true
+        }
+        return moved
+    }
+
     private fun onMoveCursorVertically(steps: Int): Boolean {
         if (steps == 0) return false
         val code = if (steps < 0) {

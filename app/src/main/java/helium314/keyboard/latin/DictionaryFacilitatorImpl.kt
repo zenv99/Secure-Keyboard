@@ -503,6 +503,15 @@ class DictionaryFacilitatorImpl : DictionaryFacilitator {
         composedData: ComposedData, ngramContext: NgramContext, keyboard: Keyboard,
         settingsValuesForSuggestion: SettingsValuesForSuggestion, sessionId: Int, inputStyle: InputStyle
     ): SuggestionResults {
+        if (composedData.mIsBatchMode && !helium314.keyboard.latin.utils.JniUtils.sHaveGestureLib) {
+            // Swipe typing without Google's closed-source library: our own open-source decoder.
+            val glideResults = SuggestionResults(SuggestedWords.MAX_SUGGESTIONS, ngramContext, false)
+            for (group in dictionaryGroups) {
+                val main = group.getDict(Dictionary.TYPE_MAIN) ?: continue
+                glideResults.addAll(helium314.keyboard.latin.glide.GlideTyping.suggest(main, composedData, keyboard))
+            }
+            return glideResults
+        }
         val proximityInfoHandle = keyboard.proximityInfo.nativeProximityInfo
         val weightOfLangModelVsSpatialModel = floatArrayOf(Dictionary.NOT_A_WEIGHT_OF_LANG_MODEL_VS_SPATIAL_MODEL)
 
@@ -842,6 +851,7 @@ private class DictionaryGroup(
         // Close old dictionary if exists. Main dictionary can be assigned multiple times.
         val oldDict = mainDict
         mainDict = newMainDict
+        if (newMainDict != null && newMainDict !== oldDict) helium314.keyboard.latin.glide.GlideTyping.prepare(newMainDict)
         if (oldDict != null && newMainDict !== oldDict)
             oldDict.close()
     }
