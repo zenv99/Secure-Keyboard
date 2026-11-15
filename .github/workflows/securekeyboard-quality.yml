@@ -139,6 +139,5 @@ jobs:
             gh release create "$TAG" "release/SecureKeyboard-${TAG}.apk" release/SHA256SUMS.txt \
               --prerelease --target "$GITHUB_SHA" --title "Secure Keyboard ${TAG}" --notes-file release/notes.md
           fi
+          # The old rolling 'test-build' release is gone: its non-version tag confused Obtainium's update check.
           gh release delete test-build --cleanup-tag --yes || true
-          gh release create test-build release/SecureKeyboard.apk release/SHA256SUMS.txt \
-            --prerelease --target "$GITHUB_SHA" --title "Secure Keyboard v1.0" --notes-file release/notes.md
