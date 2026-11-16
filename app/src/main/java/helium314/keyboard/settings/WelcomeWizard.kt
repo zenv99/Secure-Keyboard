@@ -2,7 +2,9 @@
 package helium314.keyboard.settings
 
 import android.content.Context
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.provider.Settings
 import android.view.inputmethod.InputMethodManager
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -32,6 +34,8 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -174,14 +178,34 @@ fun WelcomeWizard(
                         Text(stringResource(R.string.setup_step3_action), Modifier.weight(1f))
                     }
                 } else { // step 3
+                    var micGranted by remember {
+                        mutableStateOf(ContextCompat.checkSelfPermission(ctx, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED)
+                    }
+                    val micLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { micGranted = it }
                     Step(
                         step,
                         stringResource(R.string.setup_step3_title),
-                        stringResource(R.string.setup_step3_instruction, appName),
-                        stringResource(R.string.setup_step3_action),
-                        painterResource(R.drawable.sym_keyboard_language_switch),
-                        close
-                    )
+                        stringResource(R.string.setup_step3_instruction),
+                        stringResource(if (micGranted) R.string.setup_mic_done else R.string.setup_mic_action),
+                        painterResource(if (micGranted) R.drawable.ic_setup_check else R.drawable.ic_setup_key)
+                    ) {
+                        if (!micGranted) micLauncher.launch(Manifest.permission.RECORD_AUDIO)
+                    }
+                    Spacer(Modifier.height(4.dp))
+                    Row(
+                        Modifier.clickable { close() }
+                            .background(color = stepBackgroundColor)
+                            .padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            painterResource(R.drawable.sym_keyboard_language_switch),
+                            null,
+                            Modifier.padding(end = 6.dp).size(32.dp),
+                            tint = textColor
+                        )
+                        Text(stringResource(R.string.setup_step3_action), Modifier.weight(1f))
+                    }
                     Spacer(Modifier.height(4.dp))
                     Row(
                         Modifier.clickable { finish() }
