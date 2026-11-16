@@ -318,13 +318,38 @@ class KeyboardActionListenerImpl(private val latinIME: LatinIME, private val inp
 
     override fun onTouchpadMove(stepsX: Int, stepsY: Int): Boolean {
         var moved = false
-        if (stepsX != 0) moved = onMoveCursorHorizontally(stepsX)
+        val clampedX = clampToLine(stepsX)
+        if (clampedX != 0) moved = onMoveCursorHorizontally(clampedX)
         if (stepsY != 0) {
             val code = if (stepsY < 0) KeyCode.ARROW_UP else KeyCode.ARROW_DOWN
             repeat(abs(stepsY)) { onCodeInput(code, Constants.NOT_A_COORDINATE, Constants.NOT_A_COORDINATE, false) }
             moved = true
         }
         return moved
+    }
+
+    /**
+     * While dragging the cursor, stop at the start / end of the current line instead of wrapping to the neighbouring
+     * line, so going up or down keeps the cursor in the same column (like iOS). Only real line breaks can be seen here.
+     */
+    private fun clampToLine(steps: Int): Int {
+        if (steps == 0) return 0
+        val rtl = RichInputMethodManager.getInstance().currentSubtype.isRtlSubtype
+        val goesBack = (steps < 0) != rtl // true if the cursor moves towards the start of the text
+        if (goesBack) {
+            val before = connection.getTextBeforeCursor(64, 0) ?: return steps
+            val nl = before.lastIndexOf('\n')
+            if (nl < 0) return steps
+            val available = before.length - 1 - nl
+            val n = minOf(abs(steps), available)
+            return if (steps < 0) -n else n
+        } else {
+            val after = connection.getTextAfterCursor(64, 0) ?: return steps
+            val nl = after.indexOf('\n')
+            if (nl < 0) return steps
+            val n = minOf(abs(steps), nl)
+            return if (steps < 0) -n else n
+        }
     }
 
     private fun onMoveCursorVertically(steps: Int): Boolean {
