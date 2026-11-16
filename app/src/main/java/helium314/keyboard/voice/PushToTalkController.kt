@@ -33,6 +33,8 @@ class PushToTalkController(
     private var pendingWarm = false
     private var lastText = ""
     private var lastTextTime = 0L
+    private var sessionId = 0 // increases with every hold of the mic
+    private var lastTextSession = -1
     private var pressedAt = 0L
     private var awaiting = false // a dictation session is open: only then is incoming text accepted
 
@@ -44,10 +46,12 @@ class PushToTalkController(
                 val now = System.currentTimeMillis()
                 val accept = awaiting // stray/duplicate deliveries outside a session are dropped
                 if (isLast) awaiting = false
-                // never insert the same text twice in a row within a few seconds (duplicate delivery guard)
-                if (accept && text.isNotBlank() && !(text == lastText && now - lastTextTime < 10_000)) {
+                // Never insert the same text twice in one hold (duplicate delivery guard). Saying the same
+                // thing again in a NEW hold is of course allowed.
+                if (accept && text.isNotBlank() && !(text == lastText && sessionId == lastTextSession)) {
                     lastText = text
                     lastTextTime = now
+                    lastTextSession = sessionId
                     onText(text)
                 }
                 true
@@ -155,6 +159,7 @@ class PushToTalkController(
     }
 
     private fun startSession() {
+        sessionId++
         sessionStarted = send(AsrService.MSG_START)
         awaiting = sessionStarted
     }
