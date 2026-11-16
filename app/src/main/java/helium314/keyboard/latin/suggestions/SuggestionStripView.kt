@@ -159,6 +159,7 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
 
         // toolbar keys setup (no need to hide them any more when locked, because then suggestion strip is gone anyway
         for (key in getEnabledToolbarKeys(context.prefs())) {
+            if (key == ToolbarKey.EMOJI) continue // emoji lives in the bottom row (iOS / WhatsApp layout)
             if (key == ToolbarKey.VOICE) continue // the one big hold-to-talk mic lives in the top bar (below)
             val button = createToolbarKey(context, key)
             button.layoutParams = toolbarKeyLayoutParams
@@ -166,6 +167,7 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
             toolbar.addView(button)
         }
         for (pinnedKey in getPinnedToolbarKeys(context.prefs())) {
+            if (pinnedKey == ToolbarKey.EMOJI) continue
             val button = createToolbarKey(context, pinnedKey)
             button.layoutParams = toolbarKeyLayoutParams
             setupKey(button, colors)
@@ -174,11 +176,7 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
             if (pinnedKeyInToolbar != null && Settings.getValues().mQuickPinToolbarKeys)
                 pinnedKeyInToolbar.background = enabledToolKeyBackground
         }
-        // Left side, WhatsApp-style: [+ (more tools)] [emoji] next to the suggestions.
-        val emojiKey = createToolbarKey(context, ToolbarKey.EMOJI)
-        emojiKey.layoutParams = toolbarKeyLayoutParams
-        setupKey(emojiKey, colors)
-        leftKeys.addView(emojiKey)
+        // Left side: just the (+) tools button; emoji lives in the bottom row like on iOS / WhatsApp.
         leftKeys.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.MATCH_PARENT)
         (findViewById<ViewGroup>(R.id.suggestions_strip_wrapper)).addView(leftKeys, 1)
         // The big mic is always there, even when restored settings / an old backup say otherwise.

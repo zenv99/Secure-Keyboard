@@ -538,6 +538,20 @@ class DictionaryFacilitatorImpl : DictionaryFacilitator {
 
         includeAtLeastTwoWordSuggestions(suggestionResults, suggestionsArray, composedData.mTypedWord)
 
+        // Words typed with several letters on neighbouring keys ("trstihf" for "testing"): if exactly one common
+        // word fits, offer it first (and let auto-correct use it).
+        val typedForFuzzy = composedData.mTypedWord
+        if (!composedData.mIsBatchMode && typedForFuzzy.length >= 5 && !isValidSpellingWord(typedForFuzzy)
+            && !isValidSpellingWord(typedForFuzzy.lowercase())) {
+            val main = dictionaryGroups[0].getDict(Dictionary.TYPE_MAIN)
+            if (main != null) {
+                helium314.keyboard.latin.glide.GlideTyping.neighbourKeyCorrection(main, typedForFuzzy, keyboard)?.let { word ->
+                    suggestionResults.add(SuggestedWordInfo(word, "", SuggestedWordInfo.MAX_SCORE - 100,
+                        SuggestedWordInfo.KIND_WHITELIST, main, SuggestedWordInfo.NOT_AN_INDEX, SuggestedWordInfo.NOT_A_CONFIDENCE))
+                }
+            }
+        }
+
         return suggestionResults
     }
 

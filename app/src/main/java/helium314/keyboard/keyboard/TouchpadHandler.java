@@ -18,7 +18,7 @@ public class TouchpadHandler {
     private boolean mIsScrolling = false;
 
     private static final float EDGE_THRESHOLD_PERCENTAGE = 0.1f;        // Screen edge threshold percentage
-    private static final float TOUCHPAD_ACCELERATION_FACTOR = 50.0f;    // Lower = more acceleration
+    private static final float TOUCHPAD_ACCELERATION_FACTOR = 90.0f;    // Lower = more acceleration
     private static final float EDGE_ACCELERATION_FACTOR = 0.95f;
     private static final int MIN_EDGE_ACCELERATION_DELAY = 20;
 
@@ -107,9 +107,12 @@ public class TouchpadHandler {
         // Threshold from the sensitivity setting (0-100), then 30% faster than before.
         // A text line is taller than a character is wide, so vertical movement needs more finger travel.
         int sensitivity = Settings.getInstance().getCurrent().mTouchpadSensitivity;
-        float base = (70 - (sensitivity * 0.6f)) * 0.7f;
-        int moveThresholdX = Math.max(6, (int) base);
-        int moveThresholdY = Math.max(10, (int) (base * 1.5f));
+        // iOS trackpad feel: about one character per 7.5 dp of finger travel and one line per 17 dp
+        // (before speed-up), independent of screen density. Sensitivity 50 (default) = iOS; 0..100 = 1.45x..0.55x.
+        final float density = android.content.res.Resources.getSystem().getDisplayMetrics().density;
+        final float scale = 1.45f - sensitivity * 0.009f;
+        int moveThresholdX = Math.max(6, (int) (7.5f * density * scale));
+        int moveThresholdY = Math.max(10, (int) (17f * density * scale));
 
         // Convert finger travel into whole cursor steps and apply them right away, in ONE call per touch
         // event (a single selection change for the horizontal part), so the caret follows the finger smoothly.

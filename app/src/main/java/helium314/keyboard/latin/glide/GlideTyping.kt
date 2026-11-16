@@ -200,6 +200,71 @@ object GlideTyping {
         return result
     }
 
+    /**
+     * A clearly-intended word for a mistyped one: same length, a few letters hit on a neighbouring key
+     * (or two neighbouring letters swapped). Returns null unless exactly one common word fits well.
+     */
+    @JvmStatic
+    fun neighbourKeyCorrection(dict: Dictionary, typed: String, keyboard: Keyboard): String? {
+        val vocab = vocabs[dict] ?: run { prepare(dict); return null }
+        val lower = typed.lowercase(Locale.ROOT)
+        val typedCps = IntArray(lower.codePointCount(0, lower.length))
+        var i = 0
+        var k = 0
+        while (i < lower.length) {
+            val cp = lower.codePointAt(i)
+            if (!Character.isLetter(cp)) return null
+            typedCps[k++] = cp
+            i += Character.charCount(cp)
+        }
+        val len = typedCps.size
+        if (len < 5 || len > MAX_WORD_LENGTH) return null
+        val keyW = max(1f, keyboard.mMostCommonKeyWidth.toFloat())
+        val maxSubs = (len + 1) / 2 - 1
+        val centres = HashMap<Int, FloatArray?>()
+        fun centre(cp: Int): FloatArray? = centres.getOrPut(cp) {
+            (keyboard.getKey(cp) ?: keyboard.getKey(Character.toUpperCase(cp)))?.hitBox
+                ?.let { floatArrayOf((it.left + it.right) / 2f, (it.top + it.bottom) / 2f) }
+        }
+        var bestScore = Float.MAX_VALUE
+        var secondScore = Float.MAX_VALUE
+        var bestWord: String? = null
+        var bestProb = 0
+        for (n in vocab.seqs.indices) {
+            val seq = vocab.seqs[n]
+            if (seq.size != len) continue
+            val prob = vocab.probs[n]
+            if (prob < 60) continue
+            var cost = 0f
+            var subs = 0
+            var ok = true
+            var p = 0
+            while (p < len) {
+                if (seq[p] == typedCps[p]) { p++; continue }
+                // adjacent letters swapped ("teh" -> "the")
+                if (p + 1 < len && seq[p] == typedCps[p + 1] && seq[p + 1] == typedCps[p]) {
+                    subs++; cost += 0.8f; p += 2; continue
+                }
+                val a = centre(seq[p]); val b = centre(typedCps[p])
+                if (a == null || b == null) { ok = false; break }
+                val d = hypot(a[0] - b[0], a[1] - b[1]) / keyW
+                if (d > 1.55f) { ok = false; break }
+                subs++; cost += d; p++
+                if (subs > maxSubs) { ok = false; break }
+            }
+            if (!ok || subs == 0) continue
+            val score = cost + (1f - prob.coerceIn(0, 255) / 255f) * 0.8f
+            if (score < bestScore) {
+                secondScore = bestScore; bestScore = score; bestWord = vocab.words[n]; bestProb = prob
+            } else if (score < secondScore) {
+                secondScore = score
+            }
+        }
+        if (bestWord == null || bestProb < 80) return null
+        if (secondScore - bestScore < 0.5f) return null // not clearly one word
+        return bestWord
+    }
+
     private fun insert(scores: FloatArray, indexes: IntArray, score: Float, index: Int) {
         if (score >= scores[scores.size - 1]) return
         var pos = scores.size - 1

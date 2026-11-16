@@ -1337,4 +1337,9 @@ New dictionary:
     <string name="voice_error_no_speech" translatable="false">Didn\'t catch that, hold and speak again</string>
     <string name="touch_adaptation" translatable="false">Learn how I type</string>
     <string name="touch_adaptation_summary" translatable="false">Adjusts key detection to your tapping habits. Learned only on this device and wiped when turned off.</string>
+    <string name="wipe_learned_title">Wipe everything learned</string>
+    <string name="wipe_learned_summary">Delete the words and habits this keyboard has learned from your typing</string>
+    <string name="wipe_learned_message">This permanently deletes every word, correction and habit the keyboard learned from your typing. It cannot be undone. Your backups and settings are not touched.</string>
+    <string name="wipe_learned_button">Wipe</string>
+    <string name="wipe_learned_done">Everything learned has been wiped.</string>
 </resources>

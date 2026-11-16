@@ -59,8 +59,8 @@ fun TextCorrectionScreen(
     val suggestionsEnabled = suggestionsVisible && prefs.getBoolean(Settings.PREF_SHOW_SUGGESTIONS, Defaults.PREF_SHOW_SUGGESTIONS)
     val gestureEnabled = JniUtils.sHaveGestureLib && prefs.getBoolean(Settings.PREF_GESTURE_INPUT, Defaults.PREF_GESTURE_INPUT)
     val items = listOf(
-        SettingsWithoutKey.EDIT_PERSONAL_DICTIONARY,
         R.string.settings_category_correction,
+        SettingsWithoutKey.WIPE_LEARNED,
         Settings.PREF_BLOCK_POTENTIALLY_OFFENSIVE,
         Settings.PREF_AUTO_CORRECTION,
         if (autocorrectEnabled) Settings.PREF_MORE_AUTO_CORRECTION else null,
@@ -106,11 +106,28 @@ fun TextCorrectionScreen(
 }
 
 fun createCorrectionSettings(context: Context) = listOf(
-    Setting(context, SettingsWithoutKey.EDIT_PERSONAL_DICTIONARY, R.string.edit_personal_dictionary) {
-        Preference(
-            name = stringResource(R.string.edit_personal_dictionary),
-            onClick = { SettingsDestination.navigateTo(SettingsDestination.PersonalDictionaries) },
-        ) { NextScreenIcon() }
+    Setting(context, SettingsWithoutKey.WIPE_LEARNED, R.string.wipe_learned_title, R.string.wipe_learned_summary) { setting ->
+        var showWipe by rememberSaveable { mutableStateOf(false) }
+        val ctx = LocalContext.current
+        Preference(name = setting.title, description = setting.description, onClick = { showWipe = true })
+        if (showWipe) {
+            ConfirmationDialog(
+                onDismissRequest = { showWipe = false },
+                title = { Text(stringResource(R.string.wipe_learned_title)) },
+                content = { Text(stringResource(R.string.wipe_learned_message)) },
+                confirmButtonText = stringResource(R.string.wipe_learned_button),
+                onConfirmed = {
+                    showWipe = false
+                    // Switching personalisation off makes the keyboard delete everything it learned; switch it back on after.
+                    val p = ctx.prefs()
+                    p.edit { putBoolean(Settings.PREF_KEY_USE_PERSONALIZED_DICTS, false) }
+                    android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+                        p.edit { putBoolean(Settings.PREF_KEY_USE_PERSONALIZED_DICTS, true) }
+                        android.widget.Toast.makeText(ctx, R.string.wipe_learned_done, android.widget.Toast.LENGTH_LONG).show()
+                    }, 1500)
+                }
+            )
+        }
     },
     Setting(context, Settings.PREF_BLOCK_POTENTIALLY_OFFENSIVE,
         R.string.prefs_block_potentially_offensive_title, R.string.prefs_block_potentially_offensive_summary
