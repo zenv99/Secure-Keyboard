@@ -55,6 +55,7 @@ fun AboutScreen(
         SettingsWithoutKey.APP,
         SettingsWithoutKey.VERSION,
         SettingsWithoutKey.LICENSE,
+        SettingsWithoutKey.CREDITS,
         SettingsWithoutKey.HIDDEN_FEATURES,
         SettingsWithoutKey.GITHUB_WIKI,
         SettingsWithoutKey.COMMUNITY_LINKS,
@@ -105,6 +106,21 @@ fun createAboutSettings(context: Context) = listOf(
                 intent.data = Links.LICENSE.toUri()
                 intent.action = Intent.ACTION_VIEW
                 ctx.startActivity(intent)
+            },
+            icon = R.drawable.ic_settings_about_license
+        )
+    },
+    Setting(context, SettingsWithoutKey.CREDITS, R.string.credits_title, R.string.credits_summary) {
+        val ctx = LocalContext.current
+        Preference(
+            name = it.title,
+            description = it.description,
+            onClick = {
+                AlertDialog.Builder(ctx)
+                    .setTitle(R.string.credits_title)
+                    .setMessage(R.string.credits_message)
+                    .setPositiveButton(R.string.dialog_close, null)
+                    .create().show()
             },
             icon = R.drawable.ic_settings_about_license
         )

@@ -10,7 +10,7 @@ android {
     compileSdk = 37
 
     defaultConfig {
-        applicationId = "helium314.keyboard"
+        applicationId = "app.securekeyboard.keyboard"
         minSdk = 21
         targetSdk = 37
         versionCode = (System.getenv("SK_VERSION_CODE")?.toIntOrNull() ?: 4300)

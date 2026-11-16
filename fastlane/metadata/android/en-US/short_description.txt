@@ -1,1 +1,1 @@
-Customizable open-source keyboard
+Private keyboard with swipe typing, autocorrect and on-device voice. No data leaves your phone.

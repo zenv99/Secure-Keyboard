@@ -74,6 +74,7 @@ object SettingsWithoutKey {
     const val VERSION = "version"
     const val LICENSE = "license"
     const val HIDDEN_FEATURES = "hidden_features"
+    const val CREDITS = "credits"
     const val GITHUB = "github"
     const val GITHUB_WIKI = "github_wiki"
     const val COMMUNITY_LINKS = "community_links"
