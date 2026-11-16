@@ -106,6 +106,7 @@ class AsrService : Service() {
             var failed = false
             try {
                 record.startRecording()
+                reply(client, MSG_STARTED) // the microphone is really open now: the user may speak
                 while (running) {
                     val read = record.read(chunk, 0, chunk.size)
                     if (read < 0) { failed = true; break }
@@ -331,6 +332,7 @@ class AsrService : Service() {
         const val MSG_WARM = 3 // load the model now so the first dictation is not slow
         const val MSG_FINAL = 4
         const val MSG_ERROR = 5
+        const val MSG_STARTED = 6 // recording has really begun
 
         const val KEY_TEXT = "text"
         const val KEY_CODE = "code"

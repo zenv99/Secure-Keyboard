@@ -552,6 +552,16 @@ class DictionaryFacilitatorImpl : DictionaryFacilitator {
             }
         }
 
+        // Emoji for the word just typed ("sun" -> sun emoji); the strip keeps them after the first two real words.
+        if (!composedData.mIsBatchMode && typedForFuzzy.length in 2..15 && Settings.getValues().mSuggestEmojis) {
+            var rank = 0
+            for (emoji in helium314.keyboard.latin.glide.EmojiWords.forWord(typedForFuzzy)) {
+                if (SupportedEmojis.isUnsupported(emoji)) continue
+                suggestionResults.add(SuggestedWordInfo(emoji, "", 900_000 - rank++, SuggestedWordInfo.KIND_COMPLETION,
+                    Dictionary.DICTIONARY_HARDCODED, SuggestedWordInfo.NOT_AN_INDEX, SuggestedWordInfo.NOT_A_CONFIDENCE))
+            }
+        }
+
         return suggestionResults
     }
 

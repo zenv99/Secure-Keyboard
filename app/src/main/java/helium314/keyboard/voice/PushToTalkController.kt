@@ -52,6 +52,14 @@ class PushToTalkController(
                 }
                 true
             }
+            AsrService.MSG_STARTED -> {
+                if (held) Toast.makeText(
+                    context,
+                    context.getString(R.string.voice_listening) + " (build " + (helium314.keyboard.latin.BuildConfig.VERSION_CODE - 4300) + ")",
+                    Toast.LENGTH_SHORT
+                ).show()
+                true
+            }
             AsrService.MSG_ERROR -> {
                 awaiting = false
                 held = false
@@ -90,17 +98,14 @@ class PushToTalkController(
         held = true
         pressedAt = System.currentTimeMillis()
         if (service != null) startSession() else bind()
+        // "Listening…" is shown when the recorder has really started (MSG_STARTED), so nobody speaks too early.
         if (!bound && service == null) Toast.makeText(context, R.string.voice_error_generic, Toast.LENGTH_SHORT).show()
-        else Toast.makeText(
-            context,
-            context.getString(R.string.voice_listening) + " (build " + (helium314.keyboard.latin.BuildConfig.VERSION_CODE - 4300) + ")",
-            Toast.LENGTH_SHORT
-        ).show()
         return true
     }
 
     /** Mic key went up (or the touch was cancelled). */
     fun onRelease() {
+        if (held) bump() // small click when the finger lifts, like the one on press
         held = false
         if (sessionStarted) {
             send(AsrService.MSG_STOP)
@@ -109,6 +114,19 @@ class PushToTalkController(
             Toast.makeText(context, context.getString(R.string.voice_transcribing) + " (" + heldSeconds + " s)", Toast.LENGTH_SHORT).show()
         }
         sessionStarted = false
+    }
+
+    private fun bump() {
+        try {
+            val vibrator = if (android.os.Build.VERSION.SDK_INT >= 31)
+                (context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as android.os.VibratorManager).defaultVibrator
+            else @Suppress("DEPRECATION") (context.getSystemService(Context.VIBRATOR_SERVICE) as android.os.Vibrator)
+            if (android.os.Build.VERSION.SDK_INT >= 29)
+                vibrator.vibrate(android.os.VibrationEffect.createPredefined(android.os.VibrationEffect.EFFECT_CLICK))
+            else if (android.os.Build.VERSION.SDK_INT >= 26)
+                vibrator.vibrate(android.os.VibrationEffect.createOneShot(25, android.os.VibrationEffect.DEFAULT_AMPLITUDE))
+            else @Suppress("DEPRECATION") vibrator.vibrate(25)
+        } catch (_: Exception) { }
     }
 
     /** Bind and load the model in the background when the keyboard opens, so the first press is instant. */
