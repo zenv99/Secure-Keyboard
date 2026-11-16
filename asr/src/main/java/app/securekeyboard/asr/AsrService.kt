@@ -152,9 +152,21 @@ class AsrService : Service() {
                             // nothing but background noise: Whisper would invent words ("you"), so type nothing
                             if (last) reply(client, MSG_ERROR, code = ERR_NO_SPEECH)
                         } else {
-                            val floats = FloatArray(speech.size) { speech[it] / 32768f }
+                            val floats = normalizedFloats(speech)
                             val seconds = speech.size / SAMPLE_RATE.toDouble()
                             text = clean(engine.transcribe(floats, LANGUAGE, threads()), seconds)
+                            // Far too few words for the amount of speech (e.g. a whole sentence came back as "x"):
+                            // try once more with a little silence around the audio and keep the fuller result.
+                            if (seconds >= 1.5 && wordCount(text) < voicedSeconds(speech) * 0.7) {
+                                val pad = FloatArray(SAMPLE_RATE / 2)
+                                val padded = pad + floats + pad
+                                val retry = clean(engine.transcribe(padded, LANGUAGE, threads()), seconds)
+                                padded.fill(0f)
+                                if (wordCount(retry) > wordCount(text)) text = retry
+                            }
+                            // A lone stray letter for a clip with real speech is a failed transcription, not what was said.
+                            if (voicedSeconds(speech) >= 1.0 && wordCount(text) == 1 && text.trim().length == 1 &&
+                                text.trim().lowercase() !in listOf("a", "i")) text = ""
                             floats.fill(0f)
                             // Long clips occasionally come back far too short (the decoder stops after a few words).
                             // Real speech has well over one word per second of voiced audio: if not, redo it in
@@ -241,6 +253,14 @@ class AsrService : Service() {
         val from = maxOf(0, first - margin)
         val to = minOf(pcm.size, last + margin)
         return if (to - from < MIN_SAMPLES) pcm else pcm.copyOfRange(from, to)
+    }
+
+    /** Samples as floats, with quiet recordings amplified (up to 8x) so Whisper gets a normal level. */
+    private fun normalizedFloats(pcm: ShortArray): FloatArray {
+        var peak = 1
+        for (v in pcm) { val a = kotlin.math.abs(v.toInt()); if (a > peak) peak = a }
+        val gain = if (peak < 11000) minOf(8f, 22000f / peak) else 1f
+        return FloatArray(pcm.size) { (pcm[it] * gain).coerceIn(-32767f, 32767f) / 32768f }
     }
 
     private fun wordCount(t: String) = t.split(Regex("\\s+")).count { it.isNotEmpty() }
