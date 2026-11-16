@@ -972,6 +972,7 @@ public class LatinIME extends InputMethodService implements
     public void onUpdateSelection(int oldSelStart, int oldSelEnd, int newSelStart, int newSelEnd,
                                   int composingSpanStart, int composingSpanEnd) {
         super.onUpdateSelection(oldSelStart, oldSelEnd, newSelStart, newSelEnd, composingSpanStart, composingSpanEnd);
+        updateVoiceKeyMode();
         if (DebugFlags.DEBUG_ENABLED) {
             Log.i(TAG, "onUpdateSelection: oss=" + oldSelStart + ", ose=" + oldSelEnd
                     + ", nss=" + newSelStart + ", nse=" + newSelEnd
@@ -1269,6 +1270,19 @@ public class LatinIME extends InputMethodService implements
         mPushToTalkGesture = true; // even when only the permission screen opened, never fall back to another IME
     }
 
+    @Override
+    public void onSendKey() {
+        mKeyboardActionListener.onCodeInput(Constants.CODE_ENTER, Constants.NOT_A_COORDINATE, Constants.NOT_A_COORDINATE, false);
+    }
+
+    /** The big mic key becomes a send key while the text field contains text. */
+    private void updateVoiceKeyMode() {
+        if (!hasSuggestionStripView()) return;
+        final boolean hasText = mInputLogic.mConnection.getExpectedSelectionStart() > 0
+                || mInputLogic.mConnection.getExpectedSelectionEnd() > 0;
+        mSuggestionStripView.setVoiceKeySendMode(hasText);
+    }
+
     public void onPushToTalkRelease() {
         mPushToTalk.onRelease();
         mPushToTalkGesture = false; // also covers a slide off the key, which produces no key event
@@ -1476,6 +1490,7 @@ public class LatinIME extends InputMethodService implements
      * @param inputTransaction The transaction that has been executed.
      */
     private void updateStateAfterInputTransaction(final InputTransaction inputTransaction) {
+        updateVoiceKeyMode();
         switch (inputTransaction.getRequiredShiftUpdate()) {
             case InputTransaction.SHIFT_UPDATE_LATER -> mHandler.postUpdateShiftState();
             case InputTransaction.SHIFT_UPDATE_NOW -> mKeyboardSwitcher

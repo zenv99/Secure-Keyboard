@@ -82,6 +82,7 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
         fun onSwipeDownOnToolbar()
         fun onPushToTalkPress()
         fun onPushToTalkRelease()
+        fun onSendKey()
     }
 
     private val moreSuggestionsContainer: View
@@ -567,6 +568,19 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
         if (view.tag == ToolbarKey.VOICE) setupPushToTalkKey(view)
     }
 
+    private var voiceKeyView: ImageButton? = null
+    private var micIcon: android.graphics.drawable.Drawable? = null
+    private var sendMode = false
+
+    /** While the text field has text the big mic turns into a send / return key (like WhatsApp); empty field: mic again. */
+    fun setVoiceKeySendMode(send: Boolean) {
+        if (send == sendMode) return
+        sendMode = send
+        val view = voiceKeyView ?: return
+        if (send) view.setImageResource(R.drawable.sym_keyboard_send_lxx) else view.setImageDrawable(micIcon)
+        view.contentDescription = context.getString(if (send) R.string.label_send_key else R.string.voice)
+    }
+
     /** Big hold-to-talk mic: press starts recording, release transcribes. */
     @android.annotation.SuppressLint("ClickableViewAccessibility")
     private fun setupPushToTalkKey(view: ImageButton) {
@@ -600,7 +614,24 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
         view.setColorFilter(if (idleRed == 0xFFF5F5F5.toInt()) 0xFF000000.toInt() else 0xFFFFFFFF.toInt())
         view.setOnClickListener(null)
         view.setOnLongClickListener(null)
+        voiceKeyView = view
+        micIcon = view.drawable
+        if (sendMode) { sendMode = false; setVoiceKeySendMode(true) }
         view.setOnTouchListener { v, event ->
+            if (sendMode) {
+                when (event.actionMasked) {
+                    MotionEvent.ACTION_DOWN -> {
+                        v.isPressed = true
+                        v.performHapticFeedback(android.view.HapticFeedbackConstants.VIRTUAL_KEY, android.view.HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING)
+                    }
+                    MotionEvent.ACTION_UP -> {
+                        v.isPressed = false
+                        if (event.x >= 0 && event.x <= v.width && event.y >= 0 && event.y <= v.height) listener.onSendKey()
+                    }
+                    MotionEvent.ACTION_CANCEL -> v.isPressed = false
+                }
+                return@setOnTouchListener true
+            }
             when (event.actionMasked) {
                 MotionEvent.ACTION_DOWN -> {
                     v.isPressed = true
