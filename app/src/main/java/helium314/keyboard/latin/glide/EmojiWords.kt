@@ -1,11 +1,17 @@
 // SPDX-License-Identifier: GPL-3.0-only
 package helium314.keyboard.latin.glide
 
-import helium314.keyboard.latin.App
+import android.content.Context
 import java.util.Locale
 
 /** Bundled word -> emoji list ("sun" -> sun emoji), so emoji suggestions work with no extra download. */
 object EmojiWords {
+    @Volatile
+    private var appContext: Context? = null
+
+    @JvmStatic
+    fun init(context: Context) { appContext = context.applicationContext }
+
     @Volatile
     private var words: Map<String, List<String>>? = null
 
@@ -19,7 +25,7 @@ object EmojiWords {
         words?.let { return it }
         val map = HashMap<String, List<String>>()
         try {
-            val assets = App.app?.assets
+            val assets = appContext?.assets
             if (assets != null) {
                 assets.open("emoji_words.tsv").bufferedReader().useLines { lines ->
                     for (line in lines) {
