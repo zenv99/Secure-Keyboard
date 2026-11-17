@@ -1272,7 +1272,19 @@ public class LatinIME extends InputMethodService implements
 
     @Override
     public void onSendKey() {
-        mKeyboardActionListener.onCodeInput(Constants.CODE_ENTER, Constants.NOT_A_COORDINATE, Constants.NOT_A_COORDINATE, false);
+        // Always an editor action (send / go / search ...), never a line break.
+        final android.view.inputmethod.EditorInfo ei = getCurrentInputEditorInfo();
+        final android.view.inputmethod.InputConnection ic = getCurrentInputConnection();
+        if (ei == null || ic == null) return;
+        final int actionId = helium314.keyboard.latin.utils.InputTypeUtils.getImeOptionsActionIdFromEditorInfo(ei);
+        if (actionId == helium314.keyboard.latin.utils.InputTypeUtils.IME_ACTION_CUSTOM_LABEL) {
+            ic.performEditorAction(ei.actionId);
+        } else if (actionId != android.view.inputmethod.EditorInfo.IME_ACTION_NONE) {
+            ic.performEditorAction(actionId);
+        } else {
+            // the app uses Enter for new lines: still ask it to send
+            ic.performEditorAction(android.view.inputmethod.EditorInfo.IME_ACTION_SEND);
+        }
     }
 
     /** The big mic key becomes a send key while the text field contains text. */
