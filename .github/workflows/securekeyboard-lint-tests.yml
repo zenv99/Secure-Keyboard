@@ -2,18 +2,6 @@ name: Secure Keyboard lint and unit tests
 
 on:
   workflow_dispatch:
-  push:
-    branches: [main, 'securekeyboard-*']
-    paths:
-      - 'securekeyboard-project/**'
-      - 'app/**'
-      - 'asr/**'
-      - 'third_party/**'
-      - '.gitmodules'
-      - 'build.gradle.kts'
-      - 'settings.gradle'
-      - 'gradle/**'
-      - '.github/workflows/securekeyboard-lint-tests.yml'
   pull_request:
     branches: [main]
     paths:

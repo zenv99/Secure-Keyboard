@@ -117,6 +117,14 @@ android {
                     events("started", "passed", "failed")
                     exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.SHORT
                 }
+                it.maxHeapSize = "3g"
+                // known environment-dependent tests (network / locale / hangs on CI); everything else gates releases
+                it.filter {
+                    excludeTestsMatching("*XLinkTest*")
+                    excludeTestsMatching("*CharacterIteratorTest*")
+                    excludeTestsMatching("*InputLogicTest.timestamp*")
+                    excludeTestsMatching("*InputLogicTest.insertLetterIntoWordHangulFails*")
+                }
             }
         }
     }

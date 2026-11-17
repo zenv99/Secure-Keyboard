@@ -82,6 +82,18 @@ jobs:
         env:
           ALLOW_UNPINNED: '0' # the pin in securekeyboard-project/asr/MODEL_SHA256 is enforced
         run: bash securekeyboard-project/ci/fetch_model.sh
+      - name: Unit tests (gate - release is not built or published if these fail)
+        timeout-minutes: 30
+        run: |
+          chmod +x ./gradlew
+          ./gradlew --no-daemon :app:testDebugUnitTest
+      - name: Upload test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-test-report
+          path: app/build/reports/tests/testDebugUnitTest
+          if-no-files-found: ignore
       - name: Build debug APK
         env:
           SK_KEYSTORE_B64: ${{ secrets.SK_KEYSTORE_B64 }}
