@@ -93,10 +93,7 @@ public final class InputAttributes {
 
         // TODO: Have a helper method in InputTypeUtils
         // Make sure that passwords are not displayed in {@link SuggestionStripView}.
-        // Text boxes on web pages (browsers set the "no suggestions" flag very often) still get suggestions and
-        // autocorrect. The address bar (URI) and e-mail fields are different variations and stay untouched.
-        final boolean webText = variation == InputType.TYPE_TEXT_VARIATION_WEB_EDIT_TEXT && !mIsPasswordField;
-        mShouldShowSuggestions = !mIsPasswordField && (!flagNoSuggestions || webText);
+        mShouldShowSuggestions = !mIsPasswordField && !flagNoSuggestions;
         mMayOverrideShowingSuggestions = !mIsPasswordField;
 
         mShouldInsertSpacesAutomatically = InputTypeUtils.isAutoSpaceFriendlyType(mInputType);
@@ -114,7 +111,7 @@ public final class InputAttributes {
         // autocorrect if explicitly wanted, but also for most multi-line input types (like AOSP keyboard)
         // originally, URI and email were always excluded from autocorrect (in Suggest.java), but this is
         //  and unexpected place, and if the input field explicitly requests autocorrect we should follow the flag
-        mInputTypeShouldAutoCorrect = flagAutoCorrect || webText || (
+        mInputTypeShouldAutoCorrect = flagAutoCorrect || (
                 flagMultiLine
                 && variation != InputType.TYPE_TEXT_VARIATION_WEB_EDIT_TEXT
                 && variation != InputType.TYPE_TEXT_VARIATION_URI
