@@ -56,6 +56,7 @@ fun AboutScreen(
         SettingsWithoutKey.VERSION,
         SettingsWithoutKey.LICENSE,
         SettingsWithoutKey.CREDITS,
+        SettingsWithoutKey.DICTATION_LOG,
         SettingsWithoutKey.HIDDEN_FEATURES,
         SettingsWithoutKey.GITHUB_WIKI,
         SettingsWithoutKey.COMMUNITY_LINKS,
@@ -106,6 +107,27 @@ fun createAboutSettings(context: Context) = listOf(
                 intent.data = Links.LICENSE.toUri()
                 intent.action = Intent.ACTION_VIEW
                 ctx.startActivity(intent)
+            },
+            icon = R.drawable.ic_settings_about_license
+        )
+    },
+    Setting(context, SettingsWithoutKey.DICTATION_LOG, R.string.dictation_log_title, R.string.dictation_log_summary) {
+        val ctx = LocalContext.current
+        Preference(
+            name = it.title,
+            description = it.description,
+            onClick = {
+                val log = helium314.keyboard.voice.DictationLog.read(ctx).ifBlank { "(nothing recorded yet)" }
+                AlertDialog.Builder(ctx)
+                    .setTitle(R.string.dictation_log_title)
+                    .setMessage(log)
+                    .setPositiveButton(R.string.dialog_close, null)
+                    .setNeutralButton("Copy") { _, _ ->
+                        val cm = ctx.getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+                        cm.setPrimaryClip(android.content.ClipData.newPlainText("dictation log", log))
+                    }
+                    .setNegativeButton("Clear") { _, _ -> helium314.keyboard.voice.DictationLog.clear(ctx) }
+                    .create().show()
             },
             icon = R.drawable.ic_settings_about_license
         )

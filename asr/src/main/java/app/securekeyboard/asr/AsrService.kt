@@ -53,8 +53,15 @@ class AsrService : Service() {
         return false
     }
 
-    private fun handleStart(client: Messenger?) {
-        if (client == null || recorder != null) return
+    private fun handleStart(client: Messenger?, attempt: Int = 0) {
+        if (client == null) return
+        if (recorder != null) {
+            // The previous recording is still closing (pressed again within a moment): retry shortly instead of
+            // silently ignoring this press.
+            if (attempt < 8) main.postDelayed({ handleStart(client, attempt + 1) }, 100)
+            else reply(client, MSG_ERROR, code = ERR_AUDIO)
+            return
+        }
         if (checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
             reply(client, MSG_ERROR, code = ERR_NO_PERMISSION)
             return
@@ -140,6 +147,8 @@ class AsrService : Service() {
         private fun submit(pcm: ShortArray, last: Boolean) {
             worker.execute {
                 var text = ""
+                var meta = "clip=" + String.format(java.util.Locale.US, "%.1f", pcm.size / SAMPLE_RATE.toDouble()) + "s too-short"
+                val startedAt = System.currentTimeMillis()
                 if (pcm.size >= MIN_SAMPLES) {
                     try {
                         val engine = ensureWhisper()
@@ -147,9 +156,11 @@ class AsrService : Service() {
                         // Whisper invents / repeats words when a clip is mostly silence: keep just the speech (+200 ms).
                         val speech = trimSilence(pcm)
                         if (silent) {
+                            meta = "all-zero audio (mic blocked)"
                             reply(client, MSG_ERROR, code = ERR_SILENT)
                         } else if (speech == null) {
                             // nothing but background noise: Whisper would invent words ("you"), so type nothing
+                            meta = "only background noise, clip=" + String.format(java.util.Locale.US, "%.1f", pcm.size / SAMPLE_RATE.toDouble()) + "s"
                             if (last) reply(client, MSG_ERROR, code = ERR_NO_SPEECH)
                         } else {
                             // 0.3 s of silence in front: Whisper often drops or garbles a first word that starts right at the clip edge.
@@ -157,6 +168,7 @@ class AsrService : Service() {
                             val floats = FloatArray(SAMPLE_RATE * 3 / 10) + body
                             body.fill(0f)
                             val seconds = speech.size / SAMPLE_RATE.toDouble()
+                            val tModel = System.currentTimeMillis()
                             text = clean(engine.transcribe(floats, LANGUAGE, threads()), seconds)
                             // Far too few words for the amount of speech (e.g. a whole sentence came back as "x"):
                             // try once more with a little silence around the audio and keep the fuller result.
@@ -178,6 +190,9 @@ class AsrService : Service() {
                                 val piecesText = transcribeInPieces(engine, speech)
                                 if (wordCount(piecesText) > wordCount(text)) text = piecesText
                             }
+                            meta = String.format(java.util.Locale.US, "clip=%.1fs voiced=%.1fs words=%d model-wait=%dms transcribe=%dms",
+                                pcm.size / SAMPLE_RATE.toDouble(), voicedSeconds(speech), wordCount(text),
+                                tModel - startedAt, System.currentTimeMillis() - tModel)
                             if (text.isBlank() && last) reply(client, MSG_ERROR, code = ERR_NO_SPEECH)
                         }
                     } catch (e: AsrException) {
@@ -185,7 +200,7 @@ class AsrService : Service() {
                     }
                 }
                 pcm.fill(0)
-                reply(client, MSG_FINAL, text = text, last = last)
+                reply(client, MSG_FINAL, text = text, last = last, meta = meta)
                 main.removeCallbacks(idleUnload)
                 main.postDelayed(idleUnload, IDLE_UNLOAD_MS)
             }
@@ -252,9 +267,10 @@ class AsrService : Service() {
         if (first >= pcm.size - win) return null
         var last = pcm.size
         while (last > first + win && !loud(last - win)) last -= win
-        val margin = SAMPLE_RATE / 5
-        val from = maxOf(0, first - margin)
-        val to = minOf(pcm.size, last + margin)
+        // Soft word beginnings are quieter than the detection level: keep up to 0.5 s before the first loud
+        // moment (and 0.3 s after the last), so the first word is not clipped.
+        val from = maxOf(0, first - SAMPLE_RATE / 2)
+        val to = minOf(pcm.size, last + SAMPLE_RATE * 3 / 10)
         return if (to - from < MIN_SAMPLES) pcm else pcm.copyOfRange(from, to)
     }
 
@@ -328,12 +344,13 @@ class AsrService : Service() {
 
     private fun threads() = Runtime.getRuntime().availableProcessors().coerceIn(2, 4)
 
-    private fun reply(target: Messenger, what: Int, text: String = "", code: Int = 0, last: Boolean = false) {
+    private fun reply(target: Messenger, what: Int, text: String = "", code: Int = 0, last: Boolean = false, meta: String = "") {
         val response = Message.obtain(null, what)
         response.data = Bundle().apply {
             putString(KEY_TEXT, text)
             putInt(KEY_CODE, code)
             putBoolean(KEY_LAST, last || what == MSG_ERROR)
+            putString(KEY_META, meta)
         }
         try {
             target.send(response)
@@ -360,6 +377,7 @@ class AsrService : Service() {
         const val KEY_TEXT = "text"
         const val KEY_CODE = "code"
         const val KEY_LAST = "last"
+        const val KEY_META = "meta" // timings and counts only, never text
 
         const val ERR_NO_PERMISSION = 1
         const val ERR_NO_MODEL = 2

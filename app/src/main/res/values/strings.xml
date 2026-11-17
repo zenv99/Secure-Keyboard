@@ -823,6 +823,8 @@ New dictionary:
     <!-- license for about screen-->
     <string name="license">Open-source license</string>
     <!-- license link for about screen-->
+    <string name="dictation_log_title">Dictation log</string>
+    <string name="dictation_log_summary">Timings and error codes only, never your words or audio</string>
     <string name="credits_title">Credits and open-source licenses</string>
     <string name="credits_summary">Based on HeliBoard, GPL-3.0</string>
     <string name="credits_message">Secure Keyboard is free software under the GNU General Public License v3.0. The complete source code is at github.com/zenv99/Secure-Keyboard.\n\nIt is a modified version of HeliBoard (github.com/HeliBorg/HeliBoard), copyright Helium314 and contributors, which is based on OpenBoard and the Android Open Source Keyboard (Apache License 2.0). This is not the official HeliBoard.\n\nOn-device voice dictation uses whisper.cpp (MIT License) and the OpenAI Whisper model (MIT License).\n\nNo data is collected and nothing is sent off your device. This app has not yet been independently audited.</string>

@@ -42,6 +42,7 @@ class PushToTalkController(
         when (message.what) {
             AsrService.MSG_FINAL -> {
                 val text = message.data.getString(AsrService.KEY_TEXT).orEmpty()
+                DictationLog.add(context, "result chars=" + text.length + " " + message.data.getString(AsrService.KEY_META).orEmpty())
                 val isLast = message.data.getBoolean(AsrService.KEY_LAST)
                 val now = System.currentTimeMillis()
                 val accept = awaiting // stray/duplicate deliveries outside a session are dropped
@@ -57,6 +58,7 @@ class PushToTalkController(
                 true
             }
             AsrService.MSG_STARTED -> {
+                DictationLog.add(context, "mic live after " + (System.currentTimeMillis() - pressedAt) + " ms, held=" + held)
                 if (held) bump() // the microphone is live now: this buzz is the signal to start speaking
                 if (held) Toast.makeText(
                     context,
@@ -66,6 +68,7 @@ class PushToTalkController(
                 true
             }
             AsrService.MSG_ERROR -> {
+                DictationLog.add(context, "error code=" + message.data.getInt(AsrService.KEY_CODE))
                 awaiting = false
                 held = false
                 sessionStarted = false
@@ -85,6 +88,7 @@ class PushToTalkController(
 
         override fun onServiceDisconnected(name: ComponentName) {
             // the :asr process died (e.g. out of memory); the next press rebinds
+            DictationLog.add(context, "voice service stopped unexpectedly (held=$held)")
             service = null
             bound = false
             sessionStarted = false
@@ -102,6 +106,7 @@ class PushToTalkController(
         if (held) return true // repeated down events must not start a second session
         held = true
         pressedAt = System.currentTimeMillis()
+        DictationLog.add(context, "press, service ready=" + (service != null))
         if (service != null) startSession() else bind()
         // "Listening…" is shown when the recorder has really started (MSG_STARTED), so nobody speaks too early.
         if (!bound && service == null) Toast.makeText(context, R.string.voice_error_generic, Toast.LENGTH_SHORT).show()
@@ -110,6 +115,7 @@ class PushToTalkController(
 
     /** Mic key went up (or the touch was cancelled). */
     fun onRelease() {
+        if (held) DictationLog.add(context, "release after " + (System.currentTimeMillis() - pressedAt) + " ms, session=" + sessionStarted)
         if (held) bump() // small click when the finger lifts, like the one on press
         held = false
         if (sessionStarted) {
