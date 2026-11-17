@@ -767,12 +767,19 @@ public final class PointerTracker implements PointerTrackerQueue.Element,
         sDrawingProxy.showSlidingKeyInputPreview(null);
     }
 
+    /**
+     * Sliding a finger on backspace used to select text (upstream "delete swipe"). That cancelled key repeat and
+     * highlighted characters whenever the finger drifted during a hold, so holding backspace must ONLY repeat-delete
+     * (like iOS). Guarded by PointerTrackerBackspaceTest - do not turn this on.
+     */
+    public static final boolean DELETE_SWIPE_SELECTS_TEXT = false;
+
     private boolean isSwiper(final int code) {
         final SettingsValues sv = Settings.getValues();
         return switch (code) {
             case Constants.CODE_SPACE -> sv.mSpaceSwipeHorizontal != KeyboardActionListener.SwipeAction.NONE
                     || sv.mSpaceSwipeVertical != KeyboardActionListener.SwipeAction.NONE;
-            case KeyCode.DELETE -> sv.mDeleteSwipe > 0;
+            case KeyCode.DELETE -> DELETE_SWIPE_SELECTS_TEXT && sv.mDeleteSwipe > 0;
             default -> false;
         };
     }
