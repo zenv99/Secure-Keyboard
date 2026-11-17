@@ -83,7 +83,7 @@ jobs:
           ALLOW_UNPINNED: '0' # the pin in securekeyboard-project/asr/MODEL_SHA256 is enforced
         run: bash securekeyboard-project/ci/fetch_model.sh
       - name: Unit tests (gate - release is not built or published if these fail)
-        timeout-minutes: 30
+        timeout-minutes: 20
         run: |
           chmod +x ./gradlew
           ./gradlew --no-daemon :app:testDebugUnitTest
