@@ -637,7 +637,6 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
                     v.isPressed = true
                     v.parent?.requestDisallowInterceptTouchEvent(true)
                     micBackground.setColor(recordingRed)
-                    v.performHapticFeedback(android.view.HapticFeedbackConstants.VIRTUAL_KEY, android.view.HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING)
                     listener.onPushToTalkPress()
                 }
                 MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {

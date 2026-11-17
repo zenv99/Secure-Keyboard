@@ -152,7 +152,10 @@ class AsrService : Service() {
                             // nothing but background noise: Whisper would invent words ("you"), so type nothing
                             if (last) reply(client, MSG_ERROR, code = ERR_NO_SPEECH)
                         } else {
-                            val floats = normalizedFloats(speech)
+                            // 0.3 s of silence in front: Whisper often drops or garbles a first word that starts right at the clip edge.
+                            val body = normalizedFloats(speech)
+                            val floats = FloatArray(SAMPLE_RATE * 3 / 10) + body
+                            body.fill(0f)
                             val seconds = speech.size / SAMPLE_RATE.toDouble()
                             text = clean(engine.transcribe(floats, LANGUAGE, threads()), seconds)
                             // Far too few words for the amount of speech (e.g. a whole sentence came back as "x"):

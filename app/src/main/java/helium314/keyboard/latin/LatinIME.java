@@ -1305,6 +1305,10 @@ public class LatinIME extends InputMethodService implements
         final android.view.inputmethod.InputConnection ic = getCurrentInputConnection();
         String toInsert = text.trim();
         if (toInsert.isEmpty()) return;
+        if (ic == null) {
+            android.widget.Toast.makeText(this, "No text field to type into", android.widget.Toast.LENGTH_SHORT).show();
+            return;
+        }
         if (ic != null) {
             final CharSequence before = ic.getTextBeforeCursor(1, 0);
             if (before != null && before.length() == 1 && !Character.isWhitespace(before.charAt(0)))

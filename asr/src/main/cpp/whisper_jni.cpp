@@ -3,6 +3,7 @@
 #include <string>
 #include <cstdlib>
 #include <algorithm>
+#include <cmath>
 #include "whisper.h"
 
 extern "C" {
@@ -39,7 +40,12 @@ Java_app_securekeyboard_asr_WhisperBridge_nativeTranscribe(JNIEnv *env, jobject,
     // Same decoding setup as the first version that worked (timestamps off: turning them on duplicated text).
     params.no_timestamps = true;
     const double seconds = (double) n / 16000.0;
-    // Default (full) audio context: shrinking it for speed caused "testing testing testing ..." loops.
+    // Size the audio window to the clip instead of always encoding 30 s: much faster for short dictation.
+    // Generous margin (4 s) and a floor of 12.8 s: tighter windows caused repeated-word loops before.
+    if (seconds <= 20.0) {
+        const int ctx = (int) (std::ceil((seconds + 4.0) * 50.0 / 64.0) * 64.0);
+        params.audio_ctx = std::min(1500, std::max(640, ctx));
+    }
     // Hard limit on output: about 6 tokens per second of speech at most.
     params.max_tokens = std::min(220, std::max(16, (int) (seconds * 6.0) + 8));
     params.temperature_inc = 0.2f;      // standard fallback when output looks degenerate

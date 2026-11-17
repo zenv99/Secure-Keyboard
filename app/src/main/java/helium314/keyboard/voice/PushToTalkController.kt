@@ -57,6 +57,7 @@ class PushToTalkController(
                 true
             }
             AsrService.MSG_STARTED -> {
+                if (held) bump() // the microphone is live now: this buzz is the signal to start speaking
                 if (held) Toast.makeText(
                     context,
                     context.getString(R.string.voice_listening) + " (build " + (helium314.keyboard.latin.BuildConfig.VERSION_CODE - 4300) + ")",
