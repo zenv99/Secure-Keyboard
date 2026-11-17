@@ -111,6 +111,13 @@ android {
     testOptions {
         unitTests {
             isIncludeAndroidResources = true
+            all {
+                // show every test as it starts / ends, so a hanging or failing test can be named from the CI log
+                it.testLogging {
+                    events("started", "passed", "failed")
+                    exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.SHORT
+                }
+            }
         }
     }
 
