@@ -53,7 +53,12 @@ class KeyboardSmokeTest {
 
     private fun fail(message: String): Nothing {
         val dump = java.io.ByteArrayOutputStream().also { device.dumpWindowHierarchy(it) }.toString().take(6000)
-        throw AssertionError("$message\n--- screen ---\n$dump")
+        val ime = device.executeShellCommand("dumpsys input_method").lines()
+            .filter { Regex("mInputShown|mShowRequested|mCurId|mCurMethodId|isInputViewShown|mImeWindowVis").containsMatchIn(it) }
+            .joinToString("\n").take(1500)
+        val crashes = device.executeShellCommand("logcat -d -b crash").takeLast(3000)
+        val errors = device.executeShellCommand("logcat -d -s AndroidRuntime:E ime:E InputMethodManager:W").takeLast(2500)
+        throw AssertionError("$message\n--- input method ---\n$ime\n--- crash log ---\n$crashes\n--- errors ---\n$errors\n--- screen ---\n${dump.take(1500)}")
     }
 
     private fun waitFor(description: String, timeout: Long = 60000): UiObject2 =
