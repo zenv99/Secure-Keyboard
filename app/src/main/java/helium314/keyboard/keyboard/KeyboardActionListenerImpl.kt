@@ -1,8 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0-only
 package helium314.keyboard.keyboard
 
+import android.content.res.Resources
 import android.text.InputType
 import android.util.SparseArray
+import android.view.Choreographer
 import android.view.KeyEvent
 import android.view.inputmethod.InputMethodSubtype
 import androidx.core.util.forEach
@@ -33,6 +35,8 @@ import helium314.keyboard.latin.utils.RecapitalizeMode
 import helium314.keyboard.latin.utils.SubtypeSettings
 import helium314.keyboard.latin.utils.prefs
 import kotlin.math.abs
+
+private const val TRACKPAD_WINDOW = 4_000
 
 class KeyboardActionListenerImpl(private val latinIME: LatinIME, private val inputLogic: InputLogic) : KeyboardActionListener {
 
@@ -185,11 +189,11 @@ class KeyboardActionListenerImpl(private val latinIME: LatinIME, private val inp
     override fun onCustomRequest(request: KeyboardActionListener.CustomAction) = when (request) {
         KeyboardActionListener.CustomAction.SHOW_INPUT_METHOD_PICKER -> latinIME.showInputPickerDialog()
         KeyboardActionListener.CustomAction.TOUCHPAD_ON -> {
-            keyboardSwitcher.mainKeyboardView?.alpha = 0.5f
+            beginTrackpad()
             true
         }
         KeyboardActionListener.CustomAction.TOUCHPAD_OFF -> {
-            keyboardSwitcher.mainKeyboardView?.alpha = 1f
+            endTrackpad()
             true
         }
         KeyboardActionListener.CustomAction.PERFORM_HAPTIC -> {
@@ -314,6 +318,66 @@ class KeyboardActionListenerImpl(private val latinIME: LatinIME, private val inp
 
         keyboardSwitcher.switchToSubtype(newSubtype)
         return true
+    }
+
+    private val trackpadMotion = TrackpadMotion()
+    private var trackpadDoc: TrackpadDocument? = null
+    private var trackpadWindowStart = 0
+    private var trackpadFramePosted = false
+    private val trackpadFrame = Choreographer.FrameCallback {
+        trackpadFramePosted = false
+        val steps = trackpadMotion.consume(System.nanoTime())
+        applyTrackpadSteps(steps)
+    }
+
+    private fun beginTrackpad() {
+        // Leave any half-typed word as the user typed it, then take a snapshot to move inside.
+        inputLogic.finishInput()
+        val before = connection.getTextBeforeCursor(TRACKPAD_WINDOW, 0)?.toString() ?: ""
+        val after = connection.getTextAfterCursor(TRACKPAD_WINDOW, 0)?.toString() ?: ""
+        trackpadDoc = TrackpadDocument(before, after)
+        trackpadWindowStart = connection.expectedSelectionStart - before.length
+        trackpadMotion.reset()
+        trackpadMotion.configure(
+            Resources.getSystem().displayMetrics.density,
+            settings.current.mTouchpadSensitivity
+        )
+        keyboardSwitcher.mainKeyboardView?.alpha = 0.22f
+        performHapticFeedback(HapticEvent.KEY_LONG_PRESS)
+    }
+
+    private fun endTrackpad() {
+        if (trackpadFramePosted) {
+            Choreographer.getInstance().removeFrameCallback(trackpadFrame)
+            trackpadFramePosted = false
+            applyTrackpadSteps(trackpadMotion.consume(System.nanoTime()))
+        }
+        trackpadDoc = null
+        keyboardSwitcher.mainKeyboardView?.alpha = 1f
+        val end = connection.expectedSelectionStart
+        if (end >= 0) connection.setSelection(end, end) // refresh the text cache once, not every frame
+        inputLogic.restartSuggestionsOnWordTouchedByCursor(settings.current)
+    }
+
+    override fun onTouchpadDelta(dxPx: Float, dyPx: Float, eventNs: Long) {
+        if (trackpadDoc == null) return
+        trackpadMotion.offer(dxPx, dyPx, eventNs)
+        if (!trackpadFramePosted) {
+            trackpadFramePosted = true
+            Choreographer.getInstance().postFrameCallback(trackpadFrame)
+        }
+    }
+
+    private fun applyTrackpadSteps(steps: TrackpadSteps) {
+        val doc = trackpadDoc ?: return
+        if (steps.graphemes == 0 && steps.lines == 0) return
+        val crossed = doc.move(steps.graphemes, steps.lines)
+        if (crossed == 0) return
+        val target = (trackpadWindowStart + doc.charOffset()).coerceAtLeast(0)
+        connection.moveCursorTo(target)
+        // One light tick per character at a slow drag, and at most two ticks on a fast frame.
+        val ticks = crossed.coerceAtMost(2)
+        repeat(ticks) { performHapticFeedback(HapticEvent.GESTURE_MOVE) }
     }
 
     override fun onTouchpadMove(stepsX: Int, stepsY: Int): Boolean {

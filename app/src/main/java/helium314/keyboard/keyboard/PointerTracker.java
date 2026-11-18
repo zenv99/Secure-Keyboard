@@ -846,6 +846,17 @@ public final class PointerTracker implements PointerTrackerQueue.Element,
             }
             return;
         }
+        if (mTouchpadHandler.isInTouchpadMode() && me != null) {
+            final int pointerIndex = me.findPointerIndex(mPointerId);
+            if (pointerIndex >= 0) {
+                final int history = me.getHistorySize();
+                for (int h = 0; h < history; h++) {
+                    mTouchpadHandler.onPointerMove(
+                            (int) me.getHistoricalX(pointerIndex, h),
+                            (int) me.getHistoricalY(pointerIndex, h));
+                }
+            }
+        }
         onMoveEventInternal(x, y, eventTime);
     }
 
@@ -949,6 +960,16 @@ public final class PointerTracker implements PointerTrackerQueue.Element,
         };
     }
 
+    /** Arm the fluid trackpad at the current finger position. A following move does not jump. */
+    private void enterTrackpad(final int x, final int y) {
+        sTimerProxy.cancelKeyTimersOf(this);
+        mKeySwipeAllowed = true;
+        sInKeySwipe = true;
+        mInHorizontalSwipe = true;
+        TouchpadHandler.setTouchpadModeActive(true);
+        mTouchpadHandler.enableTouchpadMove(x, y, sListener);
+    }
+
     private void onKeySwipe(final int code, final int x, final int y, final long eventTime) {
         final SettingsValues sv = Settings.getValues();
         final int fastTypingTimeout = 2 * sv.mKeyLongpressTimeout / 3;
@@ -962,12 +983,18 @@ public final class PointerTracker implements PointerTrackerQueue.Element,
             int dX = x - mStartX;
             int dY = y - mStartY;
 
-            // Touchpad mode
-            mTouchpadHandler.enableTouchpadMove(x, y, sListener);
+            if (mTouchpadHandler.isInTouchpadMode()) {
+                mTouchpadHandler.onPointerMove(x, y);
+                return;
+            }
 
             // Vertical movement
             int stepsY = dY / sPointerStep;
             if (stepsY != 0 && abs(dX) < abs(dY) && !mInHorizontalSwipe) {
+                if (sv.mSpaceSwipeVertical == KeyboardActionListener.SwipeAction.TOUCHPAD_MODE) {
+                    enterTrackpad(x, y);
+                    return;
+                }
                 if (!mInVerticalSwipe) {
                     sTimerProxy.cancelKeyTimersOf(this);
                     mInVerticalSwipe = true;
@@ -978,9 +1005,13 @@ public final class PointerTracker implements PointerTrackerQueue.Element,
                 return;
             }
 
-            // Horizontal movement
+            // Horizontal movement. Cursor dragging uses the fluid trackpad instead of one-character jumps.
             int stepsX = dX / sPointerStep;
             if (stepsX != 0 && !mInVerticalSwipe) {
+                if (sv.mSpaceSwipeHorizontal == KeyboardActionListener.SwipeAction.MOVE_CURSOR) {
+                    enterTrackpad(x, y);
+                    return;
+                }
                 if (!mInHorizontalSwipe) {
                     sTimerProxy.cancelKeyTimersOf(this);
                     mInHorizontalSwipe = true;
@@ -1114,10 +1145,10 @@ public final class PointerTracker implements PointerTrackerQueue.Element,
             mKeySwipeAllowed = false;
             sInKeySwipe = false;
 
-            // Touchpad mode
+            final boolean wasTrackpad = mTouchpadHandler.isInTouchpadMode();
             mTouchpadHandler.disableTouchpadMode();
 
-            if (mInHorizontalSwipe || mInVerticalSwipe) {
+            if (wasTrackpad || mInHorizontalSwipe || mInVerticalSwipe) {
                 mInHorizontalSwipe = false;
                 mInVerticalSwipe = false;
                 sListener.onEndSpaceSwipe();
@@ -1172,6 +1203,11 @@ public final class PointerTracker implements PointerTrackerQueue.Element,
             return;
         }
         final int code = key.getCode();
+        // Hold the space bar (without the language-switch hold) and the keyboard becomes a trackpad.
+        if (code == Constants.CODE_SPACE && !Settings.getValues().mSpaceForLangChange) {
+            enterTrackpad(mLastX, mLastY);
+            return;
+        }
         sListener.onLongPressKey(code);
         if (key.hasNoPanelAutoPopupKey()) {
             cancelKeyTracking();
