@@ -33,6 +33,7 @@ import helium314.keyboard.settings.screens.gesturedata.TWO_WEEKS_IN_MILLIS
 fun MainSettingsScreen(
     onClickAbout: () -> Unit,
     onClickTextCorrection: () -> Unit,
+    onClickTextReplacement: () -> Unit,
     onClickPreferences: () -> Unit,
     onClickToolbar: () -> Unit,
     onClickGestureTyping: () -> Unit,
@@ -94,6 +95,12 @@ fun MainSettingsScreen(
                     icon = R.drawable.ic_settings_correction
                 ) { NextScreenIcon() }
                 Preference(
+                    name = stringResource(R.string.text_replacement_title),
+                    description = stringResource(R.string.text_replacement_summary),
+                    onClick = onClickTextReplacement,
+                    icon = R.drawable.ic_settings_correction
+                ) { NextScreenIcon() }
+                Preference(
                     name = stringResource(R.string.settings_screen_secondary_layouts),
                     onClick = onClickLayouts,
                     icon = R.drawable.ic_settings_layout
@@ -124,7 +131,7 @@ private fun PreviewScreen() {
     initPreview(LocalContext.current)
     Theme(previewDark) {
         Surface {
-            MainSettingsScreen({}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {})
+            MainSettingsScreen({}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {})
         }
     }
 }

@@ -148,6 +148,20 @@
     <string name="auto_correct_shortcuts">Auto-correct shortcuts</string>
     <!-- Description for auto_correct_shortcuts -->
     <string name="auto_correct_shortcuts_summary">When enabled shortcuts might be expanded by autocorrect</string>
+    <string name="text_replacement_title">Text Replacement</string>
+    <string name="text_replacement_summary">Type a shortcut such as omw and it becomes a phrase when you press space or punctuation. Stored only on this phone, encrypted. Backspace undoes the last one. Not used in password fields.</string>
+    <string name="text_replacement_add">Add replacement</string>
+    <string name="text_replacement_edit">Edit replacement</string>
+    <string name="text_replacement_shortcut">Shortcut</string>
+    <string name="text_replacement_phrase">Phrase</string>
+    <string name="text_replacement_shortcut_hint">omw</string>
+    <string name="text_replacement_phrase_hint">On my way!</string>
+    <string name="text_replacement_empty">No replacements yet. Add one, for example omw becomes On my way!</string>
+    <string name="text_replacement_error_shortcut">Use a shortcut with no spaces, up to 40 characters.</string>
+    <string name="text_replacement_error_phrase">Enter the phrase to insert.</string>
+    <string name="text_replacement_error_same">The shortcut and the phrase must be different.</string>
+    <string name="text_replacement_error_duplicate">That shortcut is already used.</string>
+    <string name="text_replacement_error_save">Could not save. The list stays on this phone and is not stored until the device can encrypt it.</string>
     <!-- Option to enable auto correction for for capitalized suggestions (by pressing shift) -->
     <string name="auto_correct_capitalized_suggestions">Auto-correct capitalized suggestions</string>
     <!-- Description for auto_correct_capitalized_suggestions -->

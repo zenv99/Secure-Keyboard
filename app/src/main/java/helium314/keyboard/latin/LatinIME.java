@@ -28,6 +28,7 @@ import android.view.inputmethod.InlineSuggestionsResponse;
 import android.view.inputmethod.InputMethodSubtype;
 
 import helium314.keyboard.accessibility.AccessibilityUtils;
+import helium314.keyboard.latin.inputlogic.TextReplacements;
 import helium314.keyboard.compat.ConfigurationCompatKt;
 import helium314.keyboard.compat.EditorInfoCompatUtils;
 import helium314.keyboard.compat.ImeCompat;
@@ -780,6 +781,7 @@ public class LatinIME extends InputMethodService implements
 
     void onStartInputViewInternal(EditorInfo editorInfo, boolean restarting) {
         super.onStartInputView(editorInfo, restarting);
+        TextReplacements.ensureLoaded(this);
 
         setGestureDataGatheringMode(editorInfo, restarting);
 

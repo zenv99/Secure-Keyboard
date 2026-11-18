@@ -1143,7 +1143,22 @@ public final class InputLogic {
         }
         // isComposingWord() may have changed since we stored wasComposing
         if (mWordComposer.isComposingWord()) {
-            if (settingsValues.mAutoCorrectEnabled && ! isInlineEmojiSearchAction()) {
+            // A text replacement expands on space or punctuation even when autocorrect is off,
+            // and even if the suggestion strip has not refreshed yet. Password fields and fields
+            // that forbid personalized learning never expand.
+            final boolean replacementBlocked = settingsValues.mInputAttributes.mIsPasswordField
+                    || settingsValues.mInputAttributes.mNoLearning;
+            final String replacementPhrase = replacementBlocked
+                    ? null : TextReplacements.expand(mWordComposer.getTypedWord());
+            if (replacementPhrase != null) {
+                mWordComposer.setAutoCorrection(new SuggestedWordInfo(replacementPhrase, "",
+                        SuggestedWordInfo.MAX_SCORE, SuggestedWordInfo.KIND_WHITELIST,
+                        Dictionary.DICTIONARY_USER_SHORTCUT, SuggestedWordInfo.NOT_AN_INDEX,
+                        SuggestedWordInfo.NOT_A_CONFIDENCE, null));
+            }
+            final boolean expandReplacement = replacementPhrase != null
+                    || (!replacementBlocked && isTextReplacement(mWordComposer.getAutoCorrectionOrNull()));
+            if ((settingsValues.mAutoCorrectEnabled && ! isInlineEmojiSearchAction()) || expandReplacement) {
                 final String separator = shouldAvoidSendingCode ? LastComposedWord.NOT_A_SEPARATOR
                         : StringUtils.newSingleCodePointString(codePoint);
                 commitCurrentAutoCorrection(settingsValues, separator, handler);
@@ -1305,7 +1320,7 @@ public final class InputLogic {
             inputTransaction.setRequiresUpdateSuggestions();
             return;
         }
-        if (mLastComposedWord.canRevertCommit() && sv.mBackspaceRevertsAutocorrect) {
+        if (mLastComposedWord.canRevertCommit() && (sv.mBackspaceRevertsAutocorrect || isTextReplacementUndo())) {
             String lastComposedWord = mLastComposedWord.mTypedWord;
             revertCommit(inputTransaction);
             StatsUtils.onRevertAutoCorrect();
@@ -2286,6 +2301,25 @@ public final class InputLogic {
         }
     }
 
+    private boolean isTextReplacement(final SuggestedWordInfo info) {
+        if (info == null || info.getSourceDict() == null) return false;
+        return Dictionary.TYPE_USER_SHORTCUT.equals(info.getSourceDict().mDictType)
+                && !TextUtils.equals(info.getWord(), mWordComposer.getTypedWord());
+    }
+
+    /** The committed phrase is the expansion of the shortcut the user actually typed. */
+    private boolean isTextReplacementUndo() {
+        if (mLastComposedWord.mTypedWord == null || mLastComposedWord.mCommittedWord == null) return false;
+        final String phrase = TextReplacements.expand(mLastComposedWord.mTypedWord);
+        return phrase != null && phrase.contentEquals(mLastComposedWord.mCommittedWord);
+    }
+
+    private boolean isTextReplacementCommit(final String chosenWord) {
+        if (!mWordComposer.isComposingWord()) return false;
+        final String phrase = TextReplacements.expand(mWordComposer.getTypedWord());
+        return phrase != null && phrase.equals(chosenWord);
+    }
+
     /**
      * Commit the typed string to the editor.
      * <p>
@@ -2416,8 +2450,11 @@ public final class InputLogic {
                     + "Connection.commitText");
             startTimeMillis = SystemClock.elapsedRealtime();
         }
-        // Add the word to the user history dictionary
-        performAdditionToUserHistoryDictionary(settingsValues, chosenWord, ngramContext);
+        // A text replacement is a phrase the user saved on purpose. Don't also learn it as if
+        // they had typed it. Password fields never reach this branch with a replacement.
+        if (!isTextReplacementCommit(chosenWord)) {
+            performAdditionToUserHistoryDictionary(settingsValues, chosenWord, ngramContext);
+        }
         if (DebugFlags.DEBUG_ENABLED) {
             long runTimeMillis = SystemClock.elapsedRealtime() - startTimeMillis;
             Log.d(TAG, "commitChosenWord() : " + runTimeMillis + " ms to run "

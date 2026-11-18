@@ -6,6 +6,7 @@ import android.content.Context
 import android.os.Build
 import helium314.keyboard.keyboard.emoji.SupportedEmojis
 import helium314.keyboard.latin.define.DebugFlags
+import helium314.keyboard.latin.inputlogic.TextReplacements
 import helium314.keyboard.latin.dictionary.ExpandableDictionaryUtils
 import helium314.keyboard.latin.settings.Defaults
 import helium314.keyboard.latin.settings.Settings
@@ -26,6 +27,7 @@ class App : Application() {
         super.onCreate()
         app = this
         val ctx: Context = this
+        TextReplacements.ensureLoaded(ctx)
         DebugFlags.init(this) // needed by several other inits, so do it first
 
         val scope = CoroutineScope(Dispatchers.Default)
