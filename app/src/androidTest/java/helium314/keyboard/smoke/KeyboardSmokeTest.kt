@@ -29,8 +29,14 @@ class KeyboardSmokeTest {
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
         }
         instrumentation.startActivitySync(intent)
-        // tap into the field like a user does: this is what makes Android start and show the keyboard
-        device.wait(Until.findObject(By.desc("smoke-field")), 15000)?.click()
+        // tap into the field like a user does: this is what makes Android start and show the keyboard.
+        // The node can exist before InputMethodManager will serve it, so keep tapping until the mic key is up.
+        val pkg = context.packageName
+        val end = System.currentTimeMillis() + 20000
+        while (System.currentTimeMillis() < end) {
+            device.findObject(By.desc("smoke-field"))?.click()
+            if (device.wait(Until.findObject(By.res(pkg, "sk_voice_key")), 1500) != null) return
+        }
     }
 
     @After fun close() {
