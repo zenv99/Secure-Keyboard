@@ -41,7 +41,9 @@ object EditorFieldPolicy {
             return Decision(showSuggestions = false, autoCorrect = false, blockLearning = noLearning)
         }
         if (variation == InputType.TYPE_TEXT_VARIATION_URI && !isSearchReportedAsUri(action, noSuggestions, autoCorrectFlag)) {
-            return Decision(showSuggestions = false, autoCorrect = false, blockLearning = noLearning)
+            // A dedicated URL field still composes so "." is not turned into a new word,
+            // but dictionary correction stays off.
+            return Decision(showSuggestions = true, autoCorrect = false, blockLearning = noLearning)
         }
         return Decision(showSuggestions = true, autoCorrect = true, blockLearning = noLearning)
     }

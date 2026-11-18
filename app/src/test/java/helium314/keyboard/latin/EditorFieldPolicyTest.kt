@@ -97,7 +97,7 @@ class EditorFieldPolicyTest {
         val type = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_URI
         val decision = EditorFieldPolicy.decide(type, EditorInfo.IME_ACTION_GO)
         assertFalse(decision.autoCorrect)
-        assertFalse(decision.showSuggestions)
+        assertTrue(decision.showSuggestions)
         assertFalse(decision.blockLearning)
     }
 
