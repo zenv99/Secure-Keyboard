@@ -23,7 +23,8 @@ import java.util.concurrent.Executors
  * The service replies with one MSG_FINAL per audio chunk (KEY_TEXT, KEY_LAST) or MSG_ERROR (KEY_CODE).
  * The last reply of a session always has KEY_LAST = true, so the client can always reset.
  *
- * Privacy: audio exists only in memory while the key is held and is dropped after transcription.
+ * Privacy: audio exists only in memory while the key is held, plus a 400 ms tail after release,
+ * and is dropped after transcription. The microphone is closed as soon as that tail is read.
  * Neither audio nor recognised text is ever written to disk or to the log.
  */
 class AsrService : Service() {
@@ -101,6 +102,8 @@ class AsrService : Service() {
         private val record: AudioRecord
         @Volatile private var running = true
         @Volatile private var cancelled = false
+        // Worker thread only. Previous windows of this hold, used as a short prompt. Never logged.
+        private var sessionText = ""
 
         init {
             val minBuffer = AudioRecord.getMinBufferSize(SAMPLE_RATE, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT)
@@ -125,27 +128,30 @@ class AsrService : Service() {
 
         private fun loop() {
             val chunk = ShortArray(SAMPLE_RATE / 10) // 100 ms
-            var buffer = ShortArray(SAMPLE_RATE * MAX_CHUNK_SECONDS)
-            var count = 0
+            val capture = PcmCapture(SAMPLE_RATE * MAX_CHUNK_SECONDS)
             var total = 0L
             var failed = false
             try {
                 record.startRecording()
                 reply(client, MSG_STARTED) // the microphone is really open now: the user may speak
-                while (running) {
+                while (running && !failed) {
                     val read = record.read(chunk, 0, chunk.size)
                     if (read < 0) { failed = true; break }
                     if (read == 0) continue
-                    if (count + read > buffer.size) {
-                        // Whisper handles up to 30 s per window: hand off the full chunk and keep recording.
-                        submit(buffer.copyOf(count), last = false)
-                        buffer = ShortArray(SAMPLE_RATE * MAX_CHUNK_SECONDS)
-                        count = 0
-                    }
-                    System.arraycopy(chunk, 0, buffer, count, read)
-                    count += read
+                    capture.append(chunk, read)?.let { submit(it, last = false) }
                     total += read
                     if (total > SAMPLE_RATE.toLong() * MAX_HOLD_SECONDS) running = false // stuck-key safety
+                }
+                // Finger is up, but AudioRecord.stop() discards samples the HAL already captured,
+                // and the last syllable is often still arriving. Keep the mic for the tail only.
+                if (!cancelled && !failed) {
+                    val deadline = System.nanoTime() + DictationPipeline.TAIL_NS
+                    while (!cancelled && System.nanoTime() < deadline) {
+                        val read = record.read(chunk, 0, chunk.size)
+                        if (read < 0) break // keep what we already have
+                        if (read == 0) continue
+                        capture.append(chunk, read)?.let { submit(it, last = false) }
+                    }
                 }
             } catch (_: Exception) {
                 failed = true
@@ -155,11 +161,11 @@ class AsrService : Service() {
             }
             main.post { if (recorder === this) recorder = null }
             when {
-                cancelled -> buffer.fill(0)
+                cancelled -> capture.wipe()
                 failed -> reply(client, MSG_ERROR, code = ERR_AUDIO)
-                else -> submit(buffer.copyOf(count), last = true)
+                else -> submit(capture.snapshot(), last = true)
             }
-            buffer.fill(0)
+            capture.wipe()
         }
 
         private fun submit(pcm: ShortArray, last: Boolean) {
@@ -171,53 +177,36 @@ class AsrService : Service() {
                     try {
                         val engine = ensureWhisper()
                         val silent = pcm.all { it.toInt() == 0 }
-                        // Whisper invents / repeats words when a clip is mostly silence: keep just the speech (+200 ms).
-                        val speech = trimSilence(pcm)
+                        // Energy VAD: drop leading and trailing silence, but keep a soft ending.
+                        val speech = DictationPipeline.trimSilence(pcm)
                         if (silent) {
                             meta = "all-zero audio (mic blocked)"
                             reply(client, MSG_ERROR, code = ERR_SILENT)
                         } else if (speech == null) {
                             // nothing but background noise: Whisper would invent words ("you"), so type nothing
                             meta = "only background noise, clip=" + String.format(java.util.Locale.US, "%.1f", pcm.size / SAMPLE_RATE.toDouble()) + "s"
-                            if (last) reply(client, MSG_ERROR, code = ERR_NO_SPEECH)
+                            if (last && sessionText.isBlank()) reply(client, MSG_ERROR, code = ERR_NO_SPEECH)
                         } else {
-                            // 0.3 s of silence in front: Whisper often drops or garbles a first word that starts right at the clip edge.
-                            val body = normalizedFloats(speech)
-                            val floats = FloatArray(SAMPLE_RATE * 3 / 10) + body
-                            body.fill(0f)
-                            val seconds = speech.size / SAMPLE_RATE.toDouble()
+                            val prompt = DictationPipeline.carryPrompt(sessionText)
                             val tModel = System.currentTimeMillis()
-                            text = clean(engine.transcribe(floats, LANGUAGE, threads()), seconds)
-                            // Far too few words for the amount of speech (e.g. a whole sentence came back as "x"):
-                            // try once more with a little silence around the audio and keep the fuller result.
-                            if (seconds >= 1.5 && wordCount(text) < voicedSeconds(speech) * 0.7) {
-                                val pad = FloatArray(SAMPLE_RATE / 2)
-                                val padded = pad + floats + pad
-                                val retry = clean(engine.transcribe(padded, LANGUAGE, threads()), seconds)
-                                padded.fill(0f)
-                                if (wordCount(retry) > wordCount(text)) text = retry
-                            }
-                            // A lone stray letter for a clip with real speech is a failed transcription, not what was said.
-                            if (voicedSeconds(speech) >= 1.0 && wordCount(text) == 1 && text.trim().length == 1 &&
-                                text.trim().lowercase() !in listOf("a", "i")) text = ""
-                            floats.fill(0f)
-                            // Long clips occasionally come back far too short (the decoder stops after a few words).
-                            // Real speech has well over one word per second of voiced audio: if not, redo it in
-                            // pieces cut at the pauses, which short clips handle reliably, and keep the fuller result.
-                            if (seconds >= 6.0 && wordCount(text) < voicedSeconds(speech)) {
-                                val piecesText = transcribeInPieces(engine, speech)
-                                if (wordCount(piecesText) > wordCount(text)) text = piecesText
-                            }
+                            text = transcribeSpeech(engine, speech, prompt)
+                            val delta = DictationPipeline.addedWords(sessionText, text)
+                            sessionText = DictationPipeline.joinChunk(sessionText, text)
+                            text = delta
                             meta = String.format(java.util.Locale.US, "clip=%.1fs voiced=%.1fs words=%d model-wait=%dms transcribe=%dms",
-                                pcm.size / SAMPLE_RATE.toDouble(), voicedSeconds(speech), wordCount(text),
+                                pcm.size / SAMPLE_RATE.toDouble(), DictationPipeline.voicedSeconds(speech), DictationPipeline.wordCount(text),
                                 tModel - startedAt, System.currentTimeMillis() - tModel)
-                            if (text.isBlank() && last) reply(client, MSG_ERROR, code = ERR_NO_SPEECH)
+                            if (text.isBlank() && last && sessionText.isBlank()) reply(client, MSG_ERROR, code = ERR_NO_SPEECH)
                         }
                     } catch (e: AsrException) {
                         reply(client, MSG_ERROR, code = e.code)
+                    } catch (_: Exception) {
+                        // A decode failure must still end the session. The keyboard shows the generic error.
+                        reply(client, MSG_ERROR, code = ERR_AUDIO)
                     }
                 }
                 pcm.fill(0)
+                if (last) sessionText = ""
                 reply(client, MSG_FINAL, text = text, last = last, meta = meta)
                 main.removeCallbacks(idleUnload)
                 main.postDelayed(idleUnload, IDLE_UNLOAD_MS)
@@ -236,61 +225,64 @@ class AsrService : Service() {
         return engine
     }
 
-    /** Drops bracketed noise tags and collapses runaway repetition ("a a a a a ..."), keeping real doubles. */
-    private fun clean(raw: String, seconds: Double): String {
-        val noTags = raw.replace(Regex("\\[[^\\]]*\\]|\\([^)]*\\)"), " ")
-        var words: List<String> = noTags.split(Regex("\\s+")).filter { it.isNotEmpty() }
-        for (n in 1..40) {
-            if (n * 2 > words.size) break
-            val out = ArrayList<String>()
-            var i = 0
-            while (i < words.size) {
-                var reps = 1
-                if (i + n <= words.size) {
-                    while (i + (reps + 1) * n <= words.size &&
-                        (0 until n).all { norm(words[i + it]) == norm(words[i + reps * n + it]) }) reps++
-                }
-                if (reps > 3) {
-                    repeat(2) { r -> for (k in 0 until n) out.add(words[i + r * n + k]) }
-                    i += reps * n
-                } else {
-                    out.add(words[i]); i++
-                }
-            }
-            words = out
+    /**
+     * One whisper pass when the clip fits in the 30 s window. Longer audio is overlapping
+     * windows with the previous text as a short prompt, then joined in order.
+     */
+    private fun transcribeSpeech(engine: WhisperBridge, speech: ShortArray, prompt: String): String {
+        val ranges = if (speech.size <= DictationPipeline.SINGLE_PASS_MAX_SAMPLES) listOf(0 until speech.size)
+            else DictationPipeline.windows(speech.size)
+        var text = transcribeRanges(engine, speech, ranges, prompt)
+        val seconds = speech.size / SAMPLE_RATE.toDouble()
+        val voiced = DictationPipeline.voicedSeconds(speech)
+        if (ranges.size == 1 && seconds >= 1.5 && DictationPipeline.wordCount(text) < voiced * 0.7) {
+            val body = normalizedFloats(speech)
+            val lead = FloatArray(SAMPLE_RATE * 3 / 10)
+            val pad = FloatArray(SAMPLE_RATE / 2)
+            val padded = pad + lead + body + pad
+            body.fill(0f)
+            val retry = DictationPipeline.clean(
+                engine.transcribe(padded, LANGUAGE, threads(), prompt), seconds,
+            )
+            padded.fill(0f)
+            if (DictationPipeline.wordCount(retry) > DictationPipeline.wordCount(text)) text = retry
         }
-        // The whole sentence said twice in a row ("A B C A B C"): keep one copy.
-        if (words.size >= 4 && words.size % 2 == 0) {
-            val half = words.size / 2
-            if ((0 until half).all { norm(words[it]) == norm(words[it + half]) }) words = words.take(half)
+        if (ranges.size == 1 && seconds >= 6.0 && DictationPipeline.wordCount(text) < voiced) {
+            val pieces = transcribeRanges(
+                engine, speech,
+                DictationPipeline.windows(speech.size, SAMPLE_RATE * 10, DictationPipeline.OVERLAP_SAMPLES),
+                prompt,
+            )
+            if (DictationPipeline.wordCount(pieces) > DictationPipeline.wordCount(text)) text = pieces
         }
-        // Final hard cap: nobody speaks faster than ~4 words per second.
-        val maxWords = (seconds * 4.0).toInt() + 6
-        if (words.size > maxWords) words = words.take(maxWords)
-        return words.joinToString(" ").trim()
+        return text
     }
 
-    /** The speech part of the clip (+200 ms), or null when the clip contains no speech at all. */
-    private fun trimSilence(pcm: ShortArray): ShortArray? {
-        val win = SAMPLE_RATE / 50 // 20 ms
-        fun loud(start: Int): Boolean {
-            val end = minOf(pcm.size, start + win)
-            if (end <= start) return false
-            var sum = 0L
-            for (i in start until end) sum += kotlin.math.abs(pcm[i].toInt())
-            return sum / (end - start) > 300
+    private fun transcribeRanges(
+        engine: WhisperBridge, pcm: ShortArray, ranges: List<IntRange>, prompt: String,
+    ): String {
+        var committed = ""
+        for (range in ranges) {
+            val piece = pcm.copyOfRange(range.first, range.last + 1)
+            if (piece.size < MIN_SAMPLES) continue
+            val trimmed = DictationPipeline.trimSilence(piece) ?: continue
+            val seconds = trimmed.size / SAMPLE_RATE.toDouble()
+            // 0.3 s of silence in front: a first word that starts at the clip edge is often dropped.
+            val body = normalizedFloats(trimmed)
+            val floats = FloatArray(SAMPLE_RATE * 3 / 10) + body
+            body.fill(0f)
+            val carry = DictationPipeline.carryPrompt(if (committed.isBlank()) prompt else committed)
+            var text = DictationPipeline.clean(engine.transcribe(floats, LANGUAGE, threads(), carry), seconds)
+            floats.fill(0f)
+            if (voicedEnough(trimmed) && DictationPipeline.wordCount(text) == 1 && text.trim().length == 1 &&
+                text.trim().lowercase() !in listOf("a", "i")) text = ""
+            if (text.isNotBlank()) committed = DictationPipeline.joinChunk(committed, text)
+            piece.fill(0)
         }
-        var first = 0
-        while (first < pcm.size - win && !loud(first)) first += win
-        if (first >= pcm.size - win) return null
-        var last = pcm.size
-        while (last > first + win && !loud(last - win)) last -= win
-        // Soft word beginnings are quieter than the detection level: keep up to 0.5 s before the first loud
-        // moment (and 0.3 s after the last), so the first word is not clipped.
-        val from = maxOf(0, first - SAMPLE_RATE / 2)
-        val to = minOf(pcm.size, last + SAMPLE_RATE * 3 / 10)
-        return if (to - from < MIN_SAMPLES) pcm else pcm.copyOfRange(from, to)
+        return committed
     }
+
+    private fun voicedEnough(pcm: ShortArray) = DictationPipeline.voicedSeconds(pcm) >= 1.0
 
     /** Samples as floats, with quiet recordings amplified (up to 8x) so Whisper gets a normal level. */
     private fun normalizedFloats(pcm: ShortArray): FloatArray {
@@ -300,66 +292,14 @@ class AsrService : Service() {
         return FloatArray(pcm.size) { (pcm[it] * gain).coerceIn(-32767f, 32767f) / 32768f }
     }
 
-    private fun wordCount(t: String) = t.split(Regex("\\s+")).count { it.isNotEmpty() }
-
-    /** Seconds of the clip that are clearly louder than background noise. */
-    private fun voicedSeconds(pcm: ShortArray): Double {
-        val win = SAMPLE_RATE / 50
-        var loudWindows = 0
-        var i = 0
-        while (i + win <= pcm.size) {
-            var sum = 0L
-            for (k in i until i + win) sum += kotlin.math.abs(pcm[k].toInt())
-            if (sum / win > 300) loudWindows++
-            i += win
-        }
-        return loudWindows * 0.02
-    }
-
-    /** Transcribes the clip as pieces of at most ~10 s, each cut at the quietest moment (a pause). */
-    private fun transcribeInPieces(engine: WhisperBridge, pcm: ShortArray): String {
-        val win = SAMPLE_RATE / 50 // 20 ms
-        val windows = pcm.size / win
-        val energy = LongArray(windows) { w ->
-            var sum = 0L
-            for (k in w * win until (w + 1) * win) sum += kotlin.math.abs(pcm[k].toInt())
-            sum
-        }
-        val cuts = ArrayList<Int>()
-        var start = 0 // in windows
-        while (windows - start > 500) { // more than 10 s left
-            var bestAt = start + 350
-            var best = Long.MAX_VALUE
-            for (w in start + 200..start + 480) { // cut somewhere between 4 s and 9.6 s
-                var e = 0L
-                for (k in w until w + 5) e += energy[k] // ~100 ms of quiet
-                if (e < best) { best = e; bestAt = w + 2 }
-            }
-            cuts.add(bestAt * win)
-            start = bestAt
-        }
-        val bounds = listOf(0) + cuts + listOf(pcm.size)
-        val out = ArrayList<String>()
-        for (n in 0 until bounds.size - 1) {
-            val piece = pcm.copyOfRange(bounds[n], bounds[n + 1])
-            if (piece.size < MIN_SAMPLES) continue
-            val trimmed = trimSilence(piece) ?: continue
-            val floats = FloatArray(trimmed.size) { trimmed[it] / 32768f }
-            val t = clean(engine.transcribe(floats, LANGUAGE, threads()), trimmed.size / SAMPLE_RATE.toDouble())
-            floats.fill(0f)
-            if (t.isNotBlank()) out.add(t)
-        }
-        return out.joinToString(" ")
-    }
-
-    private fun norm(w: String) = w.lowercase().filter { it.isLetterOrDigit() }
-
     // worker thread only
     private fun closeWhisper() {
         whisper?.close()
         whisper = null
     }
 
+    // whisper.cpp's stream example uses min(4, cores). Capping here keeps a short decode on the
+    // big cores instead of waking every little core. Explicit affinity is not set.
     private fun threads() = Runtime.getRuntime().availableProcessors().coerceIn(2, 4)
 
     private fun reply(target: Messenger, what: Int, text: String = "", code: Int = 0, last: Boolean = false, meta: String = "") {
@@ -406,8 +346,8 @@ class AsrService : Service() {
         const val ERR_SILENT = 7 // microphone delivered only silence (blocked by the OS)
         const val ERR_NO_SPEECH = 8 // audio was fine but nothing was recognised
 
-        private const val SAMPLE_RATE = 16_000
-        private const val MAX_CHUNK_SECONDS = 28
+        private const val SAMPLE_RATE = DictationPipeline.SAMPLE_RATE
+        private const val MAX_CHUNK_SECONDS = DictationPipeline.MAX_CHUNK_SECONDS
         private const val MAX_HOLD_SECONDS = 300
         private const val MIN_SAMPLES = SAMPLE_RATE / 4 // ignore accidental taps under 250 ms
         private const val IDLE_UNLOAD_MS = 600_000L

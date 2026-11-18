@@ -2341,6 +2341,16 @@ public final class InputLogic {
      * @param settingsValues the current values of the settings.
      * @param separatorString the separator that's causing the commit, or NOT_A_SEPARATOR if none.
      */
+    /**
+     * Commit an in-progress word before dictated text is inserted, so the dictation is not used
+     * as that word's separator and a later commit cannot replace the composing span.
+     */
+    public void commitComposingForDictation(SettingsValues settingsValues) {
+        if (mWordComposer.isComposingWord()) {
+            commitTyped(settingsValues, LastComposedWord.NOT_A_SEPARATOR);
+        }
+    }
+
     public void commitTyped(SettingsValues settingsValues, String separatorString) {
         if (!mWordComposer.isComposingWord()) return;
         String typedWord = mWordComposer.getTypedWord();

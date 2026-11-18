@@ -1352,6 +1352,7 @@ New dictionary:
     <string name="voice_error_generic" translatable="false">Voice input failed</string>
     <string name="voice_transcribing" translatable="false">Transcribing…</string>
     <string name="voice_listening" translatable="false">Listening… release to type</string>
+    <string name="voice_dictation_done" translatable="false">Done</string>
     <string name="voice_error_silent" translatable="false">Microphone gave no sound. Check mic permission for Secure Keyboard</string>
     <string name="voice_error_no_speech" translatable="false">Didn\'t catch that, hold and speak again</string>
     <string name="touch_adaptation" translatable="false">Learn how I type</string>

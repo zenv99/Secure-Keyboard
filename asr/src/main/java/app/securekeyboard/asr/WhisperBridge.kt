@@ -10,8 +10,8 @@ internal class WhisperBridge {
         return handle != 0L
     }
 
-    fun transcribe(pcm: FloatArray, language: String, threads: Int): String =
-        if (handle == 0L) "" else nativeTranscribe(handle, pcm, language, threads)
+    fun transcribe(pcm: FloatArray, language: String, threads: Int, prompt: String = ""): String =
+        if (handle == 0L) "" else nativeTranscribe(handle, pcm, language, threads, prompt)
 
     fun close() {
         if (handle != 0L) nativeFree(handle)
@@ -19,7 +19,9 @@ internal class WhisperBridge {
     }
 
     private external fun nativeInit(modelPath: String): Long
-    private external fun nativeTranscribe(handle: Long, pcm: FloatArray, language: String, threads: Int): String
+    private external fun nativeTranscribe(
+        handle: Long, pcm: FloatArray, language: String, threads: Int, prompt: String,
+    ): String
     private external fun nativeFree(handle: Long)
 
     companion object {

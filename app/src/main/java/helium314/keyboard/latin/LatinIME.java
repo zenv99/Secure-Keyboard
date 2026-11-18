@@ -1313,6 +1313,9 @@ public class LatinIME extends InputMethodService implements
             android.widget.Toast.makeText(this, "No text field to type into", android.widget.Toast.LENGTH_SHORT).show();
             return;
         }
+        // Finish the word under the cursor first. commitText replaces an active composing span,
+        // which would drop that word or, if a suggestion update lands mid-insert, part of the dictation.
+        mInputLogic.commitComposingForDictation(mSettings.getCurrent());
         if (ic != null) {
             final CharSequence before = ic.getTextBeforeCursor(1, 0);
             if (before != null && before.length() == 1 && !Character.isWhitespace(before.charAt(0)))
