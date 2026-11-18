@@ -19,6 +19,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import helium314.keyboard.keyboard.KeyboardSwitcher
+import helium314.keyboard.keyboard.TouchAdapter
+import helium314.keyboard.latin.LearnedDataFiles
 import helium314.keyboard.latin.R
 import helium314.keyboard.latin.permissions.PermissionsUtil
 import helium314.keyboard.latin.settings.Defaults
@@ -118,7 +120,9 @@ fun createCorrectionSettings(context: Context) = listOf(
                 confirmButtonText = stringResource(R.string.wipe_learned_button),
                 onConfirmed = {
                     showWipe = false
-                    // Switching personalisation off makes the keyboard delete everything it learned; switch it back on after.
+                    // Delete history files now. The preference toggle below also drops in-memory dictionaries.
+                    LearnedDataFiles.deleteUserHistoryFiles(ctx.filesDir)
+                    TouchAdapter.wipe(ctx)
                     val p = ctx.prefs()
                     p.edit { putBoolean(Settings.PREF_KEY_USE_PERSONALIZED_DICTS, false) }
                     android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({

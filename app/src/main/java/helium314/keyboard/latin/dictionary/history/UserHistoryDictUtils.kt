@@ -1,6 +1,8 @@
 package helium314.keyboard.latin.dictionary.history
 
 import android.content.Context
+import android.os.Build
+import helium314.keyboard.latin.LearnedDataFiles
 import helium314.keyboard.latin.utils.Log
 import java.lang.ref.SoftReference
 import java.util.Locale
@@ -39,9 +41,12 @@ object UserHistoryDictUtils {
                 entry.value?.get()?.clear()
             }
             sLangUserHistoryDictCache.clear()
-            context.filesDir?.listFiles { it.name.startsWith(UserHistoryDictionary.NAME) }?.forEach {
-                if (it.isDirectory) it.deleteRecursively()
-                else it.delete()
+            LearnedDataFiles.deleteUserHistoryFiles(context.filesDir)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                val protected = context.createDeviceProtectedStorageContext()?.filesDir
+                if (protected != null && protected != context.filesDir) {
+                    LearnedDataFiles.deleteUserHistoryFiles(protected)
+                }
             }
         }
     }

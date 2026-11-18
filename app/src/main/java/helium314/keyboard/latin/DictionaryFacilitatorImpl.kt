@@ -572,8 +572,16 @@ class DictionaryFacilitatorImpl : DictionaryFacilitator {
     ): List<SuggestedWordInfo> {
         val suggestions = ArrayList<SuggestedWordInfo>()
         val weightForLocale = dictGroup.getWeightForLocale(dictionaryGroups, composedData.mIsBatchMode)
+        // Password, no-personalized-learning, and incognito fields must not be offered history,
+        // contacts, or other user-specific dictionaries. Fail closed if settings are not loaded.
+        val blockPersonalization = try {
+            Settings.getValues().mIncognitoModeEnabled
+        } catch (_: Exception) {
+            true
+        }
         for (dictType in DictionaryFacilitator.ALL_DICTIONARY_TYPES) {
             val dictionary = dictGroup.getDict(dictType) ?: continue
+            if (blockPersonalization && dictionary.isUserSpecific) continue
             val dictionarySuggestions = dictionary.getSuggestions(composedData, ngramContext, proximityInfoHandle,
                 settingsValuesForSuggestion, sessionId, weightForLocale, weightOfLangModelVsSpatialModel
             ) ?: continue

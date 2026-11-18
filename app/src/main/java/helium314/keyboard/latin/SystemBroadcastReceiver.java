@@ -15,6 +15,8 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Process;
 
+import java.util.Set;
+
 import helium314.keyboard.latin.utils.KtxKt;
 import helium314.keyboard.latin.utils.Log;
 import android.view.inputmethod.InputMethodManager;
@@ -51,9 +53,19 @@ import helium314.keyboard.settings.SettingsActivity;
 public final class SystemBroadcastReceiver extends BroadcastReceiver {
     private static final String TAG = SystemBroadcastReceiver.class.getSimpleName();
 
+    /** Only system broadcasts. Anything else is ignored, even though the receiver is exported. */
+    private static final Set<String> ALLOWED_ACTIONS = Set.of(
+            Intent.ACTION_MY_PACKAGE_REPLACED,
+            Intent.ACTION_BOOT_COMPLETED,
+            Intent.ACTION_LOCKED_BOOT_COMPLETED,
+            Intent.ACTION_USER_INITIALIZE,
+            Intent.ACTION_LOCALE_CHANGED
+    );
+
     @Override
     public void onReceive(final Context context, final Intent intent) {
         final String intentAction = intent.getAction();
+        if (!ALLOWED_ACTIONS.contains(intentAction)) return;
         if (Intent.ACTION_MY_PACKAGE_REPLACED.equals(intentAction)) {
             Log.i(TAG, "Package has been replaced: " + context.getPackageName());
             toggleAppIcon(context);
