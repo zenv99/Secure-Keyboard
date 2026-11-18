@@ -8,6 +8,27 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class EditorFieldPolicyTest {
+    @Test fun doubleSpacePeriodSkipsUrlEmailAndSearchButNotAWebComment() {
+        val text = InputType.TYPE_CLASS_TEXT
+        assertTrue(EditorFieldPolicy.allowsDoubleSpacePeriod(text, EditorInfo.IME_ACTION_NONE))
+        val web = text or InputType.TYPE_TEXT_VARIATION_WEB_EDIT_TEXT
+        assertTrue(EditorFieldPolicy.allowsDoubleSpacePeriod(web, EditorInfo.IME_ACTION_NONE))
+        assertFalse(EditorFieldPolicy.allowsDoubleSpacePeriod(web, EditorInfo.IME_ACTION_SEARCH))
+        assertFalse(EditorFieldPolicy.allowsDoubleSpacePeriod(
+            text or InputType.TYPE_TEXT_VARIATION_URI or InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS,
+            EditorInfo.IME_ACTION_GO,
+        ))
+        assertFalse(EditorFieldPolicy.allowsDoubleSpacePeriod(
+            text or InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS, EditorInfo.IME_ACTION_NONE,
+        ))
+        assertFalse(EditorFieldPolicy.allowsDoubleSpacePeriod(
+            text or InputType.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS, EditorInfo.IME_ACTION_NONE,
+        ))
+        assertFalse(EditorFieldPolicy.allowsDoubleSpacePeriod(
+            text or InputType.TYPE_TEXT_VARIATION_PASSWORD, EditorInfo.IME_ACTION_NONE,
+        ))
+    }
+
     @Test fun webEditTextCorrects() {
         val web = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_WEB_EDIT_TEXT
         val plain = EditorFieldPolicy.decide(web, EditorInfo.IME_ACTION_NONE)

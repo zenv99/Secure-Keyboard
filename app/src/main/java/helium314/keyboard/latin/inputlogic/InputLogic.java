@@ -1203,7 +1203,9 @@ public final class InputLogic {
                 mSpaceState = SpaceState.WEAK;
             }
 
-            startDoubleSpacePeriodCountdown(inputTransaction);
+            if (!event.isKeyRepeat()) {
+                startDoubleSpacePeriodCountdown(inputTransaction);
+            }
             if (wasComposingWord || mSuggestedWords.isEmpty()) {
                 inputTransaction.setRequiresUpdateSuggestions();
             }
@@ -1578,6 +1580,9 @@ public final class InputLogic {
         // not fulfilled, return false.
         if (!inputTransaction.getSettingsValues().mUseDoubleSpacePeriod
                 || Constants.CODE_SPACE != event.getCodePoint()
+                // A key repeat is one held press, not a second tap.
+                || event.isKeyRepeat()
+                || !inputTransaction.getSettingsValues().mInputAttributes.allowsDoubleSpacePeriod()
                 || !isDoubleSpacePeriodCountdownActive(inputTransaction)) {
             return false;
         }
@@ -1620,17 +1625,8 @@ public final class InputLogic {
      * @return whether it's fine to apply the transformation after this code point.
      */
     private static boolean canBeFollowedByDoubleSpacePeriod(final int codePoint) {
-        // TODO: This should probably be language-dependant...
-        return Character.isLetterOrDigit(codePoint)
-                || codePoint == Constants.CODE_SINGLE_QUOTE
-                || codePoint == Constants.CODE_DOUBLE_QUOTE
-                || codePoint == Constants.CODE_CLOSING_PARENTHESIS
-                || codePoint == Constants.CODE_CLOSING_SQUARE_BRACKET
-                || codePoint == Constants.CODE_CLOSING_CURLY_BRACKET
-                || codePoint == Constants.CODE_CLOSING_ANGLE_BRACKET
-                || codePoint == Constants.CODE_PLUS
-                || codePoint == Constants.CODE_PERCENT
-                || Character.getType(codePoint) == Character.OTHER_SYMBOL;
+        // Only after a word. A second space after a period, comma, or quote stays two spaces.
+        return Character.isLetterOrDigit(codePoint);
     }
 
     /**

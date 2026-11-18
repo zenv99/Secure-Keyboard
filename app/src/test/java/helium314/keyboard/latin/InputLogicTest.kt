@@ -33,6 +33,7 @@ import helium314.keyboard.latin.utils.SubtypeSettings
 import helium314.keyboard.latin.utils.getTimestampFormatter
 import helium314.keyboard.latin.utils.prefs
 import org.junit.runner.RunWith
+import org.robolectric.shadows.ShadowSystemClock
 import org.mockito.Mockito
 import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
@@ -571,6 +572,94 @@ class InputLogicTest {
         assertEquals("hello ", text)
     }
 
+    @Test fun sentenceWithSingleSpacesDoesNotGainPeriods() {
+        typeWithGaps("I'm so tired.", 80)
+        assertEquals("I'm so tired.", text)
+    }
+
+    @Test fun fastSentenceStaysAsTyped() {
+        typeWithGaps("I'm so tired.", 40)
+        assertEquals("I'm so tired.", text)
+        assertEquals("tired.", text.takeLast(6))
+    }
+
+    @Test fun twoSpacesWithin300msBecomePeriodAndBackspaceUndoesIt() {
+        chainInput("hello")
+        input(' ')
+        advance(200)
+        input(' ')
+        assertEquals("hello. ", text)
+        functionalKeyPress(KeyCode.DELETE)
+        assertEquals("hello ", text)
+    }
+
+    @Test fun aSecondSpaceAfter400msDoesNotCapitalizeTheNextWord() {
+        chainInput("I'm")
+        input(' ')
+        advance(400)
+        input(' ')
+        chainInput("so")
+        input(' ')
+        advance(400)
+        input(' ')
+        chainInput("tired.")
+        assertEquals("I'm  so  tired.", text)
+    }
+
+    @Test fun repeatedSpaceDoesNotInsertAPeriod() {
+        chainInput("hello")
+        input(' ')
+        advance(80)
+        latinIME.onEvent(Event.createSoftwareKeypressEvent(' '.code, 0, 0, 0, 0, true))
+        handleMessages()
+        assertEquals("hello  ", text)
+    }
+
+    @Test fun doubleSpaceAfterPunctuationStaysSpaces() {
+        chainInput("end.")
+        input(' ')
+        advance(100)
+        input(' ')
+        assertEquals("end.  ", text)
+    }
+
+    @Test fun doubleSpaceIsDisabledInUrlEmailAndSearchFields() {
+        setField(InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_URI)
+        chainInput("example")
+        input(' ')
+        advance(100)
+        input(' ')
+        assertEquals("example  ", text)
+
+        reset()
+        setField(InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS)
+        chainInput("name")
+        input(' ')
+        advance(100)
+        input(' ')
+        assertEquals("name  ", text)
+
+        reset()
+        setField(
+            InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_WEB_EDIT_TEXT,
+            EditorInfo.IME_ACTION_SEARCH,
+        )
+        chainInput("query")
+        input(' ')
+        advance(100)
+        input(' ')
+        assertEquals("query  ", text)
+    }
+
+    @Test fun webCommentStillAllowsAQuickDoubleSpacePeriod() {
+        setField(InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_WEB_EDIT_TEXT)
+        chainInput("hello")
+        input(' ')
+        advance(150)
+        input(' ')
+        assertEquals("hello. ", text)
+    }
+
     @Test fun `no weird space inside multi-"`() {
         chainInput("\"\"\"")
         assertEquals("\"\"\"", text)
@@ -739,6 +828,23 @@ class InputLogicTest {
 
     private fun chainInput(text: String) = text.forEach { input(it.code) }
 
+    private fun typeWithGaps(value: String, gapMs: Long) {
+        for (ch in value) {
+            latinIME.onEvent(Event.createEventForCodePointFromUnknownSource(ch.code))
+            handleMessages()
+            advance(gapMs)
+        }
+    }
+
+    private fun advance(ms: Long) {
+        ShadowSystemClock.advanceBy(java.time.Duration.ofMillis(ms))
+    }
+
+    private fun setField(inputType: Int, imeOptions: Int = EditorInfo.IME_ACTION_NONE) {
+        ShadowInputMethodService.currentImeOptions = imeOptions
+        setInputType(inputType)
+    }
+
     private fun input(char: Char) = input(char.code)
 
     private fun input(codePoint: Int) {
@@ -849,6 +955,7 @@ class InputLogicTest {
         // restarting is false, so this is seen as a new text field
         val ei = EditorInfo()
         ei.inputType = currentInputType
+        ei.imeOptions = ShadowInputMethodService.currentImeOptions
         latinIME.mHandler.onStartInput(ei, false)
         latinIME.mHandler.onStartInputView(ei, false)
         handleMessages() // this is important so the composing span is set correctly
