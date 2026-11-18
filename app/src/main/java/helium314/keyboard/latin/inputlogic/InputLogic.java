@@ -36,6 +36,8 @@ import helium314.keyboard.keyboard.emoji.EmojiSearchActivity;
 import helium314.keyboard.keyboard.emoji.RecentEmojis;
 import helium314.keyboard.keyboard.internal.keyboard_parser.floris.KeyCode;
 import helium314.keyboard.latin.CapsMode;
+import helium314.keyboard.latin.autocorrect.AcceptedTypedWords;
+import helium314.keyboard.latin.autocorrect.AutocorrectSpacing;
 import helium314.keyboard.latin.InputStyle;
 import helium314.keyboard.latin.common.CoordinateUtils;
 import helium314.keyboard.latin.dictionary.Dictionary;
@@ -1925,6 +1927,13 @@ public final class InputLogic {
         if (!TextUtils.isEmpty(committedWord)) {
             unlearnWord(committedWordString, inputTransaction.getSettingsValues(), DictionaryFacilitator.UnlearnEvent.REVERT);
         }
+        // The user rejected this correction. Remember the typed spelling so it is not
+        // corrected again. Password and other no-learning fields do not store it.
+        if (!inputTransaction.getSettingsValues().mIncognitoModeEnabled
+                && !TextUtils.isEmpty(originallyTypedWord)
+                && !TextUtils.equals(originallyTypedWord, committedWord)) {
+            AcceptedTypedWords.remember(mLatinIME.getFilesDir(), originallyTypedWord.toString());
+        }
         final String stringToCommit = originallyTypedWord +
                 (usePhantomSpace ? "" : separatorString);
         final SpannableString textToCommit = new SpannableString(stringToCommit);
@@ -2375,6 +2384,8 @@ public final class InputLogic {
         SuggestedWordInfo autoCorrectionOrNull = mWordComposer.getAutoCorrectionOrNull();
         String typedWord = mWordComposer.getTypedWord();
         String stringToCommit = (autoCorrectionOrNull != null) ? autoCorrectionOrNull.getWord() : typedWord;
+        // Keep punctuation tight against the corrected word ("the." not "the .").
+        stringToCommit = AutocorrectSpacing.wordBeforeSeparator(stringToCommit, separator);
         boolean isBatchMode = mWordComposer.isBatchMode();
         commitChosenWord(settingsValues, stringToCommit, autoCorrectionOrNull, LastComposedWord.COMMIT_TYPE_DECIDED_WORD, separator);
         if (!typedWord.equals(stringToCommit)) {

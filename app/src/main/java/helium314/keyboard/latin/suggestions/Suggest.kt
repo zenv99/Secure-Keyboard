@@ -27,6 +27,7 @@ import helium314.keyboard.latin.define.DecoderSpecificConstants.SHOULD_REMOVE_PR
 import helium314.keyboard.latin.dictionary.Dictionary
 import helium314.keyboard.latin.settings.Settings
 import helium314.keyboard.latin.settings.SettingsValuesForSuggestion
+import helium314.keyboard.latin.autocorrect.AutocorrectPolicy
 import helium314.keyboard.latin.utils.AutoCorrectionUtils
 import helium314.keyboard.latin.utils.Log
 import helium314.keyboard.latin.utils.BackgroundGatheringCache
@@ -117,7 +118,7 @@ class Suggest(private val mDictionaryFacilitator: DictionaryFacilitator) {
         val firstOccurrenceOfTypedWordInSuggestions = SuggestedWordInfo.removeDupsAndTypedWord(capitalizedTypedWord, suggestionsContainer)
         makeFirstTwoSuggestionsNonEmoji(suggestionsContainer)
 
-        val (allowsToBeAutoCorrected, hasAutoCorrection) = shouldBeAutoCorrected(
+        val (allowsToBeAutoCorrected, decidedAutoCorrection) = shouldBeAutoCorrected(
             trailingSingleQuotesCount,
             capitalizedTypedWord,
             suggestionsContainer.firstOrNull(),
@@ -134,6 +135,9 @@ class Suggest(private val mDictionaryFacilitator: DictionaryFacilitator) {
             firstOccurrenceOfTypedWordInSuggestions,
             typedWordFirstOccurrenceWordInfo
         )
+        // User words, text replacements, and (outside no-learning fields) learned words
+        // are not rewritten. The replacement itself is still committed below.
+        val hasAutoCorrection = decidedAutoCorrection && !mustKeepTypedWord(typedWordString)
         val typedWordInfo = SuggestedWordInfo(typedWordString, "", SuggestedWordInfo.MAX_SCORE,
             SuggestedWordInfo.KIND_TYPED, typedWordFirstOccurrenceWordInfo?.sourceDict ?: Dictionary.DICTIONARY_USER_TYPED,
             SuggestedWordInfo.NOT_AN_INDEX , SuggestedWordInfo.NOT_A_CONFIDENCE)
@@ -184,6 +188,15 @@ class Suggest(private val mDictionaryFacilitator: DictionaryFacilitator) {
             false, inputStyle, sequenceNumber)
     }
 
+    private fun mustKeepTypedWord(word: String): Boolean {
+        if (word.isEmpty() || AutocorrectPolicy.isLiteralToken(word)) return AutocorrectPolicy.isLiteralToken(word)
+        return try {
+            mDictionaryFacilitator.mustKeepTypedWord(word)
+        } catch (_: Throwable) {
+            false
+        }
+    }
+
     private fun textReplacementPhrase(typed: String): String? {
         if (typed.isEmpty() || Settings.getValues().mInputAttributes.mIsPasswordField) return null
         return TextReplacements.expand(typed)
@@ -228,7 +241,8 @@ class Suggest(private val mDictionaryFacilitator: DictionaryFacilitator) {
             allowsToBeAutoCorrected = when {
                 firstSuggestionInContainer.score > scoreLimit -> true // suggestion has good score, allow
                 first == null -> false // no autocorrect if first suggestion unknown in this ngram context
-                typed == null -> true // allow autocorrect if typed word not known in this ngram context, todo: this may be too aggressive
+                // A known word with no n-gram support is not evidence that another word was intended.
+                typed == null -> false
                 else -> first.score - typed.score > 20 // autocorrect if suggested word has clearly higher score for empty word suggestions
             }
         } else {
@@ -258,7 +272,7 @@ class Suggest(private val mDictionaryFacilitator: DictionaryFacilitator) {
             val firstSuggestion = firstSuggestionInContainer ?: suggestionResults.first()
             if (suggestionResults.firstSuggestionExceedsConfidenceThreshold && firstOccurrenceOfTypedWordInSuggestions != 0) {
                 // mFirstSuggestionExceedsConfidenceThreshold is always set to false, so currently this branch is useless
-                return true to true
+                return gate(true, true, firstSuggestion, consideredWord, typedWordInfo)
             }
             if (!AutoCorrectionUtils.suggestionExceedsThreshold(firstSuggestion, consideredWord, mAutoCorrectionThreshold)) {
                 // Score is too low for autocorrect
@@ -279,7 +293,7 @@ class Suggest(private val mDictionaryFacilitator: DictionaryFacilitator) {
                 }
                 if (firstSuggestion.sourceDict.mLocale !== typedWordInfo.sourceDict.mLocale) {
                     // dict locale different -> return the better match
-                    return true to (dictLocale == firstSuggestion.sourceDict.mLocale)
+                    return gate(true, dictLocale == firstSuggestion.sourceDict.mLocale, firstSuggestion, consideredWord, typedWordInfo)
                 }
                 // the score difference may need tuning, but so far it seems alright
                 val firstWordBonusScore =
@@ -290,14 +304,31 @@ class Suggest(private val mDictionaryFacilitator: DictionaryFacilitator) {
                 val typedScoreForEmpty = firstAndTypedEmptyInfos.second?.score ?: 0
                 if (firstScoreForEmpty + firstWordBonusScore >= typedScoreForEmpty + 20) {
                     // first word is clearly better match for this ngram context
-                    return true to true
+                    return gate(true, true, firstSuggestion, consideredWord, typedWordInfo)
                 }
                 hasAutoCorrection = false
             } else {
                 hasAutoCorrection = allowed
             }
         }
-        return allowsToBeAutoCorrected to hasAutoCorrection
+        return gate(allowsToBeAutoCorrected, hasAutoCorrection, firstSuggestionInContainer, consideredWord, typedWordInfo)
+    }
+
+    private fun gate(
+        allows: Boolean,
+        has: Boolean,
+        suggestion: SuggestedWordInfo?,
+        typed: String,
+        typedWordInfo: SuggestedWordInfo?,
+    ): Pair<Boolean, Boolean> {
+        if (!has) return allows to false
+        val candidate = suggestion?.word ?: return allows to has
+        val forced = suggestion.isKindOf(SuggestedWordInfo.KIND_WHITELIST)
+            || suggestion.isKindOf(SuggestedWordInfo.KIND_SHORTCUT)
+        if (AutocorrectPolicy.suppressCorrection(typed, candidate, typedWordInfo != null, forced)) {
+            return allows to false
+        }
+        return allows to has
     }
 
     // Retrieves suggestions for the batch input

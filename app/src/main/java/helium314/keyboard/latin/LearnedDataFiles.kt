@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 package helium314.keyboard.latin
 
+import helium314.keyboard.latin.autocorrect.AcceptedTypedWords
 import java.io.File
 
 /** User-history dictionary files live only in app-private storage and are named with this prefix. */
@@ -17,6 +18,11 @@ object LearnedDataFiles {
             if (!isUserHistoryName(file.name)) continue
             val ok = if (file.isDirectory) file.deleteRecursively() else file.delete()
             if (ok) removed++
+        }
+        val accepted = File(dir, AcceptedTypedWords.FILE_NAME)
+        if (accepted.isFile && accepted.delete()) {
+            removed++
+            AcceptedTypedWords.forgetIfLoadedFrom(dir)
         }
         return removed
     }

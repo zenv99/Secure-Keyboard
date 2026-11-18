@@ -229,8 +229,9 @@ public class SettingsValues {
         mCenterSuggestionTextToEnter = prefs.getBoolean(Settings.PREF_CENTER_SUGGESTION_TEXT_TO_ENTER, Defaults.PREF_CENTER_SUGGESTION_TEXT_TO_ENTER);
         float autoCorrectConfidence = prefs.getFloat(Settings.PREF_AUTO_CORRECT_CONFIDENCE, Defaults.PREF_AUTO_CORRECT_CONFIDENCE);
         // confidence -> threshold and score limit are just some formulas that give something similar to the old values, so that confidence can be in a nice 0-1 range
+        // The 0.58 intercept (was 0.50) asks for a higher normalized score before a suggestion commits.
         mAutoCorrectionThreshold = mAutoCorrectEnabled
-                ? 0.5f - 0.5f * (float)Math.pow(autoCorrectConfidence, 0.33)
+                ? 0.58f - 0.5f * (float)Math.pow(autoCorrectConfidence, 0.33)
                 : Float.MAX_VALUE;
         mScoreLimitForAutocorrect = (int)((1.14 - 0.2 * Math.pow(autoCorrectConfidence + 0.47, 3.5)) * 900000);
         mAutoCorrectCapitalizedSuggestion = prefs.getBoolean(Settings.PREF_AUTOCORRECT_CAPITALIZED_SUGGESTION, Defaults.PREF_AUTOCORRECT_CAPITALIZED_SUGGESTION);

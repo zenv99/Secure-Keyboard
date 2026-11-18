@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 package helium314.keyboard.latin
 
+import helium314.keyboard.latin.autocorrect.AcceptedTypedWords
 import java.nio.file.Files
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -14,12 +15,14 @@ class LearnedDataFilesTest {
         val historyDir = dir.resolve("UserHistoryDictionary_fr").apply { mkdirs() }
         historyDir.resolve("UserHistoryDictionary_fr.header").writeText("h")
         val main = dir.resolve("main_en.dict").apply { writeText("keep") }
+        val accepted = dir.resolve(AcceptedTypedWords.FILE_NAME).apply { writeText("xoredrt") }
 
         val removed = LearnedDataFiles.deleteUserHistoryFiles(dir)
 
-        assertEquals(2, removed)
+        assertEquals(3, removed)
         assertFalse(history.exists())
         assertFalse(historyDir.exists())
+        assertFalse(accepted.exists())
         assertTrue(main.exists())
         assertEquals("keep", main.readText())
     }
