@@ -921,6 +921,10 @@ public class LatinIME extends InputMethodService implements
                 currentSettingsValues.mGestureTrailEnabled,
                 currentSettingsValues.mGestureFloatingPreviewTextEnabled);
 
+        // A new / restarted field: the mic must show the mode of THIS field (mic when empty, send arrow when it has text),
+        // not the mode left over from the previous field.
+        updateVoiceKeyMode();
+
         if (TRACE) Debug.startMethodTracing("/data/trace/latinime");
     }
 

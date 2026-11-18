@@ -114,9 +114,12 @@ class KeyboardSmokeTest {
         waitForVoiceKey("Voice input")
         setText(sample)
         val delete = waitFor("Delete")
+        // key nodes report bounds relative to the keyboard view, so add the view's own top edge to get screen coordinates
+        val wrapper = device.findObject(By.res(instrumentation.targetContext.packageName, "keyboard_view_wrapper"))
+            ?: fail("keyboard view not found")
         val b = delete.visibleBounds
         val x = b.centerX()
-        val y = b.centerY()
+        val y = wrapper.visibleBounds.top + b.centerY()
         val before = text().length
         // one long touch: down, (optional drift), hold ~3 s, up
         // `input swipe` with a duration is a real press-and-hold (identical start/end = a stationary finger)
