@@ -10,5 +10,6 @@ Secure Keyboard is distributed under the GNU General Public License v3.0 (see `L
 | [whisper.cpp](https://github.com/ggml-org/whisper.cpp) (git submodule in `third_party/`) | On-device speech recognition | MIT |
 | [OpenAI Whisper](https://github.com/openai/whisper) base.en model, ggml quantised | On-device speech model | MIT |
 | Dictionaries, layouts and graphics inherited from HeliBoard | Typing | See `LICENSE-Apache-2.0`, `LICENSE-CC-BY-SA-4.0` and the upstream repository for per-file terms |
+| [Unicode CLDR](https://www.unicode.org/cldr/) English emoji annotations | On-device keyword to emoji suggestions in `app/src/main/assets/emoji_words.tsv` | Unicode License v3 (https://www.unicode.org/license.txt), GPL-compatible |
 
 Original source files keep their copyright headers. Changes made in this fork are listed in the git history.

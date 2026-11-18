@@ -4,7 +4,7 @@ package helium314.keyboard.latin.glide
 import android.content.Context
 import java.util.Locale
 
-/** Bundled word -> emoji list ("sun" -> sun emoji), so emoji suggestions work with no extra download. */
+/** Bundled word to emoji lists. Built from Unicode CLDR English annotations (Unicode License) so suggestions stay on the device. Face variants are ranked ahead of the plain symbol when both names contain the word. */
 object EmojiWords {
     @Volatile
     private var appContext: Context? = null
