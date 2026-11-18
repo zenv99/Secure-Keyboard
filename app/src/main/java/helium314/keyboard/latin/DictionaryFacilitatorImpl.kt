@@ -12,6 +12,8 @@ import helium314.keyboard.keyboard.Keyboard
 import helium314.keyboard.keyboard.emoji.SupportedEmojis
 import helium314.keyboard.latin.DictionaryFacilitator.DictionaryInitializationListener
 import helium314.keyboard.latin.NgramContext.WordInfo
+import helium314.keyboard.latin.autocorrect.AcceptedTypedWords
+import helium314.keyboard.latin.autocorrect.AutocorrectPolicy
 import helium314.keyboard.latin.common.ComposedData
 import helium314.keyboard.latin.common.Constants
 import helium314.keyboard.latin.common.StringUtils
@@ -27,6 +29,7 @@ import helium314.keyboard.latin.dictionary.ExpandableBinaryDictionary
 import helium314.keyboard.latin.dictionary.UserBinaryDictionary
 import helium314.keyboard.latin.permissions.PermissionsUtil
 import helium314.keyboard.latin.dictionary.history.UserHistoryDictionary
+import helium314.keyboard.latin.inputlogic.TextReplacements
 import helium314.keyboard.latin.settings.Settings
 import helium314.keyboard.latin.settings.SettingsValuesForSuggestion
 import helium314.keyboard.latin.suggestions.SuggestedWords
@@ -538,15 +541,21 @@ class DictionaryFacilitatorImpl : DictionaryFacilitator {
 
         includeAtLeastTwoWordSuggestions(suggestionResults, suggestionsArray, composedData.mTypedWord)
 
-        // Words typed with several letters on neighbouring keys ("trstihf" for "testing"): if exactly one common
-        // word fits, offer it first (and let auto-correct use it).
+        // Fat-finger and contraction corrections (xoredrt → correct, dont → don't).
+        // Same-length neighbour matching remains as a fallback for words the edit model skips.
         val typedForFuzzy = composedData.mTypedWord
-        if (!composedData.mIsBatchMode && typedForFuzzy.length >= 5 && !isValidSpellingWord(typedForFuzzy)
-            && !isValidSpellingWord(typedForFuzzy.lowercase())) {
+        if (!composedData.mIsBatchMode && typedForFuzzy.length >= 2 && !isValidSpellingWord(typedForFuzzy)
+            && !isValidSpellingWord(typedForFuzzy.lowercase())
+            && !mustKeepTypedWord(typedForFuzzy)
+            && !AutocorrectPolicy.isLiteralToken(typedForFuzzy)) {
             val main = dictionaryGroups[0].getDict(Dictionary.TYPE_MAIN)
             if (main != null) {
-                helium314.keyboard.latin.glide.GlideTyping.neighbourKeyCorrection(main, typedForFuzzy, keyboard)?.let { word ->
-                    suggestionResults.add(SuggestedWordInfo(word, "", SuggestedWordInfo.MAX_SCORE - 100,
+                val sentenceStart = ngramContext.isBeginningOfSentenceContext
+                val corrected = helium314.keyboard.latin.glide.GlideTyping.proximityCorrection(
+                    main, typedForFuzzy, keyboard, sentenceStart
+                ) ?: helium314.keyboard.latin.glide.GlideTyping.neighbourKeyCorrection(main, typedForFuzzy, keyboard)
+                if (corrected != null) {
+                    suggestionResults.add(SuggestedWordInfo(corrected, "", SuggestedWordInfo.MAX_SCORE - 100,
                         SuggestedWordInfo.KIND_WHITELIST, main, SuggestedWordInfo.NOT_AN_INDEX, SuggestedWordInfo.NOT_A_CONFIDENCE))
                 }
             }
@@ -621,6 +630,36 @@ class DictionaryFacilitatorImpl : DictionaryFacilitator {
     // locale, and instead simply return true if word is in any of the available dictionaries
     override fun isValidSpellingWord(word: String): Boolean =
         dictionaryGroups.any { isValidWord(word, DictionaryFacilitator.ALL_DICTIONARY_TYPES, it) }
+
+    override fun mustKeepTypedWord(word: String): Boolean {
+        if (word.isEmpty()) return false
+        if (TextReplacements.expand(word) != null) return true
+        if (dictionaryContains(Dictionary.TYPE_USER, word)) return true
+        // Password, incognito, and no-personalized-learning fields do not consult learned history
+        // or words the user restored with backspace.
+        if (personalizationBlocked()) return false
+        if (dictionaryContains(Dictionary.TYPE_USER_HISTORY, word)) return true
+        return AcceptedTypedWords.remembers(word)
+    }
+
+    private fun personalizationBlocked(): Boolean = try {
+        Settings.getValues().mIncognitoModeEnabled
+    } catch (_: Throwable) {
+        true
+    }
+
+    /** User dictionary and learned history only. Contacts are not a reason to keep or rewrite a word. */
+    private fun dictionaryContains(type: String, word: String): Boolean {
+        val lower = word.lowercase()
+        return dictionaryGroups.any { group ->
+            val dict = group.getDict(type) ?: return@any false
+            try {
+                dict.isInDictionary(word) || (lower != word && dict.isInDictionary(lower))
+            } catch (_: Throwable) {
+                false
+            }
+        }
+    }
 
     // this is unused, so leave it for now (redirecting to isValidWord seems to defeat the purpose...)
     override fun isValidSuggestionWord(word: String): Boolean {

@@ -131,6 +131,15 @@ public interface DictionaryFacilitator {
             SettingsValuesForSuggestion settingsValuesForSuggestion, int sessionId,
             InputStyle inputStyle);
 
+    /**
+     * True when {@code word} must not be replaced by autocorrect: it is a user-dictionary
+     * word, a text-replacement shortcut, or (when personalization is allowed) a learned
+     * or backspace-restored word. Contacts are not consulted.
+     */
+    default boolean mustKeepTypedWord(String word) {
+        return false;
+    }
+
     boolean isValidSpellingWord(final String word);
 
     boolean isValidSuggestionWord(final String word);

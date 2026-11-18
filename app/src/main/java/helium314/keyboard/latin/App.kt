@@ -5,6 +5,7 @@ import android.app.Application
 import android.content.Context
 import android.os.Build
 import helium314.keyboard.keyboard.emoji.SupportedEmojis
+import helium314.keyboard.latin.autocorrect.AcceptedTypedWords
 import helium314.keyboard.latin.inputlogic.TextReplacements
 import helium314.keyboard.latin.define.DebugFlags
 import helium314.keyboard.latin.dictionary.ExpandableDictionaryUtils
@@ -28,6 +29,7 @@ class App : Application() {
         app = this
         val ctx: Context = this
         TextReplacements.ensureLoaded(ctx)
+        AcceptedTypedWords.ensureLoaded(ctx.filesDir)
         DebugFlags.init(this) // needed by several other inits, so do it first
 
         val scope = CoroutineScope(Dispatchers.Default)

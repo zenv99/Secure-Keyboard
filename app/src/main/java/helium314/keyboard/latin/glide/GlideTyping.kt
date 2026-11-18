@@ -2,6 +2,7 @@
 package helium314.keyboard.latin.glide
 
 import helium314.keyboard.keyboard.Keyboard
+import helium314.keyboard.latin.autocorrect.ProximityAutocorrect
 import helium314.keyboard.latin.common.ComposedData
 import helium314.keyboard.latin.dictionary.Dictionary
 import helium314.keyboard.latin.suggestions.SuggestedWordInfo
@@ -263,6 +264,49 @@ object GlideTyping {
         if (bestWord == null || bestProb < 80) return null
         if (secondScore - bestScore < 0.5f) return null // not clearly one word
         return bestWord
+    }
+
+    /**
+     * Proximity edit-distance correction for a mistyped word, including shifted fat-finger
+     * input such as "xoredrt" → "correct" and contractions such as "dont" → "don't".
+     * Uses this layout's key centres when the letter has a key, otherwise QWERTY.
+     * Returns null while the vocabulary is still loading.
+     */
+    @JvmStatic
+    fun proximityCorrection(dict: Dictionary, typed: String, keyboard: Keyboard, sentenceStart: Boolean): String? {
+        val vocab = vocabs[dict] ?: run { prepare(dict); return null }
+        val keyW = max(1f, keyboard.mMostCommonKeyWidth.toFloat())
+        val centres = HashMap<Char, FloatArray?>()
+        fun centre(ch: Char): FloatArray? = centres.getOrPut(ch) {
+            val cp = ch.code
+            val key = keyboard.getKey(cp) ?: keyboard.getKey(Character.toUpperCase(cp))
+            key?.hitBox?.let { floatArrayOf((it.left + it.right) / 2f, (it.top + it.bottom) / 2f) }
+        }
+        fun keyDistance(a: Char, b: Char): Float {
+            if (a == b) return 0f
+            val ca = centre(a)
+            val cb = centre(b)
+            if (ca == null || cb == null) return helium314.keyboard.latin.autocorrect.KeyGeometry.qwertyDistance(a, b)
+            return hypot(ca[0] - cb[0], ca[1] - cb[1]) / keyW
+        }
+        val source = object : ProximityAutocorrect.WordSource {
+            override val size: Int get() = vocab.words.size
+            override fun word(index: Int) = vocab.words[index]
+            override fun probability(index: Int) = vocab.probs[index]
+            override fun indexesNear(first: Char, distance: (Char, Char) -> Float): IntArray {
+                val out = ArrayList<Int>()
+                val f = helium314.keyboard.latin.autocorrect.KeyGeometry.baseLetter(first)
+                for ((cp, arr) in vocab.byFirst) {
+                    if (cp > 0xFFFF) continue
+                    val ch = helium314.keyboard.latin.autocorrect.KeyGeometry.baseLetter(cp.toChar())
+                    if (distance(f, ch) <= 2.3f) {
+                        for (n in arr) out.add(n)
+                    }
+                }
+                return out.toIntArray()
+            }
+        }
+        return ProximityAutocorrect.correct(typed, source, ::keyDistance, kept = false, sentenceStart = sentenceStart)
     }
 
     private fun insert(scores: FloatArray, indexes: IntArray, score: Float, index: Int) {
