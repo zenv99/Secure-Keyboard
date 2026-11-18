@@ -35,6 +35,7 @@ import helium314.keyboard.keyboard.KeyboardSwitcher
 import helium314.keyboard.keyboard.internal.KeyboardIconsSet
 import helium314.keyboard.keyboard.internal.keyboard_parser.floris.KeyCode
 import helium314.keyboard.latin.AudioAndHapticFeedbackManager
+import helium314.keyboard.voice.DictationKeySpec
 import helium314.keyboard.latin.dictionary.Dictionary
 import helium314.keyboard.latin.R
 import helium314.keyboard.latin.common.ColorType
@@ -160,7 +161,6 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
 
         // toolbar keys setup (no need to hide them any more when locked, because then suggestion strip is gone anyway
         for (key in getEnabledToolbarKeys(context.prefs())) {
-            if (key == ToolbarKey.EMOJI) continue // emoji lives in the bottom row (iOS / WhatsApp layout)
             if (key == ToolbarKey.VOICE) continue // the one big hold-to-talk mic lives in the top bar (below)
             val button = createToolbarKey(context, key)
             button.layoutParams = toolbarKeyLayoutParams
@@ -595,13 +595,23 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
     @android.annotation.SuppressLint("ClickableViewAccessibility")
     private fun setupPushToTalkKey(view: ImageButton) {
         val density = resources.displayMetrics.density
-        view.layoutParams = LinearLayout.LayoutParams((96 * density).toInt(), LinearLayout.LayoutParams.MATCH_PARENT).apply {
-            setMargins((4 * density).toInt(), (5 * density).toInt(), (4 * density).toInt(), (5 * density).toInt())
+        view.layoutParams = LinearLayout.LayoutParams((DictationKeySpec.WIDTH_DP * density).toInt(), LinearLayout.LayoutParams.MATCH_PARENT).apply {
+            setMargins(
+                (DictationKeySpec.MARGIN_START_DP * density).toInt(),
+                (DictationKeySpec.MARGIN_TOP_DP * density).toInt(),
+                (DictationKeySpec.MARGIN_END_DP * density).toInt(),
+                (DictationKeySpec.MARGIN_BOTTOM_DP * density).toInt(),
+            )
         }
-        view.setPadding((10 * density).toInt(), (4 * density).toInt(), (10 * density).toInt(), (4 * density).toInt())
+        view.setPadding(
+            (DictationKeySpec.PADDING_START_DP * density).toInt(),
+            (DictationKeySpec.PADDING_TOP_DP * density).toInt(),
+            (DictationKeySpec.PADDING_END_DP * density).toInt(),
+            (DictationKeySpec.PADDING_BOTTOM_DP * density).toInt(),
+        )
         view.scaleType = ImageView.ScaleType.FIT_CENTER
-        view.scaleX = 1f
-        view.scaleY = 1f
+        view.scaleX = DictationKeySpec.SCALE
+        view.scaleY = DictationKeySpec.SCALE
         val prefs = context.prefs()
         fun pick(name: String): Int? = when (name) {
             "red" -> 0xFFFF1744.toInt()
@@ -617,7 +627,7 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
         val recordingRed = pick(prefs.getString(Settings.PREF_DICTATION_COLOR_RECORDING, Defaults.PREF_DICTATION_COLOR_RECORDING)!!)
             ?: 0xFFFF1744.toInt()
         val micBackground = GradientDrawable().apply {
-            cornerRadius = 22 * density
+            cornerRadius = DictationKeySpec.CORNER_RADIUS_DP * density
             setColor(idleRed)
         }
         view.background = micBackground

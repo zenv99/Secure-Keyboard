@@ -127,7 +127,10 @@ open class SettingsActivity : ComponentActivity(), SharedPreferences.OnSharedPre
                     else if (showWelcomeWizard) {
                         WelcomeWizard(close = { showWelcomeWizard = false }, finish = this::finish)
                     } else {
-                        SettingsNavHost(onClickBack = { this.finish() })
+                        SettingsNavHost(
+                            onClickBack = { this.finish() },
+                            startDestination = intent?.getStringExtra(SettingsDestination.EXTRA_START),
+                        )
                         if (crashReports.isNotEmpty()) {
                             val ctx = LocalContext.current
                             ConfirmationDialog(

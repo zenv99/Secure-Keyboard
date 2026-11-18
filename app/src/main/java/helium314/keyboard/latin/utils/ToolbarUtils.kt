@@ -80,6 +80,8 @@ fun getCodeForToolbarKey(key: ToolbarKey) = Settings.getInstance().getCustomTool
     CLEAR_CLIPBOARD -> KeyCode.CLIPBOARD_CLEAR_HISTORY
     CLOSE_HISTORY -> KeyCode.CLIPBOARD
     EMOJI -> KeyCode.EMOJI
+    TEXT_REPLACEMENT -> KeyCode.TEXT_REPLACEMENT
+    LANGUAGE -> KeyCode.LANGUAGE_SWITCH
     LEFT -> KeyCode.ARROW_LEFT
     RIGHT -> KeyCode.ARROW_RIGHT
     UP -> KeyCode.ARROW_UP
@@ -121,7 +123,7 @@ fun getCodeForToolbarKeyLongClick(key: ToolbarKey) = Settings.getInstance().getC
 enum class ToolbarKey {
     VOICE, CLIPBOARD, NUMPAD, DPAD, UNDO, REDO, SETTINGS, SELECT_ALL, SELECT_WORD, COPY, CUT, PASTE, ONE_HANDED, FLOATING, SPLIT,
     INCOGNITO, AUTOCORRECT, CLEAR_CLIPBOARD, CLOSE_HISTORY, EMOJI, LEFT, RIGHT, UP, DOWN, WORD_LEFT, WORD_RIGHT,
-    PAGE_UP, PAGE_DOWN, FULL_LEFT, FULL_RIGHT, PAGE_START, PAGE_END, BACKGROUND_GATHERING
+    PAGE_UP, PAGE_DOWN, FULL_LEFT, FULL_RIGHT, PAGE_START, PAGE_END, BACKGROUND_GATHERING, TEXT_REPLACEMENT, LANGUAGE
 }
 
 enum class ToolbarMode {
@@ -130,12 +132,34 @@ enum class ToolbarMode {
 
 val toolbarKeyStrings = entries.associateWithTo(EnumMap(ToolbarKey::class.java)) { it.toString().lowercase(Locale.US) }
 
+/** What the (+) button opens. Short, and in the order used on an iOS keyboard. */
+val standardPlusMenu = listOf(
+    EMOJI, CLIPBOARD, TEXT_REPLACEMENT, SETTINGS, LANGUAGE, ONE_HANDED, UNDO, REDO, SELECT_ALL, COPY, PASTE,
+)
+
+/** The old (+) row: cursor arrows and select-word, which is not the iOS set. */
+fun legacyPlusMenu() = listOf(SETTINGS, CLIPBOARD, EMOJI, UNDO, REDO, SELECT_WORD, COPY, PASTE, LEFT, RIGHT)
+
+fun isLegacyPlusMenu(keys: List<ToolbarKey>) = keys == legacyPlusMenu()
+
 val defaultToolbarPref by lazy {
-    val default = listOf(SETTINGS, CLIPBOARD, EMOJI, UNDO, REDO, SELECT_WORD, COPY, PASTE, LEFT, RIGHT)
-    val others = entries.filterNot { it in default || it == CLOSE_HISTORY }
-    default.joinToString(Separators.ENTRY) { it.name + Separators.KV + true } + Separators.ENTRY +
+    val enabled = standardPlusMenu.toSet()
+    val others = entries.filterNot { it in enabled || it == CLOSE_HISTORY }
+    standardPlusMenu.joinToString(Separators.ENTRY) { it.name + Separators.KV + true } + Separators.ENTRY +
             others.joinToString(Separators.ENTRY) { it.name + Separators.KV + false }
 }
+
+fun enabledToolbarKeys(serialized: String): List<ToolbarKey> =
+    serialized.split(Separators.ENTRY).mapNotNull {
+        val split = it.split(Separators.KV)
+        if (split.last() == "true") {
+            try {
+                ToolbarKey.valueOf(split.first())
+            } catch (_: IllegalArgumentException) {
+                null
+            }
+        } else null
+    }
 
 val defaultPinnedToolbarPref = entries.filterNot { it == CLOSE_HISTORY }.joinToString(Separators.ENTRY) {
     it.name + Separators.KV + (it == VOICE)
@@ -150,6 +174,8 @@ val defaultClipboardToolbarPref by lazy {
 
 /** add missing keys, typically because a new key has been added */
 fun upgradeToolbarPrefs(prefs: SharedPreferences) {
+    if (prefs.contains(Settings.PREF_TOOLBAR_KEYS) && isLegacyPlusMenu(getEnabledToolbarKeys(prefs)))
+        prefs.edit { putString(Settings.PREF_TOOLBAR_KEYS, defaultToolbarPref) }
     upgradeToolbarPref(prefs, Settings.PREF_TOOLBAR_KEYS, defaultToolbarPref)
     upgradeToolbarPref(prefs, Settings.PREF_PINNED_TOOLBAR_KEYS, defaultPinnedToolbarPref)
     upgradeToolbarPref(prefs, Settings.PREF_CLIPBOARD_TOOLBAR_KEYS, defaultClipboardToolbarPref)
@@ -203,19 +229,8 @@ fun removePinnedKey(prefs: SharedPreferences, key: ToolbarKey) {
     prefs.edit { putString(Settings.PREF_PINNED_TOOLBAR_KEYS, result) }
 }
 
-private fun getEnabledToolbarKeys(prefs: SharedPreferences, pref: String, default: String): List<ToolbarKey> {
-    val string = prefs.getString(pref, default)!!
-    return string.split(Separators.ENTRY).mapNotNull {
-        val split = it.split(Separators.KV)
-        if (split.last() == "true") {
-            try {
-                ToolbarKey.valueOf(split.first())
-            } catch (_: IllegalArgumentException) {
-                null
-            }
-        } else null
-    }
-}
+private fun getEnabledToolbarKeys(prefs: SharedPreferences, pref: String, default: String): List<ToolbarKey> =
+    enabledToolbarKeys(prefs.getString(pref, default)!!)
 
 fun writeCustomKeyCodes(prefs: SharedPreferences, codes: EnumMap<ToolbarKey, Pair<Int?, Int?>>) {
     val string = codes.mapNotNull { entry -> entry.value?.let { "${entry.key.name},${it.first},${it.second}" } }.joinToString(";")

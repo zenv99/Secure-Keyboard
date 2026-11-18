@@ -98,6 +98,7 @@ object KeyCode {
     const val URI_COMPONENT_TLD =           -255
 
     const val SETTINGS =                    -301
+    const val TEXT_REPLACEMENT =           -302
 
     const val CURRENCY_SLOT_1 =             -801
     const val CURRENCY_SLOT_2 =             -802
@@ -211,7 +212,7 @@ object KeyCode {
         MEDIA_PREVIOUS, VOL_UP, VOL_DOWN, MUTE, F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12, BACK,
         TIMESTAMP, CTRL_LEFT, CTRL_RIGHT, ALT_LEFT, ALT_RIGHT, META_LEFT, META_RIGHT, SEND_INTENT_ONE, SEND_INTENT_TWO,
         SEND_INTENT_THREE, EMOJI_SEARCH, INLINE_EMOJI_SEARCH_DONE, META_LOCK,
-        BACKGROUND_GATHERING, BACKGROUND_GATHERING_TEMP_OFF, DPAD,
+        BACKGROUND_GATHERING, BACKGROUND_GATHERING_TEMP_OFF, DPAD, TEXT_REPLACEMENT,
         -> this
 
         KEY_REPEAT if (longPress) -> this

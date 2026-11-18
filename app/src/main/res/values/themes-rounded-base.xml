@@ -24,6 +24,9 @@
     >
         <!-- This should be aligned with KeyboardTheme.THEME_ID_* -->
         <item name="themeId">RoundedBase</item>
+        <item name="horizontalGap">1.7%p</item>
+        <item name="verticalGap">4.6%p</item>
+        <item name="keyboardBottomPadding">6.8%p</item>
     </style>
 
     <style
@@ -46,8 +49,8 @@
         parent="KeyboardView.Rounded_Base"
         >
         <item name="popupKeysKeyboardForActionLayout">@layout/popup_keys_keyboard_for_action_lxx</item>
-        <item name="keyPreviewBackground">@drawable/keyboard_key_feedback_lxx_light</item>
-        <item name="keyPreviewOffset">@dimen/config_key_preview_offset_lxx</item>
+        <item name="keyPreviewBackground">@drawable/keyboard_key_feedback_rounded</item>
+        <item name="keyPreviewOffset">18dp</item>
         <!-- A negative value to disable text shadow layer. -->
         <item name="languageOnSpacebarTextShadowRadius">-1.0</item>
     </style>

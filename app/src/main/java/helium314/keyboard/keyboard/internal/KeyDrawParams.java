@@ -15,7 +15,7 @@ import helium314.keyboard.latin.utils.ResourceUtils;
 
 public final class KeyDrawParams {
     @NonNull
-    public Typeface mTypeface = Typeface.DEFAULT;
+    public Typeface mTypeface = Typeface.SANS_SERIF;
 
     public int mLetterSize;
     public int mLabelSize;

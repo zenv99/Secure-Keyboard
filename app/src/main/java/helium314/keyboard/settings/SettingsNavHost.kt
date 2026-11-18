@@ -150,6 +150,7 @@ fun SettingsNavHost(
 }
 
 object SettingsDestination {
+    const val EXTRA_START = "start_destination"
     const val Settings = "settings"
     const val About = "about"
     const val TextCorrection = "text_correction"
