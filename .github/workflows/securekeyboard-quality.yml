@@ -133,14 +133,93 @@ jobs:
           name: secure-keyboard-release-aab
           path: app/build/outputs/bundle/release/*.aab
           if-no-files-found: error
-      - name: Publish test-build pre-release (main only)
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      - name: Record build info for the publish job
+        run: |
+          mkdir -p buildinfo
+          echo "${SK_SIGNED:-0}" > buildinfo/signed
+      - uses: actions/upload-artifact@v4
+        with:
+          name: secure-keyboard-buildinfo
+          path: buildinfo/signed
+
+  emulator-smoke:
+    # Runs the real keyboard on an Android emulator against a text field (mic visible, send arrow, hold backspace...).
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: gradle
+      - name: Install Android SDK platform and NDK
+        shell: bash
+        run: |
+          SDKMANAGER="${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager"
+          set +e
+          yes | "${SDKMANAGER}" --licenses
+          sdk_status=${PIPESTATUS[1]}
+          set -e
+          if [ "${sdk_status}" -ne 0 ]; then exit "${sdk_status}"; fi
+          "${SDKMANAGER}" --install 'platforms;android-37.0' 'build-tools;37.0.0' 'ndk;28.0.13004108' 'cmake;3.22.1'
+      - name: Cache on-device voice model
+        uses: actions/cache@v4
+        with:
+          path: app/src/main/assets/asr
+          key: asr-model-${{ hashFiles('securekeyboard-project/asr/MODEL_SHA256', 'securekeyboard-project/ci/fetch_model.sh') }}
+      - name: Fetch and verify on-device voice model
+        env:
+          ALLOW_UNPINNED: '0'
+        run: bash securekeyboard-project/ci/fetch_model.sh
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Keyboard smoke tests on emulator
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          arch: x86_64
+          target: google_apis
+          disable-animations: true
+          script: bash securekeyboard-project/ci/emulator_smoke.sh
+      - name: Upload emulator test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: emulator-test-report
+          path: app/build/reports/androidTests
+          if-no-files-found: ignore
+
+  publish:
+    # Only builds that passed the unit tests AND the emulator smoke tests are ever published.
+    needs: [python-tests, android-build-and-privacy, emulator-smoke]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: secure-keyboard-release-apk
+          path: apk
+      - uses: actions/download-artifact@v4
+        with:
+          name: secure-keyboard-buildinfo
+          path: buildinfo
+
+      - name: Publish pre-release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           mkdir -p release
-          cp app/build/outputs/apk/release/*.apk release/SecureKeyboard.apk
+          export GH_REPO="$GITHUB_REPOSITORY"
+          cp apk/*.apk release/SecureKeyboard.apk
           (cd release && sha256sum SecureKeyboard.apk > SHA256SUMS.txt)
           cat > release/notes.md <<EOF
           Secure Keyboard v1.0 (commit ${GITHUB_SHA:0:8}). Not yet independently audited.
@@ -150,7 +229,7 @@ jobs:
           Check the file against SHA256SUMS.txt before installing.
           EOF
           sed -i 's/^          //' release/notes.md
-          if [ "${SK_SIGNED:-}" = "1" ]; then
+          if [ "$(cat buildinfo/signed)" = "1" ]; then
             TAG="v1.0.${GITHUB_RUN_NUMBER}"
             cp release/SecureKeyboard.apk "release/SecureKeyboard-${TAG}.apk"
             gh release create "$TAG" "release/SecureKeyboard-${TAG}.apk" release/SHA256SUMS.txt \
