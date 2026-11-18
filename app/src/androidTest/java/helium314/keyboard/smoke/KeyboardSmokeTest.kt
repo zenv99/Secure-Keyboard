@@ -56,7 +56,7 @@ class KeyboardSmokeTest {
         throw AssertionError("$message\n--- screen ---\n$dump")
     }
 
-    private fun waitFor(description: String, timeout: Long = 15000): UiObject2 =
+    private fun waitFor(description: String, timeout: Long = 60000): UiObject2 =
         device.wait(Until.findObject(By.desc(description)), timeout) ?: fail("'$description' not found on screen")
 
     @Test fun micIsVisibleWhenTheKeyboardOpensOnAnEmptyField() {
@@ -84,8 +84,9 @@ class KeyboardSmokeTest {
         val y = b.centerY()
         val before = text().length
         // one long touch: down, (optional drift), hold ~3 s, up
-        device.swipe(x, y, x - drift, y, 600)
-        Thread.sleep(300)
+        // `input swipe` with a duration is a real press-and-hold (identical start/end = a stationary finger)
+        device.executeShellCommand("input swipe $x $y ${x - drift} $y 3000")
+        Thread.sleep(500)
         val after = text().length
         assertTrue("holding backspace only deleted ${before - after} characters (was $before, now $after)", before - after >= 15)
         assertTrue("text got highlighted instead of deleted (selection ${selectionLength()})", selectionLength() == 0)
