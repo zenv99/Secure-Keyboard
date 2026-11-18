@@ -109,6 +109,8 @@ android {
         }
     }
 
+    testBuildType = "debugNoMinify" // on-emulator smoke tests run against the unshrunk debug build
+
     testOptions {
         unitTests {
             isIncludeAndroidResources = true
