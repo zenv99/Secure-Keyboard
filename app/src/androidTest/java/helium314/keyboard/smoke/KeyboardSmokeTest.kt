@@ -23,7 +23,7 @@ class KeyboardSmokeTest {
     private val sample = "this is a long sentence that we are going to delete by holding backspace for a while"
 
     @Before fun open() {
-        val context = instrumentation.context
+        val context = instrumentation.targetContext
         val intent = Intent().apply {
             component = ComponentName(context.packageName, KeyboardTestActivity::class.java.name)
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
