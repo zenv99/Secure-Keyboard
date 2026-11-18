@@ -624,6 +624,8 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
         view.setColorFilter(if (idleRed == 0xFFF5F5F5.toInt()) 0xFF000000.toInt() else 0xFFFFFFFF.toInt())
         view.setOnClickListener(null)
         view.setOnLongClickListener(null)
+        view.id = R.id.sk_voice_key // stable handle for the on-emulator smoke tests
+        view.contentDescription = context.getString(R.string.voice)
         voiceKeyView = view
         micIcon = view.drawable
         if (sendMode) { sendMode = false; setVoiceKeySendMode(true) }

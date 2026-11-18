@@ -58,22 +58,51 @@ class KeyboardSmokeTest {
             .joinToString("\n").take(1500)
         val crashes = device.executeShellCommand("logcat -d -b crash").takeLast(3000)
         val errors = device.executeShellCommand("logcat -d -s AndroidRuntime:E ime:E InputMethodManager:W").takeLast(2500)
-        throw AssertionError("$message\n--- input method ---\n$ime\n--- crash log ---\n$crashes\n--- errors ---\n$errors\n--- screen ---\n${dump.take(1500)}")
+        throw AssertionError("$message\n--- input method ---\n$ime\n--- crash log ---\n$crashes\n--- errors ---\n$errors\n--- all windows ---\n${dumpImeWindows()}\n--- screen ---\n${dump.take(800)}")
+    }
+
+    /** The big mic / send key, found by its fixed id; its label tells which mode it is in. */
+    private fun waitForVoiceKey(expectedDesc: String? = null): UiObject2 {
+        val pkg = instrumentation.targetContext.packageName
+        val end = System.currentTimeMillis() + 60000
+        while (System.currentTimeMillis() < end) {
+            val node = device.findObject(By.res(pkg, "sk_voice_key"))
+            if (node != null && (expectedDesc == null || node.contentDescription == expectedDesc)) return node
+            Thread.sleep(300)
+        }
+        fail("voice key (id sk_voice_key${expectedDesc?.let { ", desc '$it'" } ?: ""}) not found")
+    }
+
+    private fun dumpImeWindows(): String {
+        val sb = StringBuilder()
+        fun walk(n: android.view.accessibility.AccessibilityNodeInfo?, depth: Int) {
+            if (n == null || depth > 12) return
+            val r = android.graphics.Rect(); n.getBoundsInScreen(r)
+            if (!n.contentDescription.isNullOrEmpty() || n.viewIdResourceName != null)
+                sb.append(" ".repeat(depth)).append(n.className).append(" id=").append(n.viewIdResourceName)
+                    .append(" desc=").append(n.contentDescription).append(" ").append(r.toShortString()).append('\n')
+            for (i in 0 until n.childCount) walk(n.getChild(i), depth + 1)
+        }
+        for (w in instrumentation.uiAutomation.windows) {
+            sb.append("WINDOW type=").append(w.type).append(" title=").append(w.title).append('\n')
+            if (w.type == android.view.accessibility.AccessibilityWindowInfo.TYPE_INPUT_METHOD) walk(w.root, 0)
+        }
+        return sb.toString().take(4000)
     }
 
     private fun waitFor(description: String, timeout: Long = 60000): UiObject2 =
         device.wait(Until.findObject(By.desc(description)), timeout) ?: fail("'$description' not found on screen")
 
     @Test fun micIsVisibleWhenTheKeyboardOpensOnAnEmptyField() {
-        waitFor("Voice input")
+        waitForVoiceKey("Voice input")
     }
 
     @Test fun micBecomesSendWhenThereIsText() {
-        waitFor("Voice input")
+        waitForVoiceKey("Voice input")
         setText(sample)
-        waitFor("Send")
+        waitForVoiceKey("Send")
         setText("")
-        waitFor("Voice input")
+        waitForVoiceKey("Voice input")
     }
 
     @Test fun holdingBackspaceKeepsDeleting() = holdBackspace(drift = 0)
@@ -81,7 +110,7 @@ class KeyboardSmokeTest {
     @Test fun holdingBackspaceWithFingerDriftStillDeletesAndNeverSelects() = holdBackspace(drift = 60)
 
     private fun holdBackspace(drift: Int) {
-        waitFor("Voice input")
+        waitForVoiceKey("Voice input")
         setText(sample)
         val delete = waitFor("Delete")
         val b = delete.visibleBounds
