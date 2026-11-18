@@ -793,19 +793,6 @@ public final class RichInputConnection implements PrivateCommandPerformer {
         return reloadTextCache();
     }
 
-    /**
-     * Move the caret without reading the editor back. The space-bar trackpad calls this once per
-     * frame; reloading the text cache on every frame is what made the cursor feel late and jumpy.
-     * The cache is refreshed when the finger lifts.
-     */
-    public boolean moveCursorTo(final int offset) {
-        if (offset < 0 || !isConnected()) return false;
-        mExpectedSelStart = offset;
-        mExpectedSelEnd = offset;
-        mComposingText.setLength(0);
-        return mIC.setSelection(offset, offset);
-    }
-
     public void selectAll() {
         if (!isConnected()) return;
         if (mExpectedSelStart != mExpectedSelEnd && mExpectedSelStart == 0 && !hasTextAfterCursor()) { // all text already selected

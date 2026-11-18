@@ -66,7 +66,10 @@ fun AdvancedSettingsScreen(
         if (Settings.readHorizontalSpaceSwipe(prefs) == KeyboardActionListener.SwipeAction.SWITCH_LANGUAGE
             || Settings.readVerticalSpaceSwipe(prefs) == KeyboardActionListener.SwipeAction.SWITCH_LANGUAGE)
             Settings.PREF_LANGUAGE_SWIPE_DISTANCE else null,
-        Settings.PREF_TOUCHPAD_SENSITIVITY,
+        if (Settings.readVerticalSpaceSwipe(prefs) == KeyboardActionListener.SwipeAction.TOUCHPAD_MODE)
+            Settings.PREF_TOUCHPAD_SENSITIVITY else null,
+        if (Settings.readVerticalSpaceSwipe(prefs) == KeyboardActionListener.SwipeAction.TOUCHPAD_MODE)
+            Settings.PREF_TOUCHPAD_EDGE_SCROLL else null,
         Settings.PREF_DELETE_SWIPE,
         Settings.PREF_SPACE_TO_CHANGE_LANG,
         Settings.PREFS_LONG_PRESS_SYMBOLS_FOR_NUMPAD,
@@ -150,6 +153,9 @@ fun createAdvancedSettings(context: Context) = listOf(
             range = 0f..100f,
             description = { value -> value.toString() }
         )
+    },
+    Setting(context, Settings.PREF_TOUCHPAD_EDGE_SCROLL, R.string.touchpad_edge_scroll, R.string.touchpad_edge_scroll_description) {
+        SwitchPreference(it, Defaults.PREF_TOUCHPAD_EDGE_SCROLL)
     },
     Setting(context, Settings.PREF_DELETE_SWIPE, R.string.delete_swipe) {
         val items = listOf(
