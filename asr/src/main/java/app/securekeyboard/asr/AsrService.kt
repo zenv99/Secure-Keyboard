@@ -31,14 +31,27 @@ class AsrService : Service() {
     private val worker = Executors.newSingleThreadExecutor()
 
     private var recorder: Recorder? = null // main thread only
+    private var startToken = 0 // newest press; older retry loops give up
+    private var pendingStart = false // MSG_START received, microphone not open yet (main thread only)
+    private var pendingClient: Messenger? = null
     private var whisper: WhisperBridge? = null // worker thread only
 
     private val idleUnload = Runnable { worker.execute { closeWhisper() } }
 
     private val incoming = Handler(Looper.getMainLooper()) { message ->
         when (message.what) {
-            MSG_START -> { handleStart(message.replyTo); true }
-            MSG_STOP -> { recorder?.stop(); true }
+            MSG_START -> { pendingStart = true; startToken++; handleStart(message.replyTo, startToken); true }
+            MSG_STOP -> {
+                // Released before the microphone was even opened (fast tap / retry window): cancel that start, otherwise
+                // the recorder would start later with nobody left to stop it and keep the microphone busy.
+                if (pendingStart) {
+                    pendingStart = false
+                    pendingClient?.let { reply(it, MSG_FINAL, last = true, meta = "released before the microphone opened") }
+                    pendingClient = null
+                }
+                recorder?.stop()
+                true
+            }
             MSG_WARM -> { worker.execute { try { ensureWhisper() } catch (_: AsrException) { } }; true }
             else -> false
         }
@@ -53,20 +66,25 @@ class AsrService : Service() {
         return false
     }
 
-    private fun handleStart(client: Messenger?, attempt: Int = 0) {
+    private fun handleStart(client: Messenger?, token: Int, attempt: Int = 0) {
         if (client == null) return
+        if (!pendingStart || token != startToken) return // released or superseded while waiting: this start was cancelled
+        pendingClient = client
         if (recorder != null) {
             // The previous recording is still closing (pressed again within a moment): retry shortly instead of
             // silently ignoring this press.
-            if (attempt < 8) main.postDelayed({ handleStart(client, attempt + 1) }, 100)
-            else reply(client, MSG_ERROR, code = ERR_AUDIO)
+            if (attempt < 8) main.postDelayed({ handleStart(client, token, attempt + 1) }, 100)
+            else { pendingStart = false; pendingClient = null; reply(client, MSG_ERROR, code = ERR_AUDIO) }
             return
         }
         if (checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+            pendingStart = false; pendingClient = null
             reply(client, MSG_ERROR, code = ERR_NO_PERMISSION)
             return
         }
         main.removeCallbacks(idleUnload)
+        pendingStart = false
+        pendingClient = null
         val created = try {
             Recorder(client)
         } catch (_: Exception) {
@@ -390,7 +408,7 @@ class AsrService : Service() {
 
         private const val SAMPLE_RATE = 16_000
         private const val MAX_CHUNK_SECONDS = 28
-        private const val MAX_HOLD_SECONDS = 300
+        private const val MAX_HOLD_SECONDS = 60
         private const val MIN_SAMPLES = SAMPLE_RATE / 4 // ignore accidental taps under 250 ms
         private const val IDLE_UNLOAD_MS = 600_000L
         private const val LANGUAGE = "en"
