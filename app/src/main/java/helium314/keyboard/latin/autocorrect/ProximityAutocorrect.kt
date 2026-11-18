@@ -252,3 +252,4 @@ object ProximityAutocorrect {
         return if (distance(ch, neighbor) <= KeyGeometry.ADJACENT) 0.78f else 1.15f
     }
 }
+
