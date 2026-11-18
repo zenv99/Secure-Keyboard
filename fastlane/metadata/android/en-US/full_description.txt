@@ -1,16 +1,11 @@
-Secure Keyboard is a private keyboard that works the way you expect, and keeps everything on your phone.
+Secure Keyboard is an Android keyboard forked from HeliBoard. It is not the official HeliBoard.
 
-The app has no internet permission. It cannot send what you type or say anywhere. No ads, no tracking, no accounts.
+The app does not declare an INTERNET permission. CI rejects a build that adds one, or that adds a permission or exported component outside the allowlist. Android backup and device transfer are disabled. There is no account or analytics SDK.
 
-Features:
-• Learning autocorrect that fixes slips, including neighbouring-key mistakes, and learns how you type. Wipe what it has learned at any time.
-• Swipe typing: slide across the letters to type a word.
-• Push-to-talk dictation: hold the mic and speak. Speech is converted to text on the device. No audio leaves your phone.
-• Smooth cursor control: drag on the space bar to move the cursor in any direction.
-• Emoji suggestions as you type.
-• Clean layout with a single emoji key and a large send key.
-• Themes, layouts, clipboard history, one-handed mode and more.
+Dictation uses the microphone only while the mic key is held. Speech is transcribed on the device with whisper.cpp. The model checksum is pinned. Learned words can be wiped. Password fields and fields that disallow personalized learning are not learned from. Clipboard history is off unless you enable it.
 
-Open source (GPL-3.0). Source code: github.com/zenv99/Secure-Keyboard. Based on HeliBoard. This is not the official HeliBoard.
+Text replacement, a space-bar trackpad, autocorrect, and swipe typing run on the device.
 
-Not yet independently audited.
+GPL-3.0. Source: github.com/zenv99/Secure-Keyboard.
+
+Not independently audited. GrapheneOS hardened_malloc and the per-app network toggle were not confirmed on a GrapheneOS phone. See SECURITY.md in the repository.
