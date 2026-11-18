@@ -6,7 +6,6 @@
 
 package helium314.keyboard.latin;
 
-import android.os.Build;
 import android.text.InputType;
 import android.view.inputmethod.EditorInfo;
 
@@ -86,14 +85,13 @@ public final class InputAttributes {
         }
 
         final int variation = mInputType & InputType.TYPE_MASK_VARIATION;
-        final boolean flagNoSuggestions = 0 != (mInputType & InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
-        final boolean flagMultiLine = 0 != (mInputType & InputType.TYPE_TEXT_FLAG_MULTI_LINE);
-        final boolean flagAutoCorrect = 0 != (mInputType & InputType.TYPE_TEXT_FLAG_AUTO_CORRECT);
+        final int imeOptions = editorInfo != null ? editorInfo.imeOptions : 0;
         final boolean flagAutoComplete = 0 != (mInputType & InputType.TYPE_TEXT_FLAG_AUTO_COMPLETE);
+        final EditorFieldPolicy.Decision field = EditorFieldPolicy.decide(mInputType, imeOptions);
 
-        // TODO: Have a helper method in InputTypeUtils
-        // Make sure that passwords are not displayed in {@link SuggestionStripView}.
-        mShouldShowSuggestions = !mIsPasswordField && !flagNoSuggestions;
+        // Passwords never show suggestions. Web and search fields do, even when Chromium sets
+        // TYPE_TEXT_FLAG_NO_SUGGESTIONS because the page turned autocomplete off.
+        mShouldShowSuggestions = field.getShowSuggestions();
         mMayOverrideShowingSuggestions = !mIsPasswordField;
 
         mShouldInsertSpacesAutomatically = InputTypeUtils.isAutoSpaceFriendlyType(mInputType);
@@ -108,16 +106,7 @@ public final class InputAttributes {
         mDisableGestureFloatingPreviewText = InputAttributes.inPrivateImeOptions(
                 mPackageNameForPrivateImeOptions, NO_FLOATING_GESTURE_PREVIEW, editorInfo);
 
-        // autocorrect if explicitly wanted, but also for most multi-line input types (like AOSP keyboard)
-        // originally, URI and email were always excluded from autocorrect (in Suggest.java), but this is
-        //  and unexpected place, and if the input field explicitly requests autocorrect we should follow the flag
-        mInputTypeShouldAutoCorrect = flagAutoCorrect || (
-                flagMultiLine
-                && variation != InputType.TYPE_TEXT_VARIATION_WEB_EDIT_TEXT
-                && variation != InputType.TYPE_TEXT_VARIATION_URI
-                && !InputTypeUtils.isEmailVariation(variation)
-                && !flagNoSuggestions
-        );
+        mInputTypeShouldAutoCorrect = field.getAutoCorrect();
 
         mApplicationSpecifiedCompletionOn = flagAutoComplete && isFullscreenMode;
 
@@ -131,10 +120,9 @@ public final class InputAttributes {
                 && InputType.TYPE_TEXT_VARIATION_WEB_PASSWORD != variation;
 
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-            mNoLearning = (editorInfo.imeOptions & EditorInfo.IME_FLAG_NO_PERSONALIZED_LEARNING) != 0;
-        else
-            mNoLearning = false;
+        // Password fields and IME_FLAG_NO_PERSONALIZED_LEARNING block storage. They do not, by
+        // themselves, turn off dictionary correction for a field that is otherwise eligible.
+        mNoLearning = field.getBlockLearning();
     }
 
     public boolean isTypeNull() {
