@@ -408,7 +408,7 @@ class AsrService : Service() {
 
         private const val SAMPLE_RATE = 16_000
         private const val MAX_CHUNK_SECONDS = 28
-        private const val MAX_HOLD_SECONDS = 60
+        private const val MAX_HOLD_SECONDS = 300
         private const val MIN_SAMPLES = SAMPLE_RATE / 4 // ignore accidental taps under 250 ms
         private const val IDLE_UNLOAD_MS = 600_000L
         private const val LANGUAGE = "en"
