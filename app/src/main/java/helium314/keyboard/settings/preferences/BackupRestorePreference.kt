@@ -32,6 +32,7 @@ import helium314.keyboard.latin.utils.prefs
 import helium314.keyboard.latin.utils.protectedPrefs
 import helium314.keyboard.settings.Setting
 import helium314.keyboard.settings.SettingsActivity
+import helium314.keyboard.settings.isSafeZipEntry
 import helium314.keyboard.settings.dialogs.ConfirmationDialog
 import helium314.keyboard.settings.dialogs.InfoDialog
 import helium314.keyboard.settings.filePicker
@@ -326,13 +327,8 @@ private fun readJsonLinesToSettings(list: List<String>, prefs: SharedPreferences
 }
 
 private fun restoreEntryToDir(zip: ZipInputStream, baseDir: File, entryName: String): Boolean {
-    val file = File(baseDir, entryName)
-    val canonicalBase = baseDir.canonicalFile
-    val canonicalTarget = file.canonicalFile
-    if (canonicalTarget.path != canonicalBase.path
-        && !canonicalTarget.path.startsWith(canonicalBase.path + File.separator)
-    ) return false
-    FileUtils.copyStreamToNewFile(zip, file)
+    if (!isSafeZipEntry(baseDir, entryName)) return false
+    FileUtils.copyStreamToNewFile(zip, File(baseDir, entryName))
     return true
 }
 

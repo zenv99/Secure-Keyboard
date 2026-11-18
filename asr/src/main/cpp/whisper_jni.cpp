@@ -28,7 +28,11 @@ Java_app_securekeyboard_asr_WhisperBridge_nativeTranscribe(JNIEnv *env, jobject,
     if (ctx == nullptr) return env->NewStringUTF("");
 
     const jsize n = env->GetArrayLength(pcm);
+    // One Whisper window is 30 s. Reject anything larger instead of allocating without a bound.
+    constexpr jsize kMaxSamples = 16000 * 32;
+    if (n <= 0 || n > kMaxSamples) return env->NewStringUTF("");
     jfloat *samples = env->GetFloatArrayElements(pcm, nullptr);
+    if (samples == nullptr) return env->NewStringUTF("");
     const char *language = env->GetStringUTFChars(lang, nullptr);
 
     whisper_full_params params = whisper_full_default_params(WHISPER_SAMPLING_GREEDY);

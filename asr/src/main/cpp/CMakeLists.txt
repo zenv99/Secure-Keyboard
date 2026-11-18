@@ -16,6 +16,10 @@ set(CMAKE_BUILD_TYPE Release CACHE STRING "" FORCE)
 # CPU features (armv8.2-a + dotprod + fp16, i.e. Cortex-A75 / Snapdragon 845 and newer) come from
 # -DGGML_CPU_ARM_ARCH in asr/build.gradle.kts so ggml enables its matching kernels.
 
+# Hardening for the JNI library and the bundled whisper.cpp objects.
+add_compile_options(-fstack-protector-strong -D_FORTIFY_SOURCE=2)
+add_link_options(-Wl,-z,relro -Wl,-z,now -Wl,-z,noexecstack)
+
 add_subdirectory(${WHISPER_DIR} ${CMAKE_CURRENT_BINARY_DIR}/whisper)
 
 add_library(securekeyboard_whisper SHARED whisper_jni.cpp)

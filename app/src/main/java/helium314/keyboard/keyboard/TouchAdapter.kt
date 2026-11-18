@@ -51,7 +51,7 @@ object TouchAdapter {
     @JvmStatic
     @Synchronized
     fun learn(key: Key, rawX: Int, rawY: Int) {
-        if (store == null || !enabled()) return
+        if (store == null || personalizationBlocked() || !enabled()) return
         val width = key.width
         val height = key.height
         if (width <= 0 || height <= 0) return
@@ -65,13 +65,29 @@ object TouchAdapter {
     @JvmStatic
     @Synchronized
     fun offsetX(keyWidth: Int): Int =
-        if (store == null || !enabled()) 0 else Math.round(learner.correctionX() * keyWidth)
+        if (store == null || personalizationBlocked() || !enabled()) 0 else Math.round(learner.correctionX() * keyWidth)
 
     /** Vertical shift in pixels to add to touches. */
     @JvmStatic
     @Synchronized
     fun offsetY(keyHeight: Int): Int =
-        if (store == null || !enabled()) 0 else Math.round(learner.correctionY() * keyHeight)
+        if (store == null || personalizationBlocked() || !enabled()) 0 else Math.round(learner.correctionY() * keyHeight)
+
+    /** Password and no-learning fields must not update the stored tap offset. */
+    private fun personalizationBlocked(): Boolean {
+        val values = Settings.getInstance()?.current ?: return true
+        return values.mIncognitoModeEnabled
+    }
+
+    /** Drops the three stored tap-offset numbers. Used by "wipe everything learned". */
+    @JvmStatic
+    @Synchronized
+    fun wipe(context: Context) {
+        init(context)
+        learner.reset()
+        sinceSave = 0
+        store?.edit()?.clear()?.commit()
+    }
 
     private fun save() {
         sinceSave = 0

@@ -29,7 +29,8 @@ LOCAL_C_INCLUDES += $(LOCAL_PATH)/$(LATIN_IME_SRC_DIR)
 
 LOCAL_CFLAGS += -Wall -Wextra -Weffc++ -Wformat=2 -Wcast-qual -Wcast-align \
     -Wwrite-strings -Wfloat-equal -Wpointer-arith -Winit-self -Wredundant-decls \
-    -Woverloaded-virtual -Wsign-promo -Wno-system-headers
+    -Woverloaded-virtual -Wsign-promo -Wno-system-headers \
+    -fstack-protector-strong -D_FORTIFY_SOURCE=2
 
 # To suppress compiler warnings for unused variables/functions used for debug features etc.
 LOCAL_CFLAGS += -Wno-unused-parameter -Wno-unused-function -w
@@ -92,8 +93,8 @@ LOCAL_SDK_VERSION := 14
 LOCAL_NDK_STL_VARIANT := c++_static
 LOCAL_LDFLAGS += -ldl
 
-# Avoid issues with reproducible builds, see https://gitlab.com/fdroid/rfp/-/issues/2662
-LOCAL_LDFLAGS += -Wl,--build-id=none
+# RELRO + immediate binding, no executable stack. build-id=none keeps the binary reproducible.
+LOCAL_LDFLAGS += -Wl,-z,relro,-z,now,-z,noexecstack -Wl,--build-id=none
 
 include $(BUILD_SHARED_LIBRARY)
 #################### Clean up the tmp vars
