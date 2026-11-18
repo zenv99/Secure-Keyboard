@@ -29,6 +29,8 @@ class KeyboardSmokeTest {
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
         }
         instrumentation.startActivitySync(intent)
+        // tap into the field like a user does: this is what makes Android start and show the keyboard
+        device.wait(Until.findObject(By.desc("smoke-field")), 15000)?.click()
     }
 
     @After fun close() {
@@ -78,7 +80,7 @@ class KeyboardSmokeTest {
         fun walk(n: android.view.accessibility.AccessibilityNodeInfo?, depth: Int) {
             if (n == null || depth > 12) return
             val r = android.graphics.Rect(); n.getBoundsInScreen(r)
-            if (!n.contentDescription.isNullOrEmpty() || n.viewIdResourceName != null)
+            run {
                 sb.append(" ".repeat(depth)).append(n.className).append(" id=").append(n.viewIdResourceName)
                     .append(" desc=").append(n.contentDescription).append(" ").append(r.toShortString()).append('\n')
             for (i in 0 until n.childCount) walk(n.getChild(i), depth + 1)
@@ -87,7 +89,7 @@ class KeyboardSmokeTest {
             sb.append("WINDOW type=").append(w.type).append(" title=").append(w.title).append('\n')
             if (w.type == android.view.accessibility.AccessibilityWindowInfo.TYPE_INPUT_METHOD) walk(w.root, 0)
         }
-        return sb.toString().take(4000)
+        return sb.toString().take(6000)
     }
 
     private fun waitFor(description: String, timeout: Long = 60000): UiObject2 =
