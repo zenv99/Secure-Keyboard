@@ -120,6 +120,12 @@ public interface KeyboardActionListener {
 
     /** Touchpad (drag on the keyboard) cursor movement: whole characters horizontally, whole lines vertically. */
     default boolean onTouchpadMove(int stepsX, int stepsY) { return false; }
+
+    /**
+     * Fluid space-bar trackpad. [dxPx]/[dyPx] are the finger movement since the previous sample,
+     * in pixels. [eventNs] is {@link System#nanoTime()} when the sample was received.
+     */
+    default void onTouchpadDelta(float dxPx, float dyPx, long eventNs) {}
     void onEndSpaceSwipe();
     void toggleLayout(LayoutDirective.Utility layout, int autoCapsFlags, @Nullable RecapitalizeMode recapitalizeMode);
     void onLongPressAlphaSymbolForNumpad();
