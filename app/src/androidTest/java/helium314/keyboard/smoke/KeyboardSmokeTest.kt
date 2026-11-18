@@ -80,8 +80,7 @@ class KeyboardSmokeTest {
         fun walk(n: android.view.accessibility.AccessibilityNodeInfo?, depth: Int) {
             if (n == null || depth > 12) return
             val r = android.graphics.Rect(); n.getBoundsInScreen(r)
-            run {
-                sb.append(" ".repeat(depth)).append(n.className).append(" id=").append(n.viewIdResourceName)
+            sb.append(" ".repeat(depth)).append(n.className).append(" id=").append(n.viewIdResourceName)
                     .append(" desc=").append(n.contentDescription).append(" ").append(r.toShortString()).append('\n')
             for (i in 0 until n.childCount) walk(n.getChild(i), depth + 1)
         }
