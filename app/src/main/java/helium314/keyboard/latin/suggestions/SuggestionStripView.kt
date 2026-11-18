@@ -244,11 +244,21 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
         suggestionsStrip.layoutDirection = newLayoutDirection
     }
 
+    /** The big mic must always be on screen (also while the toolbar is open, e.g. an empty field on open); other pinned keys hide with the strip. */
+    private fun applyPinnedKeysVisibility() {
+        val toolbarVisible = toolbarContainer.isVisible
+        pinnedKeys.isVisible = true
+        for (i in 0 until pinnedKeys.childCount) {
+            val child = pinnedKeys.getChildAt(i)
+            child.isVisible = !toolbarVisible || child.tag == ToolbarKey.VOICE
+        }
+    }
+
     fun setToolbarVisibility(toolbarVisible: Boolean) {
-        pinnedKeys.isVisible = !toolbarVisible
+        toolbarContainer.isVisible = toolbarVisible
+        applyPinnedKeysVisibility()
         leftKeys.isVisible = !toolbarVisible
         suggestionsStrip.isVisible = !toolbarVisible
-        toolbarContainer.isVisible = toolbarVisible
 
         if (DEBUG_SUGGESTIONS) {
             for (view in debugInfoViews) {
@@ -520,7 +530,7 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
 
     fun updateVoiceKey() {
         val show = true // built-in on-device voice: always available
-        toolbar.findViewWithTag<View>(ToolbarKey.VOICE)?.isVisible = show
+        toolbar.findViewWithTag<View>(ToolbarKey.VOICE)?.isVisible = false // the big pinned mic is always shown instead
         pinnedKeys.findViewWithTag<View>(ToolbarKey.VOICE)?.isVisible = show
     }
 
@@ -538,7 +548,7 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
         }
 
         toolbarExpandKey.setOnClickListener(if (!toolbarIsExpandable) null else this)
-        pinnedKeys.visibility = suggestionsStrip.visibility
+        applyPinnedKeysVisibility()
         leftKeys.visibility = suggestionsStrip.visibility
         isExternalSuggestionVisible = false
     }
