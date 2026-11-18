@@ -25,7 +25,14 @@ class KeyboardTestActivity : Activity() {
     override fun onResume() {
         super.onResume()
         field.requestFocus()
-        field.post { (getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager).showSoftInput(field, 0) }
+        // The first showSoftInput often runs before the view is served ("is not served") and is ignored.
+        field.post { showKeyboard(8) }
+    }
+
+    private fun showKeyboard(triesLeft: Int) {
+        val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
+        if (imm.showSoftInput(field, InputMethodManager.SHOW_IMPLICIT) || triesLeft <= 0) return
+        field.postDelayed({ showKeyboard(triesLeft - 1) }, 250)
     }
 
     companion object { @Volatile var instance: KeyboardTestActivity? = null }

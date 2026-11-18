@@ -61,6 +61,7 @@ fun TextCorrectionScreen(
     val suggestionsEnabled = suggestionsVisible && prefs.getBoolean(Settings.PREF_SHOW_SUGGESTIONS, Defaults.PREF_SHOW_SUGGESTIONS)
     val gestureEnabled = JniUtils.sHaveGestureLib && prefs.getBoolean(Settings.PREF_GESTURE_INPUT, Defaults.PREF_GESTURE_INPUT)
     val items = listOf(
+        SettingsWithoutKey.TEXT_REPLACEMENT,
         R.string.settings_category_correction,
         SettingsWithoutKey.WIPE_LEARNED,
         Settings.PREF_BLOCK_POTENTIALLY_OFFENSIVE,
@@ -108,6 +109,11 @@ fun TextCorrectionScreen(
 }
 
 fun createCorrectionSettings(context: Context) = listOf(
+    Setting(context, SettingsWithoutKey.TEXT_REPLACEMENT, R.string.text_replacement_title, R.string.text_replacement_summary) { setting ->
+        Preference(name = setting.title, description = setting.description, onClick = {
+            SettingsDestination.navigateTo(SettingsDestination.TextReplacement)
+        }) { NextScreenIcon() }
+    },
     Setting(context, SettingsWithoutKey.WIPE_LEARNED, R.string.wipe_learned_title, R.string.wipe_learned_summary) { setting ->
         var showWipe by rememberSaveable { mutableStateOf(false) }
         val ctx = LocalContext.current

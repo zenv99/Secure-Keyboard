@@ -14,6 +14,8 @@ import helium314.keyboard.latin.CapsMode
 import helium314.keyboard.latin.DictionaryFacilitator
 import helium314.keyboard.latin.InputStyle
 import helium314.keyboard.latin.NgramContext
+import helium314.keyboard.latin.inputlogic.TextReplacementRules
+import helium314.keyboard.latin.inputlogic.TextReplacements
 import helium314.keyboard.latin.WordComposer
 import helium314.keyboard.latin.common.ComposedData
 import helium314.keyboard.latin.common.Constants
@@ -173,8 +175,18 @@ class Suggest(private val mDictionaryFacilitator: DictionaryFacilitator) {
             }
         }
         val isTypedWordValid = firstOccurrenceOfTypedWordInSuggestions > -1 || (!resultsArePredictions && !allowsToBeAutoCorrected)
+        // User text replacement ("omw" -> "On my way!") is shown in the center slot and committed
+        // on space or punctuation, whether or not general autocorrect is on. Backspace reverts it.
+        val replacement = textReplacementPhrase(typedWordString)
+        if (replacement != null) TextReplacementRules.pinSuggestion(suggestionsList, replacement)
         return SuggestedWords(suggestionsList, suggestionResults.rawSuggestions, typedWordInfo,
-            isTypedWordValid, hasAutoCorrection || correctToCapitalizedWord, false, inputStyle, sequenceNumber)
+            isTypedWordValid, hasAutoCorrection || correctToCapitalizedWord || replacement != null,
+            false, inputStyle, sequenceNumber)
+    }
+
+    private fun textReplacementPhrase(typed: String): String? {
+        if (typed.isEmpty() || Settings.getValues().mInputAttributes.mIsPasswordField) return null
+        return TextReplacements.expand(typed)
     }
 
     // returns [allowsToBeAutoCorrected, hasAutoCorrection]
