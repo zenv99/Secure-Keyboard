@@ -3,6 +3,7 @@
 ## Release invariants
 
 - No `android.permission.INTERNET` in the merged release manifest.
+- No `android.permission.ACCESS_BACKGROUND_LOCATION`. Coarse and fine location are requested only when Location is tapped, for one fix, inserted as a maps link, and never stored.
 - No analytics, ads, telemetry, crash upload, remote configuration, cloud inference or account SDK.
 - No user text or audio transmitted off-device.
 - Password fields: no suggestions, voice capture or personalization.

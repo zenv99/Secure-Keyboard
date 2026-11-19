@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="clipboard_provider_authority" translatable="false">app.securekeyboard.keyboard.clipprovider</string>
+    <string name="attach_provider_authority" translatable="false">app.securekeyboard.keyboard.attachprovider</string>
 </resources>

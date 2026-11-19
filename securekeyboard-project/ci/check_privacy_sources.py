@@ -27,8 +27,11 @@ if app.get(ANDROID + "fullBackupContent") != "@xml/backup_rules":
 if app.get(ANDROID + "dataExtractionRules") != "@xml/data_extraction_rules":
     fail("Android 12+ dataExtractionRules not attached")
 for permission in manifest.findall("uses-permission"):
-    if permission.get(ANDROID + "name") == "android.permission.INTERNET":
+    name = permission.get(ANDROID + "name")
+    if name == "android.permission.INTERNET":
         fail("INTERNET permission declared in source manifest")
+    if name == "android.permission.ACCESS_BACKGROUND_LOCATION":
+        fail("ACCESS_BACKGROUND_LOCATION must never be declared")
 
 legacy_path = ROOT / "app/src/main/res/xml/backup_rules.xml"
 legacy = ET.parse(legacy_path).getroot()
@@ -65,6 +68,9 @@ ALLOWED_PERMISSIONS = {
     "android.permission.RECORD_AUDIO",
     "android.permission.VIBRATE",
     "android.permission.RECEIVE_BOOT_COMPLETED",
+    # Asked only when the user taps Location. Never background.
+    "android.permission.ACCESS_COARSE_LOCATION",
+    "android.permission.ACCESS_FINE_LOCATION",
 }
 # Exported components. A new exported component must be added here on purpose.
 # Services must also carry an android:permission.
@@ -93,6 +99,8 @@ for path in manifests:
         name = permission.get(ANDROID + "name")
         if name == "android.permission.INTERNET":
             fail(f"INTERNET permission declared in {path}")
+        if name == "android.permission.ACCESS_BACKGROUND_LOCATION":
+            fail(f"ACCESS_BACKGROUND_LOCATION declared in {path}")
         if name not in ALLOWED_PERMISSIONS:
             fail(f"permission {name} in {path} is not on the allowlist")
     for tag in ("activity", "service", "receiver", "provider"):

@@ -18,6 +18,7 @@ By Zen V. Based on [HeliBoard](https://github.com/HeliBorg/HeliBoard). Free soft
 - The app has **no INTERNET permission**. It cannot connect to anything. The build pipeline checks this on every release and fails if it ever changes.
 - No analytics, ads, telemetry, crash reporting, accounts or cloud features.
 - Microphone permission is used only while you hold the dictation button.
+- Location permission is asked only when you tap Location. One fix is inserted as a maps link and is not stored. Background location is never used.
 - Android backup is disabled.
 - Full details: [PRIVACY_POLICY.md](PRIVACY_POLICY.md) and [securekeyboard-project/docs/PRIVACY.md](securekeyboard-project/docs/PRIVACY.md).
 

@@ -32,6 +32,12 @@ object KeyGeometry {
         return hypot(pa.x - pb.x, pa.y - pb.y)
     }
 
+    /** Key centre in key-width units, or null when the letter is not on this map. */
+    fun centre(ch: Char): FloatArray? {
+        val p = pos[baseLetter(ch)] ?: return null
+        return floatArrayOf(p.x, p.y)
+    }
+
     /** Fold accents so "é" sits on the E key. */
     fun baseLetter(ch: Char): Char {
         val c = ch.lowercaseChar()

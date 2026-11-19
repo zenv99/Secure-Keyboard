@@ -754,6 +754,7 @@ class InputLogicTest {
         getAutocorrectedWithSpaceAfter("hello", "hullo")
         functionalKeyPress(KeyCode.DELETE)
         assertEquals("hello", text)
+        latinIME.prefs().edit { putBoolean(Settings.PREF_BACKSPACE_REVERTS_AUTOCORRECT, true) }
     }
 
     @Test fun `remove glide typing word on delete`() {
@@ -1048,6 +1049,8 @@ class InputLogicTest {
 }
 
 private var currentScript = ScriptUtils.SCRIPT_LATIN
+internal var shadowKeyboard: helium314.keyboard.keyboard.Keyboard? = null
+private val shadowKeyboardView: MainKeyboardView = Mockito.mock(MainKeyboardView::class.java)
 private val messages = mutableListOf<Message>() // for latinIME / ShadowInputMethodService
 private val delayedMessages = mutableListOf<Message>() // for latinIME / ShadowInputMethodService
 
@@ -1072,8 +1075,13 @@ class ShadowHandler {
 @Implements(KeyboardSwitcher::class)
 class ShadowKeyboardSwitcher {
     @Implementation
-    // basically only needed for null check
-    fun getMainKeyboardView(): MainKeyboardView = Mockito.mock(MainKeyboardView::class.java)
+    // One view for the whole test, so a keyboard installed on it stays installed.
+    fun getMainKeyboardView(): MainKeyboardView {
+        val view = shadowKeyboardView
+        val keyboard = shadowKeyboard
+        if (keyboard != null) Mockito.`when`(view.keyboard).thenReturn(keyboard)
+        return view
+    }
     @Implementation
     // only affects view
     fun setKeyboard(keyboardId: Int, toggleState: KeyboardSwitcher.KeyboardSwitchState) = Unit

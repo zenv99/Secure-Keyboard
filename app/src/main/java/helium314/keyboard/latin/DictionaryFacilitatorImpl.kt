@@ -248,9 +248,10 @@ class DictionaryFacilitatorImpl : DictionaryFacilitator {
                 }
 
                 listener?.onUpdateMainDictionaryAvailability(hasAtLeastOneInitializedMainDictionary())
-                latchForWaitingLoadingMainDictionary.countDown()
             } catch (e: Throwable) {
                 Log.e(TAG, "could not initialize main dictionaries for $locales", e)
+            } finally {
+                latchForWaitingLoadingMainDictionary.countDown()
             }
         }
     }
@@ -515,31 +516,36 @@ class DictionaryFacilitatorImpl : DictionaryFacilitator {
             }
             return glideResults
         }
-        val proximityInfoHandle = keyboard.proximityInfo.nativeProximityInfo
-        val weightOfLangModelVsSpatialModel = floatArrayOf(Dictionary.NOT_A_WEIGHT_OF_LANG_MODEL_VS_SPATIAL_MODEL)
-
-        val waitForOtherDicts = if (dictionaryGroups.size == 1) null else CountDownLatch(dictionaryGroups.size - 1)
-        val suggestionsArray = Array<List<SuggestedWordInfo>?>(dictionaryGroups.size) { null }
-        for (i in 1..dictionaryGroups.lastIndex) {
-            scope.launch {
-                suggestionsArray[i] = getSuggestions(composedData, ngramContext, settingsValuesForSuggestion, sessionId,
-                    proximityInfoHandle, weightOfLangModelVsSpatialModel, dictionaryGroups[i])
-                waitForOtherDicts?.countDown()
-            }
-        }
-        suggestionsArray[0] = getSuggestions(composedData, ngramContext, settingsValuesForSuggestion, sessionId,
-            proximityInfoHandle, weightOfLangModelVsSpatialModel, dictionaryGroups[0])
         val suggestionResults = SuggestionResults(
             SuggestedWords.MAX_SUGGESTIONS, ngramContext, false
         )
-        waitForOtherDicts?.await()
+        try {
+            val proximityInfoHandle = keyboard.proximityInfo.nativeProximityInfo
+            val weightOfLangModelVsSpatialModel = floatArrayOf(Dictionary.NOT_A_WEIGHT_OF_LANG_MODEL_VS_SPATIAL_MODEL)
 
-        suggestionsArray.forEach {
-            if (it == null) return@forEach
-            suggestionResults.addAll(it)
+            val waitForOtherDicts = if (dictionaryGroups.size == 1) null else CountDownLatch(dictionaryGroups.size - 1)
+            val suggestionsArray = Array<List<SuggestedWordInfo>?>(dictionaryGroups.size) { null }
+            for (i in 1..dictionaryGroups.lastIndex) {
+                scope.launch {
+                    suggestionsArray[i] = getSuggestions(composedData, ngramContext, settingsValuesForSuggestion, sessionId,
+                        proximityInfoHandle, weightOfLangModelVsSpatialModel, dictionaryGroups[i])
+                    waitForOtherDicts?.countDown()
+                }
+            }
+            suggestionsArray[0] = getSuggestions(composedData, ngramContext, settingsValuesForSuggestion, sessionId,
+                proximityInfoHandle, weightOfLangModelVsSpatialModel, dictionaryGroups[0])
+            waitForOtherDicts?.await()
+
+            suggestionsArray.forEach {
+                if (it == null) return@forEach
+                suggestionResults.addAll(it)
+            }
+
+            includeAtLeastTwoWordSuggestions(suggestionResults, suggestionsArray, composedData.mTypedWord)
+        } catch (t: Throwable) {
+            // A missing native library must not skip fat-finger and run-on corrections.
+            Log.w(TAG, "dictionary suggestions unavailable", t)
         }
-
-        includeAtLeastTwoWordSuggestions(suggestionResults, suggestionsArray, composedData.mTypedWord)
 
         // Fat-finger and contraction corrections (xoredrt → correct, dont → don't).
         // Same-length neighbour matching remains as a fallback for words the edit model skips.
@@ -550,10 +556,12 @@ class DictionaryFacilitatorImpl : DictionaryFacilitator {
             && !AutocorrectPolicy.isLiteralToken(typedForFuzzy)) {
             val main = dictionaryGroups[0].getDict(Dictionary.TYPE_MAIN)
             if (main != null) {
-                val sentenceStart = ngramContext.isBeginningOfSentenceContext
+                // Case follows what was typed. A wrong "start of sentence" flag was
+                // capitalizing corrections in the middle of a line.
+                val sentenceStart = typedForFuzzy.firstOrNull()?.isUpperCase() == true
                 val corrected = helium314.keyboard.latin.glide.GlideTyping.proximityCorrection(
-                    main, typedForFuzzy, keyboard, sentenceStart
-                ) ?: helium314.keyboard.latin.glide.GlideTyping.neighbourKeyCorrection(main, typedForFuzzy, keyboard)
+                    main, typedForFuzzy, keyboard, sentenceStart, composedData.mInputPointers
+                )
                 val merged = corrected
                     ?: helium314.keyboard.latin.glide.GlideTyping.missingSpace(main, typedForFuzzy, keyboard)
                 if (merged != null) {
@@ -630,6 +638,21 @@ class DictionaryFacilitatorImpl : DictionaryFacilitator {
     // Spell checker is using this, and has its own instance of DictionaryFacilitatorImpl,
     // meaning that it always has default mConfidence. So we cannot choose to only check preferred
     // locale, and instead simply return true if word is in any of the available dictionaries
+    override fun autocorrectTypedWord(typed: String): String? {
+        if (typed.length < 2 || isValidSpellingWord(typed) || isValidSpellingWord(typed.lowercase())
+            || mustKeepTypedWord(typed) || AutocorrectPolicy.isLiteralToken(typed)) return null
+        val main = dictionaryGroups.getOrNull(0)?.getDict(Dictionary.TYPE_MAIN) ?: return null
+        val keyboard = try {
+            helium314.keyboard.keyboard.KeyboardSwitcher.getInstance().keyboard
+        } catch (_: Exception) {
+            null
+        } ?: return null
+        val sentenceStart = typed.firstOrNull()?.isUpperCase() == true
+        return helium314.keyboard.latin.glide.GlideTyping.proximityCorrection(
+            main, typed, keyboard, sentenceStart, null
+        ) ?: helium314.keyboard.latin.glide.GlideTyping.missingSpace(main, typed, keyboard)
+    }
+
     override fun spaceSlipCorrection(previous: String, fragment: String): String? {
         val main = dictionaryGroups.getOrNull(0)?.getDict(Dictionary.TYPE_MAIN) ?: return null
         val keyboard = try {

@@ -5,7 +5,7 @@
     { "label": "delete", "width": 0.15 }
   ],
   [
-    { "label": "symbol_alpha", "width": 0.16 },
+    { "label": "symbol_alpha", "width": 0.15 },
     { "$": "variation_selector",
       "email":    { "label": "@", "labelFlags": 1073741824, "groupId": 1, "type": "function" },
       "uri":      { "label": "/", "labelFlags": 1073741824, "groupId": 1, "type": "function" },
@@ -19,6 +19,6 @@
       "symbols": { "label": "period", "labelFlags": 1073741824 },
       "moreSymbols": { "label": "period", "labelFlags": 1073741824 }
     },
-    { "label": "action", "width": 0.18, "labelFlags": 1073741824 }
+    { "label": "action", "width": 0.22, "labelFlags": 1073741824 }
   ]
 ]

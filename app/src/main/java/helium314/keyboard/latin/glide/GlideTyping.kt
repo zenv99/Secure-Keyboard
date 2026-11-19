@@ -33,10 +33,35 @@ object GlideTyping {
         val seqs: Array<IntArray>, // lower-case letters of the word without apostrophes
         val probs: IntArray,
         val byFirst: Map<Int, IntArray>,
+        val byLetters: Map<String, Int>,
     )
 
     private val vocabs: MutableMap<Dictionary, Vocab> = Collections.synchronizedMap(WeakHashMap())
     private val loading: MutableSet<Dictionary> = Collections.synchronizedSet(Collections.newSetFromMap(WeakHashMap<Dictionary, Boolean>()))
+
+    /** The dictionary the user is typing against. Built on first use so a correction is not skipped while a background load is still running. */
+    private fun vocabOf(dict: Dictionary): Vocab? {
+        vocabs[dict]?.let { return it }
+        if (loading.contains(dict)) {
+            // A full dictionary is already loading. Don't build it again on the key path.
+            val deadline = System.nanoTime() + 80_000_000L
+            while (System.nanoTime() < deadline) {
+                vocabs[dict]?.let { return it }
+                if (!loading.contains(dict)) break
+                try { Thread.sleep(2) } catch (_: InterruptedException) { break }
+            }
+            return vocabs[dict]
+        }
+        synchronized(vocabs) {
+            vocabs[dict]?.let { return it }
+            if (loading.contains(dict)) return null
+            return try {
+                buildVocab(dict).also { vocabs[dict] = it }
+            } catch (_: Throwable) {
+                null
+            }
+        }
+    }
 
     /** Starts loading the vocabulary of [dict] in the background (once). */
     @JvmStatic
@@ -89,7 +114,14 @@ object GlideTyping {
         }
         val groups = HashMap<Int, MutableList<Int>>()
         for (n in seqs.indices) groups.getOrPut(seqs[n][0]) { ArrayList() }.add(n)
-        return Vocab(words, seqs, probs, groups.mapValues { it.value.toIntArray() })
+        val byLetters = HashMap<String, Int>(words.size)
+        for (n in words.indices) {
+            val key = helium314.keyboard.latin.autocorrect.AutocorrectPolicy.lettersOf(words[n])
+            if (key.isEmpty()) continue
+            val old = byLetters[key]
+            if (old == null || probs[n] > probs[old]) byLetters[key] = n
+        }
+        return Vocab(words, seqs, probs, groups.mapValues { it.value.toIntArray() }, byLetters)
     }
 
     /** Suggestions for the swipe in [composedData] (best first); empty while the vocabulary is still loading. */
@@ -207,7 +239,7 @@ object GlideTyping {
      */
     @JvmStatic
     fun neighbourKeyCorrection(dict: Dictionary, typed: String, keyboard: Keyboard): String? {
-        val vocab = vocabs[dict] ?: run { prepare(dict); return null }
+        val vocab = vocabOf(dict) ?: return null
         val lower = typed.lowercase(Locale.ROOT)
         val typedCps = IntArray(lower.codePointCount(0, lower.length))
         var i = 0
@@ -273,40 +305,22 @@ object GlideTyping {
      * Returns null while the vocabulary is still loading.
      */
     @JvmStatic
-    fun proximityCorrection(dict: Dictionary, typed: String, keyboard: Keyboard, sentenceStart: Boolean): String? {
-        val vocab = vocabs[dict] ?: run { prepare(dict); return null }
+    @JvmOverloads
+    fun proximityCorrection(
+        dict: Dictionary,
+        typed: String,
+        keyboard: Keyboard,
+        sentenceStart: Boolean,
+        pointers: helium314.keyboard.latin.common.InputPointers? = null,
+    ): String? {
+        val opened = openSource(dict, keyboard) ?: return null
         val keyW = max(1f, keyboard.mMostCommonKeyWidth.toFloat())
-        val centres = HashMap<Char, FloatArray?>()
-        fun centre(ch: Char): FloatArray? = centres.getOrPut(ch) {
-            val cp = ch.code
-            val key = keyboard.getKey(cp) ?: keyboard.getKey(Character.toUpperCase(cp))
-            key?.hitBox?.let { floatArrayOf((it.left + it.right) / 2f, (it.top + it.bottom) / 2f) }
-        }
-        fun keyDistance(a: Char, b: Char): Float {
-            if (a == b) return 0f
-            val ca = centre(a)
-            val cb = centre(b)
-            if (ca == null || cb == null) return helium314.keyboard.latin.autocorrect.KeyGeometry.qwertyDistance(a, b)
-            return hypot(ca[0] - cb[0], ca[1] - cb[1]) / keyW
-        }
-        val source = object : ProximityAutocorrect.WordSource {
-            override val size: Int get() = vocab.words.size
-            override fun word(index: Int) = vocab.words[index]
-            override fun probability(index: Int) = vocab.probs[index]
-            override fun indexesNear(first: Char, distance: (Char, Char) -> Float): IntArray {
-                val out = ArrayList<Int>()
-                val f = helium314.keyboard.latin.autocorrect.KeyGeometry.baseLetter(first)
-                for ((cp, arr) in vocab.byFirst) {
-                    if (cp > 0xFFFF) continue
-                    val ch = helium314.keyboard.latin.autocorrect.KeyGeometry.baseLetter(cp.toChar())
-                    if (distance(f, ch) <= 2.3f) {
-                        for (n in arr) out.add(n)
-                    }
-                }
-                return out.toIntArray()
-            }
-        }
-        return ProximityAutocorrect.correct(typed, source, ::keyDistance, kept = false, sentenceStart = sentenceStart)
+        val touches = touchPoints(typed, pointers, keyW)
+        return ProximityAutocorrect.correct(
+            typed, opened.first, opened.second,
+            kept = false, sentenceStart = sentenceStart,
+            touches = touches, centreOf = { ch -> centreInKeyWidths(keyboard, ch, keyW) },
+        )
     }
 
     /** "gobi" + "g" → "going". Null until the vocabulary has loaded, or when the tokens should stay apart. */
@@ -323,11 +337,40 @@ object GlideTyping {
         return ProximityAutocorrect.missingSpace(typed, opened.first, opened.second)
     }
 
+    /** Touch points in key-width units, one per typed letter. Unknown presses stay null. */
+    private fun touchPoints(typed: String, pointers: helium314.keyboard.latin.common.InputPointers?, keyW: Float): Array<FloatArray?>? {
+        if (pointers == null || keyW <= 0f) return null
+        val n = typed.length
+        if (pointers.pointerSize < n) return null
+        val xs = pointers.xCoordinates
+        val ys = pointers.yCoordinates
+        val out = arrayOfNulls<FloatArray>(n)
+        var any = false
+        for (i in 0 until n) {
+            val x = xs[i]
+            val y = ys[i]
+            if (x < 0 || y < 0) continue
+            out[i] = floatArrayOf(x / keyW, y / keyW)
+            any = true
+        }
+        return if (any) out else null
+    }
+
+    private fun centreInKeyWidths(keyboard: Keyboard, ch: Char, keyW: Float): FloatArray? {
+        val cp = ch.code
+        val key = keyboard.getKey(cp) ?: keyboard.getKey(Character.toUpperCase(cp))
+        val box = key?.hitBox
+        if (box != null && keyW > 0f) {
+            return floatArrayOf((box.left + box.right) / 2f / keyW, (box.top + box.bottom) / 2f / keyW)
+        }
+        return helium314.keyboard.latin.autocorrect.KeyGeometry.centre(ch)
+    }
+
     private fun openSource(
         dict: Dictionary,
         keyboard: Keyboard?,
     ): Pair<ProximityAutocorrect.WordSource, (Char, Char) -> Float>? {
-        val vocab = vocabs[dict] ?: run { prepare(dict); return null }
+        val vocab = vocabOf(dict) ?: return null
         val keyW = max(1f, keyboard?.mMostCommonKeyWidth?.toFloat() ?: 1f)
         val centres = HashMap<Char, FloatArray?>()
         fun centre(ch: Char): FloatArray? = centres.getOrPut(ch) {
@@ -347,6 +390,10 @@ object GlideTyping {
             override val size: Int get() = vocab.words.size
             override fun word(index: Int) = vocab.words[index]
             override fun probability(index: Int) = vocab.probs[index]
+            override fun exact(letters: String): Pair<String, Int>? {
+                val n = vocab.byLetters[letters] ?: return null
+                return vocab.words[n] to vocab.probs[n]
+            }
             override fun indexesNear(first: Char, distance: (Char, Char) -> Float): IntArray {
                 val out = ArrayList<Int>()
                 val f = helium314.keyboard.latin.autocorrect.KeyGeometry.baseLetter(first)

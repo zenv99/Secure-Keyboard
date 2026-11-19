@@ -96,7 +96,13 @@ class KeyboardSwitcher private constructor() {
     private var keyboardLayoutSet: KeyboardLayoutSet? = null
 
     val mainKeyboardView get() = inputView?.keyboardView
-    val keyboard get() = mainKeyboardView?.keyboard
+    /** Set only by typing tests. A real input view replaces this on the device. */
+    private var keyboardForTest: Keyboard? = null
+    val keyboard get() = keyboardForTest ?: mainKeyboardView?.keyboard
+
+    fun useKeyboardForTest(keyboard: Keyboard?) {
+        keyboardForTest = keyboard
+    }
     val wrapperView get() = inputView?.wrapperView
     val stripContainer get() = inputView?.stripContainer
     val emojiTabStrip get() = inputView?.emojiTabStrip

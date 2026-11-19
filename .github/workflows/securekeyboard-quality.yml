@@ -107,16 +107,12 @@ jobs:
             export SK_KEYSTORE_PASSWORD="$PW"
             export SK_VERSION_CODE=$((4300 + GITHUB_RUN_NUMBER))
             # v1.0 shipped as versionCode 4394. Stay above it so this APK installs as an update.
-            if [ "$SK_VERSION_CODE" -le 4394 ]; then
-              export SK_VERSION_CODE=4395
+            # Stay above the already published v1.0.1 (versionCode 4396).
+            if [ "$SK_VERSION_CODE" -le 4396 ]; then
+              export SK_VERSION_CODE=4397
             fi
-            if ! GH_TOKEN="$GITHUB_TOKEN" gh release view v1.0.1 --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
-              export SK_VERSION_NAME="1.0.1"
-            elif ! GH_TOKEN="$GITHUB_TOKEN" gh release view v1.0 --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
-              export SK_VERSION_NAME="1.0"
-            else
-              export SK_VERSION_NAME="1.0.${GITHUB_RUN_NUMBER}"
-            fi
+            # This release is v1.0.1. If that pre-release already exists, the publish job replaces its files.
+            export SK_VERSION_NAME="1.0.1"
             echo "SK_SIGNED=1" >> "$GITHUB_ENV"
             echo "SK_VERSION_NAME=$SK_VERSION_NAME" >> "$GITHUB_ENV"
             echo "Signing with the permanent Secure Keyboard key"
@@ -253,12 +249,12 @@ jobs:
           Secure Keyboard v1.0.1 (commit ${GITHUB_SHA:0:8}). Not yet independently audited.
 
           What changed
-          - The keyboard follows the iPhone layout used in WhatsApp: small corner radius, light and dark colors, no number hints on the letter keys, a wide space bar labeled space, and 123 plus emoji beside it. The big button stays the microphone when the field is empty and Send when there is text.
-          - Key vibration is off unless it is turned on in settings. Existing installs that were still on the previous default are switched off once.
-          - Autocorrect handles short slips such as iw to is, and a space typed in place of a nearby letter such as gobi g to going. A missing space such as isgoing becomes is going. A word that is already correct is left alone, and backspace still restores the previous correction.
+          - Autocorrect fixes neighboring-key slips and run-on words on space (hwllo to hello, iamgoing to I am going, whatbtime to what time). A real word or name is left alone.
+          - Dictation can be used again after it finishes, and then performs the field's send action. It does not insert a newline.
+          - The plus menu is Photos, Camera, Location, Document, Contact, Emoji, Clipboard, Text shortcuts, and Settings. Location is requested only when tapped, takes one fix, and inserts a maps link as text. It is not stored.
 
           Privacy
-          This build passed the automated privacy gate: no INTERNET permission, backup disabled, only the allowlisted permissions. Voice audio, recognition, and learned words stay on the device.
+          No INTERNET permission. No background location. Backup is off. Voice, the location fix, and learned words stay on the device.
 
           License
           Secure Keyboard is free software under the GNU General Public License v3.0. It is a modified version of HeliBoard (copyright Helium314 and contributors), which is based on OpenBoard and the Android Open Source Keyboard (Apache License 2.0). This is not the official HeliBoard.
@@ -302,8 +298,13 @@ jobs:
           sed -i 's/^          //' release/notes.md
           if [ "$(cat buildinfo/signed)" = "1" ]; then
             cp release/SecureKeyboard.apk "release/SecureKeyboard-${TAG}.apk"
-            gh release create "$TAG" "release/SecureKeyboard-${TAG}.apk" release/SHA256SUMS.txt \
-              --prerelease --target "$GITHUB_SHA" --title "Secure Keyboard ${TAG}" --notes-file release/notes.md
+            if [ "$TAG" = "v1.0.1" ] && gh release view "$TAG" >/dev/null 2>&1; then
+              gh release upload "$TAG" "release/SecureKeyboard-${TAG}.apk" release/SHA256SUMS.txt --clobber
+              gh release edit "$TAG" --prerelease --target "$GITHUB_SHA" --title "Secure Keyboard v1.0.1" --notes-file release/notes.md
+            else
+              gh release create "$TAG" "release/SecureKeyboard-${TAG}.apk" release/SHA256SUMS.txt \
+                --prerelease --target "$GITHUB_SHA" --title "Secure Keyboard ${TAG}" --notes-file release/notes.md
+            fi
           fi
           # The old rolling 'test-build' release is gone: its non-version tag confused Obtainium's update check.
           gh release delete test-build --cleanup-tag --yes || true

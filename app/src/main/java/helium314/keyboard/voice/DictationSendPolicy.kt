@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-only
 package helium314.keyboard.voice
 
+import android.text.InputType
 import android.view.inputmethod.EditorInfo
+import helium314.keyboard.latin.utils.InputTypeUtils
 
 /**
  * The big button is a dictation key on an empty field and a send key once the field has text,
@@ -33,5 +35,26 @@ object DictationSendPolicy {
             EditorInfo.IME_ACTION_SEND
         else
             declared
+    }
+
+    /**
+     * After dictation inserts text, perform the field's editor action.
+     * Password fields and a bare URL field do not. A search field performs search.
+     * The action is never a newline.
+     */
+    fun shouldPerformAction(inputType: Int, imeOptions: Int): Boolean {
+        if (InputTypeUtils.isAnyPasswordInputType(inputType)) return false
+        val variation = inputType and InputType.TYPE_MASK_VARIATION
+        val action = imeOptions and EditorInfo.IME_MASK_ACTION
+        val noSuggestions = inputType and InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS != 0
+        val autoCorrect = inputType and InputType.TYPE_TEXT_FLAG_AUTO_CORRECT != 0
+        if (variation == InputType.TYPE_TEXT_VARIATION_URI
+            && action != EditorInfo.IME_ACTION_SEARCH
+            && !noSuggestions
+            && !autoCorrect
+        ) {
+            return false
+        }
+        return true
     }
 }

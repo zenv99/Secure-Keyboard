@@ -146,6 +146,40 @@ class ProximityAutocorrectTest {
         assertNull(ProximityAutocorrect.missingSpace("today", words))
     }
 
+    @Test fun fatFingersAndRunOns() {
+        val words = ProximityAutocorrect.ListWords(VOCAB + listOf(
+            w("hello", 220), w("good", 200), w("thanks", 180), w("going", 210),
+            w("tomorrow", 160), w("thank", 150), w("gonna", 140), w("time", 170),
+            w("what", 160), w("way", 150), w("my", 180), w("on", 190), w("see", 160), w("go", 180),
+            w("am", 170), w("you", 200), w("something", 190), w("today", 160),
+            w("together", 150), w("jonathan", 80), w("elizabeth", 80),
+        ))
+        val hwllo = ProximityAutocorrect.correct("hwllo", words)
+        assertEquals("hello", hwllo, "cost=${ProximityAutocorrect.alignmentCost("hwllo", "hello", KeyGeometry::qwertyDistance, 3f)}")
+        assertEquals("the", ProximityAutocorrect.correct("rhe", words))
+        assertEquals("good", ProximityAutocorrect.correct("gpod", words))
+        assertEquals("thanks", ProximityAutocorrect.correct("thwnks", words))
+        assertEquals("is going", ProximityAutocorrect.spaceSlip("gobi", "g", words)?.let { "is $it" }
+            ?: ProximityAutocorrect.spaceSlip("gobi", "g", words))
+        assertEquals("going", ProximityAutocorrect.spaceSlip("gobi", "g", words))
+        assertEquals("I am going", ProximityAutocorrect.missingSpace("iamgoing", words))
+        assertEquals("see you tomorrow", ProximityAutocorrect.missingSpace("seeyoutomorrow", words))
+        assertEquals("thank you", ProximityAutocorrect.missingSpace("thankyou", words))
+        assertEquals("on my way", ProximityAutocorrect.missingSpace("onmyway", words))
+        assertEquals("what time", ProximityAutocorrect.missingSpace("whatbtime", words))
+        assertEquals("gonna go", ProximityAutocorrect.missingSpace("gonnabgo", words))
+        assertNull(ProximityAutocorrect.missingSpace("something", words))
+        assertNull(ProximityAutocorrect.missingSpace("together", words))
+        assertNull(ProximityAutocorrect.missingSpace("jonathan", words))
+        assertNull(ProximityAutocorrect.correct("jonathan", words))
+        // Touch nearer E than A makes hallo → hello. The key centres alone leave a/e too far.
+        val e = KeyGeometry.centre('e')!!
+        val touches = arrayOfNulls<FloatArray>(5)
+        touches[1] = floatArrayOf(e[0], e[1])
+        assertNull(ProximityAutocorrect.correct("hallo", words))
+        assertEquals("hello", ProximityAutocorrect.correct("hallo", words, touches = touches, centreOf = KeyGeometry::centre))
+    }
+
     @Test fun largeCorpusStaysAccurateAndFast() {
         val base = VOCAB.map { it.word }.filter { it.length >= 4 && it.all { ch -> ch.isLetter() } }.distinct()
         val extras = COMMON.filter { it !in base }

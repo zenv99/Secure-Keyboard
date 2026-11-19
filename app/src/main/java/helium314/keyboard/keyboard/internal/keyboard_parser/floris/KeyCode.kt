@@ -99,6 +99,11 @@ object KeyCode {
 
     const val SETTINGS =                    -301
     const val TEXT_REPLACEMENT =           -302
+    const val ATTACH_PHOTO =               -303
+    const val ATTACH_CAMERA =              -304
+    const val ATTACH_DOCUMENT =            -305
+    const val ATTACH_CONTACT =             -306
+    const val ATTACH_LOCATION =            -307
 
     const val CURRENCY_SLOT_1 =             -801
     const val CURRENCY_SLOT_2 =             -802
@@ -213,6 +218,7 @@ object KeyCode {
         TIMESTAMP, CTRL_LEFT, CTRL_RIGHT, ALT_LEFT, ALT_RIGHT, META_LEFT, META_RIGHT, SEND_INTENT_ONE, SEND_INTENT_TWO,
         SEND_INTENT_THREE, EMOJI_SEARCH, INLINE_EMOJI_SEARCH_DONE, META_LOCK,
         BACKGROUND_GATHERING, BACKGROUND_GATHERING_TEMP_OFF, DPAD, TEXT_REPLACEMENT,
+        ATTACH_PHOTO, ATTACH_CAMERA, ATTACH_DOCUMENT, ATTACH_CONTACT, ATTACH_LOCATION,
         -> this
 
         KEY_REPEAT if (longPress) -> this

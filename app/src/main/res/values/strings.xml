@@ -392,6 +392,15 @@
     <string name="close_history" tools:keep="@string/close_history">Close clipboard history</string>
     <string name="emoji" tools:keep="@string/emoji">Emoji</string>
     <string name="text_replacement" translatable="false">Text replacement</string>
+    <string name="photo" translatable="false">Photos</string>
+    <string name="camera" translatable="false">Camera</string>
+    <string name="document" translatable="false">Document</string>
+    <string name="contact" translatable="false">Contact</string>
+    <string name="location" translatable="false">Location</string>
+    <string name="location_denied" translatable="false">Location permission was not granted</string>
+    <string name="location_unavailable" translatable="false">Location is not available</string>
+    <string name="attach_not_accepted" translatable="false">This app doesn\'t accept that file from a keyboard</string>
+    <string name="attach_camera_unavailable" translatable="false">No camera app is available</string>
     <string name="language" translatable="false">Languages</string>
     <string name="floating" tools:keep="@string/floating">Floating Keyboard</string>
     <!-- Title of the setting to set clipboard toolbar keys -->

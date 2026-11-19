@@ -131,6 +131,8 @@ public final class InputLogic {
     private long mDoubleSpacePeriodCountdownStart;
 
     private boolean mJustRevertedACommit = false;
+    /** The next separator should commit a space-slip word already placed in the composer. */
+    private boolean mSpaceSlipReady = false;
 
     private long mCursorMoveExpectedUntil = 0L;
 
@@ -739,6 +741,21 @@ public final class InputLogic {
                 break;
             case KeyCode.TEXT_REPLACEMENT:
                 mLatinIME.launchTextReplacements();
+                break;
+            case KeyCode.ATTACH_PHOTO:
+                mLatinIME.launchAttach(helium314.keyboard.latin.attach.AttachPickerActivity.MODE_PHOTO);
+                break;
+            case KeyCode.ATTACH_CAMERA:
+                mLatinIME.launchAttach(helium314.keyboard.latin.attach.AttachPickerActivity.MODE_CAMERA);
+                break;
+            case KeyCode.ATTACH_DOCUMENT:
+                mLatinIME.launchAttach(helium314.keyboard.latin.attach.AttachPickerActivity.MODE_DOCUMENT);
+                break;
+            case KeyCode.ATTACH_CONTACT:
+                mLatinIME.launchAttach(helium314.keyboard.latin.attach.AttachPickerActivity.MODE_CONTACT);
+                break;
+            case KeyCode.ATTACH_LOCATION:
+                mLatinIME.launchLocation();
                 break;
             case KeyCode.ACTION_NEXT:
                 performEditorAction(EditorInfo.IME_ACTION_NEXT);
@@ -2360,17 +2377,27 @@ public final class InputLogic {
         final String fragment = mWordComposer.getTypedWord();
         if (fragment == null || fragment.length() < 1 || fragment.length() > 4) return;
         final CharSequence before = mConnection.getTextBeforeCursor(48, 0);
-        if (before == null || before.length() < 3 || before.charAt(before.length() - 1) != ' ') return;
-        int start = before.length() - 2;
-        while (start >= 0 && !Character.isWhitespace(before.charAt(start))) start--;
-        final String previous = before.subSequence(start + 1, before.length() - 1).toString();
+        if (before == null || before.length() < fragment.length() + 3) return;
+        String upToSpace = before.toString();
+        // The cursor sits after the fragment, so the space is just before that fragment.
+        if (upToSpace.endsWith(fragment)) {
+            upToSpace = upToSpace.substring(0, upToSpace.length() - fragment.length());
+        }
+        if (upToSpace.isEmpty() || upToSpace.charAt(upToSpace.length() - 1) != ' ') return;
+        int start = upToSpace.length() - 2;
+        while (start >= 0 && !Character.isWhitespace(upToSpace.charAt(start))) start--;
+        final String previous = upToSpace.substring(start + 1, upToSpace.length() - 1);
         if (previous.length() < 2) return;
         final String merged = mDictionaryFacilitator.spaceSlipCorrection(previous, fragment);
         if (merged == null || merged.equalsIgnoreCase(fragment)) return;
+        // Drop the fragment, then the previous token and its space, and compose the joined word.
+        mConnection.setComposingText("", 1);
         mConnection.deleteTextBeforeCursor(previous.length() + 1);
+        mConnection.setComposingText(merged, 1);
         mWordComposer.setAutoCorrection(new SuggestedWordInfo(merged, "", SuggestedWordInfo.MAX_SCORE,
                 SuggestedWordInfo.KIND_WHITELIST, Dictionary.DICTIONARY_HARDCODED,
                 SuggestedWordInfo.NOT_AN_INDEX, SuggestedWordInfo.NOT_A_CONFIDENCE, null));
+        mSpaceSlipReady = true;
     }
 
     public void commitTyped(SettingsValues settingsValues, String separatorString) {
@@ -2401,7 +2428,7 @@ public final class InputLogic {
      */
     private void commitCurrentAutoCorrection(SettingsValues settingsValues, String separator, LatinIME.UIHandler handler) {
         // Complete any pending suggestions query first
-        if (handler.hasPendingUpdateSuggestions()) {
+        if (handler.hasPendingUpdateSuggestions() && !mSpaceSlipReady) {
             handler.cancelUpdateSuggestionStrip();
             // To know the input style here, we should retrieve the in-flight "update suggestions"
             // message and read its arg1 member here. However, the Handler class does not let
@@ -2414,8 +2441,19 @@ public final class InputLogic {
             performUpdateSuggestionStripSync(settingsValues, InputStyle.TYPING);
         }
         SuggestedWordInfo autoCorrectionOrNull = mWordComposer.getAutoCorrectionOrNull();
+        mSpaceSlipReady = false;
         String typedWord = mWordComposer.getTypedWord();
         String stringToCommit = (autoCorrectionOrNull != null) ? autoCorrectionOrNull.getWord() : typedWord;
+        if (settingsValues.mAutoCorrectEnabled && typedWord != null && typedWord.equals(stringToCommit)) {
+            final String fixed = mDictionaryFacilitator.autocorrectTypedWord(typedWord);
+            if (fixed != null && !fixed.equals(typedWord)) {
+                stringToCommit = fixed;
+                autoCorrectionOrNull = new SuggestedWordInfo(fixed, "", SuggestedWordInfo.MAX_SCORE,
+                        SuggestedWordInfo.KIND_WHITELIST, Dictionary.DICTIONARY_HARDCODED,
+                        SuggestedWordInfo.NOT_AN_INDEX, SuggestedWordInfo.NOT_A_CONFIDENCE, null);
+                mWordComposer.setAutoCorrection(autoCorrectionOrNull);
+            }
+        }
         // Keep punctuation tight against the corrected word ("the." not "the .").
         stringToCommit = AutocorrectSpacing.wordBeforeSeparator(stringToCommit, separator);
         boolean isBatchMode = mWordComposer.isBatchMode();
