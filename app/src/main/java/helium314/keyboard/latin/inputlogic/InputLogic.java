@@ -1161,6 +1161,7 @@ public final class InputLogic {
             final boolean expandReplacement = replacementPhrase != null
                     || isTextReplacement(mWordComposer.getAutoCorrectionOrNull());
             if ((settingsValues.mAutoCorrectEnabled && ! isInlineEmojiSearchAction()) || expandReplacement) {
+                maybeMergeSpaceSlip(settingsValues);
                 final String separator = shouldAvoidSendingCode ? LastComposedWord.NOT_A_SEPARATOR
                         : StringUtils.newSingleCodePointString(codePoint);
                 commitCurrentAutoCorrection(settingsValues, separator, handler);
@@ -2348,6 +2349,28 @@ public final class InputLogic {
         if (mWordComposer.isComposingWord()) {
             commitTyped(settingsValues, LastComposedWord.NOT_A_SEPARATOR);
         }
+    }
+
+    /**
+     * "gobi g" → "going": the space replaced a letter next to the space bar.
+     * Deletes the previous token and the space, then lets the fragment commit as the whole word.
+     */
+    private void maybeMergeSpaceSlip(final SettingsValues settingsValues) {
+        if (!settingsValues.mAutoCorrectEnabled || settingsValues.mInputAttributes.mIsPasswordField) return;
+        final String fragment = mWordComposer.getTypedWord();
+        if (fragment == null || fragment.length() < 1 || fragment.length() > 4) return;
+        final CharSequence before = mConnection.getTextBeforeCursor(48, 0);
+        if (before == null || before.length() < 3 || before.charAt(before.length() - 1) != ' ') return;
+        int start = before.length() - 2;
+        while (start >= 0 && !Character.isWhitespace(before.charAt(start))) start--;
+        final String previous = before.subSequence(start + 1, before.length() - 1).toString();
+        if (previous.length() < 2) return;
+        final String merged = mDictionaryFacilitator.spaceSlipCorrection(previous, fragment);
+        if (merged == null || merged.equalsIgnoreCase(fragment)) return;
+        mConnection.deleteTextBeforeCursor(previous.length() + 1);
+        mWordComposer.setAutoCorrection(new SuggestedWordInfo(merged, "", SuggestedWordInfo.MAX_SCORE,
+                SuggestedWordInfo.KIND_WHITELIST, Dictionary.DICTIONARY_HARDCODED,
+                SuggestedWordInfo.NOT_AN_INDEX, SuggestedWordInfo.NOT_A_CONFIDENCE, null));
     }
 
     public void commitTyped(SettingsValues settingsValues, String separatorString) {

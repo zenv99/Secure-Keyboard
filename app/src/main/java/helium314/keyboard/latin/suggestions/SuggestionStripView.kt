@@ -644,7 +644,7 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
                 when (event.actionMasked) {
                     MotionEvent.ACTION_DOWN -> {
                         v.isPressed = true
-                        v.performHapticFeedback(android.view.HapticFeedbackConstants.VIRTUAL_KEY, android.view.HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING)
+                        AudioAndHapticFeedbackManager.getInstance().performHapticFeedback(v, HapticEvent.KEY_PRESS)
                     }
                     MotionEvent.ACTION_UP -> {
                         v.isPressed = false

@@ -24,8 +24,10 @@
     >
         <!-- This should be aligned with KeyboardTheme.THEME_ID_* -->
         <item name="themeId">RoundedBase</item>
-        <item name="horizontalGap">1.7%p</item>
-        <item name="verticalGap">4.6%p</item>
+        <item name="horizontalGap">1.5%p</item>
+        <item name="verticalGap">3.0%p</item>
+        <item name="keyboardLeftPadding">0.8%p</item>
+        <item name="keyboardRightPadding">0.8%p</item>
         <item name="keyboardBottomPadding">6.8%p</item>
     </style>
 

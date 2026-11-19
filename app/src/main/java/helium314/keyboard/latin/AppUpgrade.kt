@@ -707,6 +707,18 @@ private object AppUpgrade {
                 prefs.edit { remove("emoji_recent_keys")  }
             }
         }
+        if (oldVersion in 1..4394) {
+            // v1.0 shipped vibration on, a 12 ms key tick, key hints, and a dpad key.
+            // Those were defaults, not a choice. Turn them off once. A custom duration is kept.
+            val duration = if (prefs.contains(Settings.PREF_VIBRATION_DURATION_SETTINGS))
+                prefs.getInt(Settings.PREF_VIBRATION_DURATION_SETTINGS, 12) else 12
+            val vibrate = prefs.getBoolean(Settings.PREF_VIBRATE_ON, true)
+            prefs.edit {
+                if (vibrate && duration == 12) putBoolean(Settings.PREF_VIBRATE_ON, false)
+                putBoolean(Settings.PREF_SHOW_HINTS, false)
+                putBoolean(Settings.PREF_SHOW_DPAD_KEY, false)
+            }
+        }
         if (oldVersion <= 4201) {
             if (prefs.contains("delete_swipe")) {
                 val old = prefs.getBoolean("delete_swipe", true)

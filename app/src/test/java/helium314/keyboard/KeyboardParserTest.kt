@@ -321,7 +321,7 @@ f""", // no newline at the end
     }
 
     @Test fun spaceKey() {
-        assertIsExpected("""[[{ "code":   32, "label": "space" }]]""", Expected(32, icon = "space_key", background = Key.BACKGROUND_TYPE_SPACEBAR))
+        assertIsExpected("""[[{ "code":   32, "label": "space" }]]""", Expected(32, "space", background = Key.BACKGROUND_TYPE_SPACEBAR))
     }
 
     @Test fun emojiKey() {

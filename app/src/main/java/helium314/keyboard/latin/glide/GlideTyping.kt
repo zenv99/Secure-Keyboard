@@ -309,6 +309,60 @@ object GlideTyping {
         return ProximityAutocorrect.correct(typed, source, ::keyDistance, kept = false, sentenceStart = sentenceStart)
     }
 
+    /** "gobi" + "g" → "going". Null until the vocabulary has loaded, or when the tokens should stay apart. */
+    @JvmStatic
+    fun spaceSlip(dict: Dictionary, previous: String, fragment: String, keyboard: Keyboard?): String? {
+        val opened = openSource(dict, keyboard) ?: return null
+        return ProximityAutocorrect.spaceSlip(previous, fragment, opened.first, opened.second)
+    }
+
+    /** "isgoing" → "is going". */
+    @JvmStatic
+    fun missingSpace(dict: Dictionary, typed: String, keyboard: Keyboard): String? {
+        val opened = openSource(dict, keyboard) ?: return null
+        return ProximityAutocorrect.missingSpace(typed, opened.first, opened.second)
+    }
+
+    private fun openSource(
+        dict: Dictionary,
+        keyboard: Keyboard?,
+    ): Pair<ProximityAutocorrect.WordSource, (Char, Char) -> Float>? {
+        val vocab = vocabs[dict] ?: run { prepare(dict); return null }
+        val keyW = max(1f, keyboard?.mMostCommonKeyWidth?.toFloat() ?: 1f)
+        val centres = HashMap<Char, FloatArray?>()
+        fun centre(ch: Char): FloatArray? = centres.getOrPut(ch) {
+            if (keyboard == null) return@getOrPut null
+            val cp = ch.code
+            val key = keyboard.getKey(cp) ?: keyboard.getKey(Character.toUpperCase(cp))
+            key?.hitBox?.let { floatArrayOf((it.left + it.right) / 2f, (it.top + it.bottom) / 2f) }
+        }
+        fun keyDistance(a: Char, b: Char): Float {
+            if (a == b) return 0f
+            val ca = centre(a)
+            val cb = centre(b)
+            if (ca == null || cb == null) return helium314.keyboard.latin.autocorrect.KeyGeometry.qwertyDistance(a, b)
+            return hypot(ca[0] - cb[0], ca[1] - cb[1]) / keyW
+        }
+        val source = object : ProximityAutocorrect.WordSource {
+            override val size: Int get() = vocab.words.size
+            override fun word(index: Int) = vocab.words[index]
+            override fun probability(index: Int) = vocab.probs[index]
+            override fun indexesNear(first: Char, distance: (Char, Char) -> Float): IntArray {
+                val out = ArrayList<Int>()
+                val f = helium314.keyboard.latin.autocorrect.KeyGeometry.baseLetter(first)
+                for ((cp, arr) in vocab.byFirst) {
+                    if (cp > 0xFFFF) continue
+                    val ch = helium314.keyboard.latin.autocorrect.KeyGeometry.baseLetter(cp.toChar())
+                    if (distance(f, ch) <= 2.3f) {
+                        for (n in arr) out.add(n)
+                    }
+                }
+                return out.toIntArray()
+            }
+        }
+        return source to ::keyDistance
+    }
+
     private fun insert(scores: FloatArray, indexes: IntArray, score: Float, index: Int) {
         if (score >= scores[scores.size - 1]) return
         var pos = scores.size - 1
