@@ -122,7 +122,7 @@ object ProximityAutocorrect {
         var bestScore = INF
         var bestWord: String? = null
         var bestRaw = INF
-        var secondRaw = INF
+        var secondScore = INF
         for (index in indexes) {
             val probability = words.probability(index)
             if (probability < MIN_PROBABILITY) continue
@@ -140,17 +140,17 @@ object ProximityAutocorrect {
             val score = rank(raw, probability, overlap(typedLetters, candidateLetters), lenDiff)
             val sameAsBest = bestWord != null && AutocorrectPolicy.lettersOf(bestWord!!) == candidateLetters
             if (score < bestScore) {
-                if (!sameAsBest) secondRaw = bestRaw
+                if (!sameAsBest) secondScore = bestScore
                 bestScore = score
                 bestRaw = raw
                 bestWord = candidate
-            } else if (!sameAsBest && raw < secondRaw) {
-                secondRaw = raw
+            } else if (!sameAsBest && score < secondScore) {
+                secondScore = score
             }
         }
         val chosen = bestWord ?: return null
-        // Two different words at almost the same edit cost: leave the typed word.
-        if (secondRaw - bestRaw < 0.12f && secondRaw < INF / 2) return null
+        // Nearly identical cheap candidates are ambiguous. A clearly better score is kept.
+        if (bestRaw < 1.2f && secondScore - bestScore < 0.015f && secondScore < INF / 2) return null
         if (bestRaw > limit) return null
         return applyCase(typed, chosen, sentenceStart)
     }
@@ -171,8 +171,8 @@ object ProximityAutocorrect {
         length == 2 -> 0f
         length == 3 -> 1.00f
         length == 4 -> 1.30f
-        length <= 6 -> 1.85f
-        else -> 2.40f
+        length <= 6 -> 2.15f
+        else -> 3.50f
     }
 
     /**
@@ -420,10 +420,8 @@ object ProximityAutocorrect {
                 curr[j] = best
                 if (best < rowBest) rowBest = best
             }
-            // Do not abandon the row early. A transposition is charged on the next row
-            // against the row before this one, so an expensive middle row can still
-            // finish as a cheap swap ("teh" → "the").
-            if (rowBest > limit && prev.min() > limit && before.min() > limit) return limit + 1f
+            // A shifted typo is expensive in the middle and cheap at the end ("xoredrt" → "correct").
+            // Abandoning the row as soon as it exceeds the limit drops those matches.
             val oldest = before
             before = prev
             prev = curr
@@ -446,7 +444,7 @@ object ProximityAutocorrect {
             if (target == null) distance(a, b)
             else hypot(touch[0] - target[0], touch[1] - target[1])
         } else distance(a, b)
-        return if (d <= KeyGeometry.ADJACENT) 0.42f + 0.28f * d else 2.4f
+        return if (d <= KeyGeometry.ADJACENT) 0.42f + 0.28f * d else 2.55f
     }
 
     private fun indelCost(ch: Char, neighbor: Char?, distance: (Char, Char) -> Float): Float {

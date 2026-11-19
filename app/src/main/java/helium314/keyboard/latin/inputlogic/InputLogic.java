@@ -2446,7 +2446,13 @@ public final class InputLogic {
         String stringToCommit = (autoCorrectionOrNull != null) ? autoCorrectionOrNull.getWord() : typedWord;
         if (settingsValues.mAutoCorrectEnabled && typedWord != null && typedWord.equals(stringToCommit)) {
             final String fixed = mDictionaryFacilitator.autocorrectTypedWord(typedWord);
-            if (fixed != null && !fixed.equals(typedWord)) stringToCommit = fixed;
+            if (fixed != null && !fixed.equals(typedWord)) {
+                stringToCommit = fixed;
+                autoCorrectionOrNull = new SuggestedWordInfo(fixed, "", SuggestedWordInfo.MAX_SCORE,
+                        SuggestedWordInfo.KIND_WHITELIST, Dictionary.DICTIONARY_HARDCODED,
+                        SuggestedWordInfo.NOT_AN_INDEX, SuggestedWordInfo.NOT_A_CONFIDENCE, null);
+                mWordComposer.setAutoCorrection(autoCorrectionOrNull);
+            }
         }
         // Keep punctuation tight against the corrected word ("the." not "the .").
         stringToCommit = AutocorrectSpacing.wordBeforeSeparator(stringToCommit, separator);

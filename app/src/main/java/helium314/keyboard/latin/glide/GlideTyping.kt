@@ -41,8 +41,20 @@ object GlideTyping {
 
     /** The dictionary the user is typing against. Built on first use so a correction is not skipped while a background load is still running. */
     private fun vocabOf(dict: Dictionary): Vocab? {
+        vocabs[dict]?.let { return it }
+        if (loading.contains(dict)) {
+            // A full dictionary is already loading. Don't build it again on the key path.
+            val deadline = System.nanoTime() + 80_000_000L
+            while (System.nanoTime() < deadline) {
+                vocabs[dict]?.let { return it }
+                if (!loading.contains(dict)) break
+                try { Thread.sleep(2) } catch (_: InterruptedException) { break }
+            }
+            return vocabs[dict]
+        }
         synchronized(vocabs) {
             vocabs[dict]?.let { return it }
+            if (loading.contains(dict)) return null
             return try {
                 buildVocab(dict).also { vocabs[dict] = it }
             } catch (_: Throwable) {
