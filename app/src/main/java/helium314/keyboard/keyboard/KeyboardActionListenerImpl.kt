@@ -375,9 +375,9 @@ class KeyboardActionListenerImpl(private val latinIME: LatinIME, private val inp
         if (crossed == 0) return
         val target = (trackpadWindowStart + doc.charOffset()).coerceAtLeast(0)
         connection.moveCursorTo(target)
-        // One light tick per character at a slow drag, and at most two ticks on a fast frame.
-        val ticks = crossed.coerceAtMost(2)
-        repeat(ticks) { performHapticFeedback(HapticEvent.GESTURE_MOVE) }
+        // One light tick per character the caret actually moved. The motion model already
+        // caps a frame, so a flick cannot buzz for the whole line.
+        repeat(crossed.coerceAtMost(3)) { performHapticFeedback(HapticEvent.GESTURE_MOVE) }
     }
 
     override fun onTouchpadMove(stepsX: Int, stepsY: Int): Boolean {

@@ -582,7 +582,7 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
     private var micIcon: android.graphics.drawable.Drawable? = null
     private var sendMode = false
 
-    /** While the text field has text the big mic turns into a send / return key (like WhatsApp); empty field: mic again. */
+    /** Empty field: the mic. Any text, typed or dictated: the paper-plane send icon. Never the return arrow. */
     fun setVoiceKeySendMode(send: Boolean) {
         if (send == sendMode) return
         sendMode = send
