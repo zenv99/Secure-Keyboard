@@ -176,9 +176,11 @@ class GestureFieldTest {
     }
 
     private fun shot(name: String) {
-        val dir = instrumentation.targetContext.getExternalFilesDir("shots") ?: return
+        val dir = File(instrumentation.targetContext.filesDir, "shots")
         dir.mkdirs()
-        device.takeScreenshot(File(dir, "$name.png"))
+        val file = File(dir, "$name.png")
+        val wrote = device.takeScreenshot(file)
+        println("SHOT $name wrote=$wrote bytes=${file.length()} path=${file.absolutePath}")
     }
 
     private fun shown(ime: LatinIME): Boolean {

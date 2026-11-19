@@ -14,5 +14,8 @@ adb shell pm grant "$PKG" android.permission.RECORD_AUDIO || true
 ./gradlew --no-daemon :app:connectedDebugNoMinifyAndroidTest \
   -Pandroid.testInstrumentationRunnerArguments.package=helium314.keyboard.smoke
 mkdir -p emulator-screenshots
+adb root || true
+adb pull "/data/data/${PKG}/files/shots" emulator-screenshots || true
 adb pull "/sdcard/Android/data/${PKG}/files/shots" emulator-screenshots || true
 find emulator-screenshots -type f -name '*.png' -print
+test -n "$(find emulator-screenshots -type f -name '*.png' -print)"
