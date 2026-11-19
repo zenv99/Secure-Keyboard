@@ -1,1072 +1,3868 @@
+# Derived from Unicode CLDR English annotations (https://www.unicode.org/cldr/). Unicode License. Face variants rank ahead of the plain symbol when both names contain the word. Not sent off the device.
 ab	🆎
 abacus	🧮
 abc	🔤
-abcd	🔡
-accept	🉑
+abcd	🔠 🔡
+above	⪍ ⪺
+absentminded	😶‍🌫
+absolutely	👊
+absorbing	🧽
+ac	∧
+accent	^ ` ´
+acceptable	🉑
+access	♿
+accessibility	🛗 🐕‍🦺 🦮 🦯 🦼
+accident	🫗
 accordion	🪗
-adult	🧑
-afghanistan	🇦🇫
-airplane	✈️
-albania	🇦🇱
-alembic	⚗️
-algeria	🇩🇿
-alien	👽
+accounting	🧾
+acidity	🍋‍🟩
+act	🤹 🤹‍♀ 🤹‍♂
+action	🎬
+active	🤸 🤸‍♀ 🤸‍♂
+actor	🧑‍🎤 🎭 👨‍🎤 👩‍🎤
+actress	🎭
+acute	´ ∠
+add	+
+addition	⊞
+address	📢
+adhesive	🩹
+adjoint	⊹
+admiration	🥹
+admission	🎟 🎫
+adorable	🩷
+adorbs	💘 🐶 😘 💞
+adore	🥰
+adult	🧑‍🧒 🧑‍🧑‍🧒 🧑‍🧒‍🧒 🧑‍🧑‍🧒‍🧒 👨
+aerial	🚡
+aeroplane	✈ 🛩 🛫 🛬
+aesculapius	⚕
+af	🔥
+afraid	😨
+africa	🌍
+afro	🦱 🪮
+again	🔄 🤦 🤦‍♀ 🤦‍♂
+age	🔞
+agree	👊 💯
+agreement	🤝
+aid	🦻 🩼 ⛑
+air	🪟
+airplane	✈ 🛩 🛫 🛬
+alarm	⏰ 🚨
+alces	🫎
+alcohol	🍷 🍸 🍹 🍺 🍻
+ale	🍺
+alembic	⚗
+alert	🚨
+alien	👽 👾
+aliens	📡 🛸
+alinea	¶
+all	∀ ≌ ◕
+almond	🌰
+almost	≈ ⪺
+alpaca	🦙
+alpha	🦁
+alphabet	🔤
+alternation	〽
+amazed	😳
+amazement	🫢
+amble	🚶 🚶‍♀ 🚶‍♂
 ambulance	🚑
-america	🇺🇸
+american	🏈
+americas	🌎
+amoeba	🦠
+amount	🈷 🤏
+ampersand	&
+ampersat	@
 amphora	🏺
-anchor	⚓
-andorra	🇦🇩
-angel	👼
-anger	💢
-angola	🇦🇴
-angry	😠
-anguilla	🇦🇮
+amulet	🧿 🪬
+amusement	🎡 🎢 🛝
+anatomical	🫀
+anchor	⚓ 🔱
+angel	😇 👼
+angelic	😇 🪽
+angels	😇
+anger	😠 😡 💢 😤 🗯
+angle	∠ ∟ 〈 〉 《
+angled	⊿
+angry	😠 👿 😡 😤 👺
 anguished	😧
+animal	😻 🐭 🐮 🐯 🐰
+animals	🐁 🐂 🐄 🐈 🐕
+ankle	🦶
+annelid	🪱
+anniversary	💑 💝 💏 💐 💕
+annoyed	😖 🙍 🙍‍♀ 🙍‍♂
+answer	🟰
 ant	🐜
-antarctica	🇦🇶
-apple	🍎
-aquarius	♒
-argentina	🇦🇷
-aries	♈
-armenia	🇦🇲
-art	🎨
-artist	🧑‍🎨
-aruba	🇦🇼
-asterisk	*️⃣
+antarctica	🐧
+antenna	📡 📶
+anticlockwise	↶ ↺ 🔄
+antlers	🫎
+anxiety	🫪
+anxious	😰 😟 😨 😥 🫦
+any	∀
+ape	🦧
+apocalypse	🧟 🪋 🧟‍♀ 🧟‍♂
+apology	🙇 🙇‍♀ 🙇‍♂
+apostrophe	' ‘ ’ ‚
+applause	👏
+apple	🍎 🍏 🥧
+application	🈸
+appreciate	🙏
+apprehend	👮 👮‍♀ 👮‍♂
+approval	👏
+approximate	≈
+approximately	≅ ≒
+approximation	≈
+aquarium	🪼
+aquarius	♒ 🏺
+ara	₳
+arabic	، ؛ ؟
+arc	◜ ◝ ◞ ◟
+archer	♐ 🏹
+archery	🏹
+architect	🧑‍💼 👨‍💼 👩‍💼
+arctic	🐻‍❄
+arepa	🫓
+argument	🫯
+aries	♈ 🐏
+arm	🦾 💪
+army	🪖
+arobase	@
+arrest	👮 👮‍♀ 👮‍♂
+arrival	🛬
+arrivals	🛬
+arrived	🚆 🚈 🛄
+arriving	🛬
+arroba	@
+arrow	➡ ⬅ ⬆ ⬇ 🔙
+arrows	⇇ ⇈ ⇉ ⇊ 🔃
+art	🎨 🎭 🖼
+articulated	🚛
+artist	🧑‍🎨 🎨 👨‍🎨 👩‍🎨
+arts	🎭 🥋
+artsy	🎨
+arty	🎨
+ary	∏ ∑ ⋂ ⋃ ⋁
+as	∋ ⋭
+ascend	🐦‍🔥 🪽
+ascension	🐦‍🔥
+ashes	⚱
+asia	🌏
+ask	🙇 🙇‍♀ 🙇‍♂ 🙏
+ass	🫏
+assassin	🥷
+assembly	🧑‍🏭 👨‍🏭 👩‍🏭
+assistance	🐕‍🦺
+asterisk	* ∗ ⊛ ✳
+asterism	⁂
 astonished	😲
-astronaut	🧑‍🚀
+astronaut	🧑‍🚀 👨‍🚀 👩‍🚀
+astronomy	⭐
+asymptote	≃
+asymptotically	≃
+atheist	⚛
+athletic	👟 ⛹ ⛹‍♀ ⛹‍♂
+athletics	🎽 🤾 🤾‍♀ 🤾‍♂
 atm	🏧
-atom	⚛️
-australia	🇦🇺
-austria	🇦🇹
-automobile	🚗
+atom	⚛
+atque	∧
+attraction	🧲
+aubergine	🍆
+austral	₳
+australia	🌏 🐨
+auto	🛺
+automated	🏧
+automobile	🚗 🚘 🛻
+autumn	🍂 🥮
+avalanche	🛘
+aviation	🪽
 avocado	🥑
+award	🎖 🏅
+away	💨
+awe	🫢
+awesome	😛 😎 😃 🎉 👌
+awful	😔 😞 😢
+awk	😬
+awkward	😐 😑 😬 😳 😶
+aww	🥹
+ax	🪓
 axe	🪓
-azerbaijan	🇦🇿
-baby	👶 🚼
-back	🔙
+baa	🐑
+babe	💑 💏
+babies	👶 🍼
+babooshka	🪆
+baboushka	🪆
+babushka	🪆
+baby	👶 🍼 🐤 👼 🚼
+back	🔙 🤚 🥹 🚪
+backhand	👆 👇 👈 👉 🤚
 backpack	🎒
-bacon	🥓
+backpacking	🎒 🥾
+backslash	\
+bacon	🥓 🐷 🐖
+bacteria	🦠 🧫
+bactrian	🐫
+bad	🦹 👎 🦹‍♀ 🦹‍♂
+badge	📛
 badger	🦡
 badminton	🏸
+bae	😍 💑 😘 😚 💏
+bag	👝 💰 🎒 👜 🧳
 bagel	🥯
-bahamas	🇧🇸
-bahrain	🇧🇭
-bald	🦲
-balloon	🎈
-bamboo	🎍
-banana	🍌
-bangbang	‼️
-bangladesh	🇧🇩
+baggage	🛄 🛅
+bags	🛍 🫩 🛄
+baguette	🥖
+bait	🪤
+bakery	🥯 🧁
+balance	⚖ ♎ 🤹 🤹‍♀ 🤹‍♂
+balancing	🤹 🤹‍♀ 🤹‍♂
+bald	🦲 👴
+ball	⚽ 🍙 🎊 🔮 🪩
+ballet	🧑‍🩰 🩰 🥿
+balloon	🎈 💬 💭 🗨 🗯
+ballot	🗳 ☑
+ballpoint	🖊
+bamboo	🐼 🎍
+banana	🍌 🐵 🐒
+band	🪈
+bandage	🩹 🤕
+bandana	🧕
+bang	❣ ! ¡ ❕ ❗
+bangbang	‼
 banjo	🪕
-bank	🏦
-barbados	🇧🇧
-barber	💈
-baseball	⚾
+bank	🏦 🏧 💰 💱 💳
+banknote	💴 💵 💶 💷 💸
+banner	🎋
+bar	― 🍫 📊 ⇤ ⇥
+barb	↼ ↽ ↾ ↿ ⇀
+barbell	🏋 🏋‍♀ 🏋‍♂
+barber	💈 💇 💇‍♀ 💇‍♂
+bare	🪾
+barefoot	👣
+barf	🤮
+bargain	🉐
+barrel	🍯
+barren	🪾
+barrier	🚧
+bars	📶 ↹
+base	↨
+baseball	⚾ 🧢
 basket	🧺
-basketball	🏀
-bat	🦇
-bath	🛀
-bathtub	🛁
-battery	🔋
-beach	🏖️
-beans	🫘
-bear	🐻
+basketball	🏀 ⛹ ⛹‍♀ ⛹‍♂
+bat	🦇 🏏 🏓
+bath	🛁 🛀
+bathing	👙 🧼 🩲 🩳 🩱
+bathroom	🚻 🚽 🪥 🚹 🚺
+bathtub	🛁 🛀
+battery	🔋 🪫
+bawling	😭
+bday	🥳 🎂
+beach	🌞 😎 🏖 🐋 🐬
+beacon	🛙 🚨
+bead	🧿
+beads	📿
+beak	🐦‍⬛
+beaming	😁
+beans	🫘 🫛
+beanstalk	🫛
+bear	🐻 🐻‍❄ 🧸 🐨 🍯
+beard	🧔 🧔‍♀ 🧔‍♂
+bearded	🧔 🧔‍♀ 🧔‍♂
+bearer	♒ ⛎ 🐍
+beast	💪
+beat	🫀 🪘
+beating	💓
+beauty	🌹 👄 🪷 💇 💇‍♀
 beaver	🦫
-bed	🛏️
+because	∵
+beckon	🫴
+bed	🛏 😴 🛌
+bedtime	😴 🥱 🛌
 bee	🐝
-beer	🍺
-beers	🍻
+beer	🍺 🍻 🫚
+beet	🫜
 beetle	🪲 🐞
+befuddled	😕
+beg	🙇 🙇‍♀ 🙇‍♂ 🙏
+begging	🥺
 beginner	🔰
-belarus	🇧🇾
-belgium	🇧🇪
-belize	🇧🇿
-bell	🔔
-benin	🇧🇯
+behind	⛅ 🌤 🌥 🌦
+believe	😮
+bell	🔔 🛎 🫑 🔕 🎐
+bellhop	🛎
+belly	🫃 🫄
+bemolle	♭
+bench	💪
+bent	🦵 🧢
 bento	🍱
-bermuda	🇧🇲
-bhutan	🇧🇹
-bicycle	🚲
-bicyclist	🚴
-bike	🚲
+berries	🍒 🫐
+berry	🍓 🫐
+bestest	💜
+bestie	👯‍♀ 👯‍♂ 👬 👭 🧑‍🤝‍🧑
+bet	💰 👌
+between	≬
+beverage	☕ 🧃 🍶 🍷 🍵
+bewilder	🤦 🤦‍♀ 🤦‍♂
+bff	👥 👯‍♀ 👯‍♂ 👬 👭
+biceps	💪
+bicycle	🚲 🚳 🚴 🚴‍♀ 🚴‍♂
+bicycles	🚳
+bicyclist	🚴 🚴‍♀ 🚴‍♂ 🚵 🚵‍♀
+big	🐯 🥺 🐅 🐆 😃
+bigfoot	🫈
+bike	🚲 🚳 🔐 🚴 🚴‍♀
+biking	🚴 🚴‍♀ 🚴‍♂ 🚵 🚵‍♀
 bikini	👙
-biohazard	☣️
-bird	🐦
-birthday	🎂
+bilberry	🫐
+bill	💴 💵 💶 💷 💸
+billed	🧢
+billiard	🎱
+billion	💰 💷 💲 💸
+billionaire	🚤
+bin	🚮
+binary	⋈
+biohazard	☣
+biologist	🧑‍🔬 🧬 🧫 👨‍🔬 👩‍🔬
+biology	🧫
+bird	🐦 🐦‍⬛ 🐓 🐔 🐧
+birdie	🏸 🏌 🏌‍♀ 🏌‍♂
+birth	🍼
+birthday	🥳 🎂 🎈 💐 🎁
+bisexual	🏳‍🌈
 bison	🦬
-blossom	🌼
+bisque	🦞
+bit	🤏
+bitcoin	₿
+bite	🦟 🫦
+biting	🫦
+black	⚫ ✒ 🏴 🐈‍⬛ 🐦‍⬛
+blades	🛼
+blame	😞 😠 😨
+blank	😐 😶
+bleed	🩸
+bless	⛪
+blessed	😇 🙏
+blind	🦮 🦯 👨‍🦯 👩‍🦯 🧑‍🦯
+bloated	🫪 🫃 🫄
+block	🫷 🫸
+blond	👱 👱‍♀ 👱‍♂
+blonde	👱‍♀
+blood	🩸 🧛 🅰 🅱 🅾
+bloom	🪻
+blossom	🌼 🌸 🌷
+blouse	👚
+blow	🌬 😮‍💨 🍃
 blowfish	🐡
+blowing	😮‍💨 😘
+blown	🤯
+blu	📀 💿
+blue	🫐 🥶 😰 💙 📘
 blueberries	🫐
-blush	😊
+blueberry	🫐
+bluebonnet	🪻
+blush	😊 😚
 boar	🐗
-boat	⛵
-bolivia	🇧🇴
-bomb	💣
-bone	🦴
-book	📖
-bookmark	🔖
+board	🎬 🛹
+boat	🛥 🚣 🚣‍♀ 🚣‍♂ ⛴
+boba	🧋
+body	👀 👁 👂 👃 👄
+bodybuilder	💪 🏋 🏋‍♀ 🏋‍♂
+bok	🥬
+bollywood	🎥
+bolt	🔩
+bomb	💣 💥
+bone	🦴 🍖 🍗 ☠
+bones	🦴 🩻
+boo	👻
+book	📚 📕 📖 📗 📘
+bookbag	🎒
+bookkeeping	🧾
+bookmark	🔖 📑
 books	📚
-boom	💥
+boom	🎆 🎇 💣 💥 👊
 boomerang	🪃
-boot	👢
-botswana	🇧🇼
+boot	👢 🥾
+booze	🍷 🍸 🍹 🍺 🍻
+bored	😒 😔 🥱 🫩 💅
+born	🍼
+boss	😏
+bottle	🍼 🧴 🍾 🍶
+bottoms	🍻
+boulder	🪨
+bouncing	⛹ ⛹‍♀ ⛹‍♂
 bouquet	💐
-bow	🙇
+bow	🏹 🎁 🙇 🙇‍♀ 🙇‍♂
+bowing	🙇 🙇‍♀ 🙇‍♂
+bowl	🍜 🥣 🏈
 bowling	🎳
+bowtie	⋈
+box	🍱 🥡 🧃 🗃 ☑
+boxing	🥊
 boy	👦
+boys	👬
+brace	{ }
+brachiosaurus	🦕
+bracket	[ ] { } 〈
+brackets	« » 〈 〉
 brain	🧠
-brazil	🇧🇷
-bread	🍞
+brainy	🤓
+branch	🪹 🪺
+branches	🪾
+brass	🪊
+brawl	🫯
+brb	₢ 🔜
+bread	🍞 🥖 🥐 🥪 🥯
+break	💔 🔔 ⛓‍💥
+breakfast	🍩 🍳 🥐 🥓 🥚
+breaking	🫫 ⛓‍💥
+breaky	🍴
+breast	🤱
+breath	🫁
+breathe	🫁
+brew	🫖
 brick	🧱
 bricks	🧱
+bride	👰‍♀
+bridge	🌉
 briefcase	💼
 briefs	🩲
+bright	🌝 🌞 😎 🔆 ☀
+brightness	🔅 🔆
+brine	🫝
+bro	😎 👊 💪 👨
+broadband	🛜
 broccoli	🥦
+broken	⛓‍💥 💔
+brontosaurus	🦕
+bronze	🥉
 broom	🧹
-brunei	🇧🇳
+brothers	👬
+brown	🍄‍🟫 🟤 🟫 🤎 👞
+brr	🧥
+bruh	👊
+brush	🪥
+bs	💩
+btc	₿
+bubble	🫧 🧋 🗨 🗯 👁‍🗨
 bubbles	🫧
 bucket	🪣
-bug	🐛
+buckingham	💂 💂‍♀ 💂‍♂
+buddhism	🪷
+buddhist	☸
+buffalo	🐃 🦬
+bug	🐛 🦗 🪲
+build	👷 📲 👷‍♀ 👷‍♂
+building	🏗 🏛 🏢 🌇 🏠
 bulb	💡
-bulgaria	🇧🇬
+bull	🎯 ♉ 🐂
+bullet	• ∙ ◘ ◦ 🚅
 bullseye	🎯
+bumblebee	🐝
+bump	👊
+bundle	🧣 🧥
+bunny	🐰 👯 👯‍♀ 👯‍♂ 🐇
+buoy	🛟
+burger	🍔
+burgers	🥬
+burn	❤‍🔥 🔥 🪼
+burp	🫧
 burrito	🌯
-burundi	🇧🇮
-bus	🚌
+burro	🫏
+bury	🪏
+bus	🚌 🚍 🚏 🚎 🚐
+business	🧑‍💼 🈺 👨‍💼 👩‍💼 🕴
 busstop	🚏
+bust	👤 👥
+busts	👥
+but	😥 ◕
 butter	🧈
-butterfly	🦋
+buttercup	🌼
+butterflies	😟
+butterfly	🦋 🫌
+button	⏏ ⏸ ⏹ ⏺ ▶
 bye	👋
+cab	🚕 🚖
+cabbage	🥦 🥬
+cabbie	🚕 🚖
+cabinet	🗄
+cable	🚠 🚡
+cableway	🚠
+caboose	🚂
 cactus	🌵
-cake	🍰
-calendar	📅 📆
-calling	📲
-cambodia	🇰🇭
+caddy	🏌 🏌‍♀ 🏌‍♂
+cafe	☕
+caffeine	☕
+cake	🎂 🥮 🍥 🍰
+calculation	🧮
+calculator	🧮
+calculus	∫ ∬
+calendar	📅 🗓 📆
+call	😥 🤙 📲
+calm	😌 🪷
+camcorder	📹
 camel	🐪 🐫
-camera	📷
-cameroon	🇨🇲
-camping	🏕️
-canada	🇨🇦
-cancer	♋
-candle	🕯️
-candy	🍬
-canoe	🛶
-capricorn	♑
-car	🚗
+camera	📷 🎥 📹 📸 🎦
+camping	🏕 ⛺ 🥾
+can	🗑 🥫
+cancel	✖ ❌
+cancer	♋ 🦀
+candelabrum	🕎
+candle	🕯
+candlestick	🕎
+candy	🍬 🍭 🪅 🍫
+cane	🦯 👨‍🦯 👩‍🦯 🧑‍🦯 🩼
+canned	🥫
+canoe	🛶 🚣 🚣‍♀ 🚣‍♂
+cantaloupe	🍈
+cap	🎓 🧢 👲
+capped	🏔
+capricorn	♑ 🐐
+capsicum	🫑
+captivated	🫣
+car	🏎 🚃 🚋 🚓 🚔
+carbs	🍞
+card	♥ 💳 📇 🪪 🗂
+cardiac	💛
+cardinal	➡ ⬅ ⬆ ⬇
+cardio	💓
+cardiology	🫀
+cards	🎴
+care	💅
+caret	‸ ^
+carets	« »
+carousel	🎠
+carp	🎏
+carpenter	🪚
+carpentry	🪚
 carrot	🥕
-cartwheeling	🤸
-castle	🏰
-cat	🐱 🐈
-cd	💿
-chad	🇹🇩
-chains	⛓️
-chair	🪑
-champagne	🍾
-chart	💹
-check	✅
-cheese	🧀
+cars	🚍 🚖 🚘
+cart	🛒
+cartoon	💭
+cartwheel	🤸 🤸‍♀ 🤸‍♂
+cartwheeling	🤸 🤸‍♀ 🤸‍♂
+case	🛄 🛅
+cash	🏧 💰 💳 💷 💲
+casino	🎰
+cask	🪣
+casserole	🥘
+castle	🏰 🏯
+casual	👖 👕
+cat	🐱 🐈 🐯 🐈‍⬛ 😺
+catch	🪝 🪍 🤾 🤾‍♀ 🤾‍♂
+caterpillar	🫌
+cats	🐈
+caught	😦
+caution	⚠
+cavities	🍬
+caw	🐦‍⬛
+cd	📀 💿
+celebrate	🥳 🎈 🪅 🎉 🎊
+celebration	🥳 🎀 🎆 🎇 🎈
+cell	📱 📳 📶 📴 📵
+cemetery	🪦
+censor	🤬
+cent	¢ %
+cereal	🥣
+ceremony	🎑
+cha	🪇
+chai	☕
+chain	⛓ ⛓‍💥
+chains	⛓
+chair	🪑 💺
+champion	🏆
+championship	⛹ ⛹‍♀ ⛹‍♂
+champs	🏆
+change	🪸 🫌
+changing	🚼
+chapel	⛪ 💒
+charge	💳 💲 🈂 🈚 🈶
+charm	🧿
+chart	📈 📉 📊 💹
+check	✔ ✅ ☑ 🛫
+checked	✔ 🛄 ✅ ☑
+checkered	🏁
+checkmark	✔ ✅
+cheerful	😀
+cheering	📣
+cheers	🍻
+cheery	😀
+cheese	🧀 🍕 🫕 🪤
+chef	🧑‍🍳 🔪 👨‍🍳 👩‍🍳
+chemist	🧑‍🔬 🧪 👨‍🔬 👩‍🔬
+chemistry	⚗ 🧪
+chemotherapy	🦲
+chequered	🏁
 cherries	🍒
+cherry	🌸 🍒
+chess	♟
+chest	🪎 🧰
 chestnut	🌰
-chicken	🐔
-child	🧒
-chile	🇨🇱
-china	🇨🇳
-chipmunk	🐿️
-chopsticks	🥢
-church	⛪
+chevron	^ « » 〈 〉
+chick	🐣 🐤 🐥
+chicken	🐔 🍗
+chickpea	🧆
+child	🧒 🧑‍🧒 🧑‍🧑‍🧒 🧑‍🧒‍🧒 👦
+children	🚸 👶
+chilling	😎
+chime	🎐
+chin	🤔
+chinese	👲
+chip	🍪
+chipmunk	🐿
+chocolate	🍫 🍪 🫕
+choo	🚆
+chop	🪓 🥩 💇 💇‍♀ 💇‍♂
+chopsticks	🥢 🍜 🥡
+choy	🥬
+christ	✝
+christian	⛪ ☦ ✝
+christmas	🎄 🌲 🎁 🎅 🤶
+chuck	🤾 🤾‍♀ 🤾‍♂
+church	⛪ 🔔 👼
+cicles	◉
 cigarette	🚬
-cinema	🎦
-cityscape	🏙️
+cinco	🪅
+cinema	🎦 🎞 🎥 📽
+circle	○ ◌ ● ⚪ ⚫
+circled	⊕ ⊖ ⊗ Ⓜ ⊘
+circles	◎
+circular	◜ ◝ ◞ ◟
+circumflex	^
+circus	🎪
+citation	👮 👮‍♀ 👮‍♂
+citrus	🍊 🍋 🍋‍🟩
+city	🏙 🌆 🏢
+cityscape	🏙 🌆
 cl	🆑
-clamp	🗜️
-clap	👏
+clack	🪭
+claim	🛄
+clamp	🗜
+clap	👏 🪭
 clapper	🎬
-climbing	🧗
+clapping	👏
+class	🚲
+classical	🏛
+classy	🧐
+claus	🎅 🤶 🧑‍🎄
+claws	🦞
+clay	🧱
+clean	🧼 🪥 🫧
+cleaning	🧹 🧼 🧽
+clearly	💯
+clenched	✊ 👊
+clever	🤓
+climate	🪸
+climb	🪜 🧗 🧗‍♀ 🧗‍♂
+climber	🧗 🧗‍♀ 🧗‍♂
+climbing	🧗 🧗‍♀ 🧗‍♂
+clink	🥂 🍻
+clinking	🥂 🍻
 clipboard	📋
-cloud	☁️
+clock	⏰ ⏲ 🕰 ⌚ ⏱
+clockwise	🔃 ↷ ↻ 🔁 🔂
+close	😓 😥 ) ] }
+closed	😆 😝 🌂 📕 😙
+closet	🚾 🚪
+clothes	👚 👖 👗 👛 👜
+clothing	☂ 👑 👓 👔 👖
+cloud	☁ 🌧 🌬 🫯 ⛅
+clouds	😶‍🌫
+cloudy	⛅
+clover	🍀
 clown	🤡
-clubs	♣️
-cn	🇨🇳
-coat	🧥
+club	♣ 🍷 🍸 🍹
+clubs	♣
+clue	🫆 🗝 🧩
+clutch	👝
+cmon	🙏
+cny	¥
+coaster	🎢
+coat	🧥 🥼
 cockroach	🪳
-cocktail	🍸
+cocktail	🍸 🍋‍🟩 🍹
 coconut	🥥
+coder	🧑‍💻 👨‍💻 👩‍💻
 coffee	☕
-coffin	⚰️
-coin	🪙
-cold	🥶
+coffin	⚰
+cog	⚙
+cogwheel	⚙
+coin	🪙 👛
+colada	🍍 🥥
+cold	🥶 😅 😓 😰 😷
+collage	📌
+collar	👕 👚 🧑‍💼 👨‍💼 👩‍💼
+collect	🪍
+collection	∪
+collide	💥
 collision	💥
-colombia	🇨🇴
-comet	☄️
-comoros	🇰🇲
+colon	: ; ؛
+colorful	🦚 🎨
+comb	🪮
+combat	🤼‍♀ 🤼‍♂ 🤼
+come	🫴
+comet	☄
+comfort	🫂
+comfortable	👘
+comfy	🥿
+comic	💣 💤 💥 💧 💫
+comma	, ، 、
+commercial	@
+communication	📝 📟 📢 📦 📰
 compass	🧭
-compression	🗜️
-computer	💻
+complete	✅
+completed	✅
+complicated	😥
+composition	∘
+compress	🗜
+computer	💽 🖥 🖱 ⌨ 💻
+concentrate	😣
+concentration	😣
+concentric	◎ ◉
+concertina	🪗
+conch	🐚
+condiment	🧂 🫙 🫝
+confetti	🎊
 confounded	😖
-confused	😕
-congrats	🎉
-congratulations	㊗️
-construction	🚧
-cook	🧑‍🍳
-cookie	🍪
-cooking	🍳
-cool	😎 🆒
-cop	👮
-copyright	©️
+confused	😕 😖 😵‍💫 🫤
+confusing	😕
+confusion	🫤
+conga	🪘
+congee	🥣
+congrats	👏
+congratulations	㊗ 👏
+congruence	≅
+conjugate	⊹
+connectivity	🛜
+consider	🤔
+construction	🚧 🏗 👷 👷‍♀ 👷‍♂
+contact	🔭 📡 🔎
+contain	⋭
+container	🫙
+containing	▣ ◈ ◉ ◙
+contains	∋ ∈
+contour	∮
+control	🎛 🛂 ^
+controller	🎮
+convenience	🏪
+convoluted	🥨
+cook	🧑‍🍳 👨‍🍳 👩‍🍳
+cooked	🍚
+cookie	🍪 🥠
+cooking	🍳 🏺 🔪 🍴 🍽
+cool	😛 😎 🆒 🪭
+cooling	🪭
+cop	👮 👮‍♀ 👮‍♂
+cops	🚓
+copter	🚁
+copyright	© ℗
 coral	🪸
-corn	🌽
-couple	👫
-couplekiss	💏
-cow	🐄 🐮
-crab	🦀
+cord	🪢
+cork	🍾
+corn	🌽 🍿
+corner	「 」 ↴ ↵ 『
+corners	▢
+correct	👊
+correction	🪌
+corvid	🐦‍⬛
+cosmetics	💄 💅
+cosmetology	💇 💇‍♀ 💇‍♂
+cost	😫 😲 💰
+couch	🛋
+counterclockwise	🔄
+counterpart	👯‍♀ 👯‍♂ 👯
+country	🏠 🏡
+couple	💑 💏 👬 👭 🧑‍🤝‍🧑
+cover	📔
+cow	🐮 🐄
+cowboy	🤠
+cowgirl	🤠
+crab	🦀 ♋
+cracked	🔓
+cracker	🍘
 cracking	🫫
-crayon	🖍️
-cricket	🦗
-croatia	🇭🇷
+crane	🏗
+crayon	🖍
+crazy	😳 🤪 🫨 😜
+cream	🍨 🍦
+creative	🎨
+creature	🫈 🐙 👹 👺 👻
+credentials	🪪
+credit	💳
+crescent	🌙 ☪ 🌒 🌘 🥐
+cricket	🦗 🏏
+crime	🫆
+criminal	🦹 🦹‍♀ 🦹‍♂
+cringe	😖
+crochet	🧶
 crocodile	🐊
 croissant	🥐
+crook	🪝
+crops	🌽
+cross	☦ ✝ ❌ ❎ ⨯
+crossbones	☠
+crossed	⚔ 🎌 🤞 😵 🔀
+crosshatch	▦ ▩
+crossing	🚸
+crotchet	[ ]
 crow	🐦‍⬛
-crown	👑
+crown	👑 🫅 👸 🤴
+cruise	🚣 🚣‍♀ 🚣‍♂
+crumbling	🫫
+crush	🥰
+crushed	💔
 crutch	🩼
-cry	😭 😢
-crying	😢
-cuba	🇨🇺
-cucumber	🥒
+cruzeiro	₢
+cry	😢 😭 🥹 😿
+crying	😢 😩 😪 😿 😂
+cryptid	🫈
+crystal	🔮
+crêpe	🥞
+cube	🧊
+cubed	³
+cubical	🏢
+cucumber	🥒 🫝
+cuffs	⛓‍💥
+culture	🧫
+cup	🥤 🍶 🪠 🍵
 cupcake	🧁
-cupid	💘
-curacao	🇨🇼
+cupid	💘 🪉
+cupped	🤲
+curious	🦝
+curl	📃 ➰ ➿
+curling	🥌
+curls	💪
+curly	➰ 🦱 { } ➿
+currency	💱 £ ¥ ₢ ₤
 curry	🍛
 cursing	🤬
+curve	🪝
+curving	↩ ↪ ⤴ ⤵
+cussing	🤬
 custard	🍮
 customs	🛃
+cut	🥩 ✂ 💈 🪚 💇
+cute	🩷 🩵
+cutlery	🍴
+cutting	✂
+cya	👋
+cyan	🩵
+cycle	🚲 🚴 🚴‍♀ 🚴‍♂ 🚵
+cycling	🚲
+cyclist	🚲 🚴 🚴‍♀ 🚴‍♂ 🚵
 cyclone	🌀
-cyprus	🇨🇾
-czechia	🇨🇿
-dagger	🗡️
-dancer	💃
-dancers	👯
+cygnet	🦢
+dad	🧢 👨‍🍼
+dagger	🗡 † ‡
+dairy	🧈
+dam	🦫
+dance	🪇 🩰 🪩 💃 🕺
+dancer	🧑‍🩰 👯‍♀ 👯‍♂ 💃 🕺
+dancing	💃 🕺
+dandelion	🌼
+danger	🛘 ⚡
+dangerous	💣
 dango	🍡
+dapper	😏
+dark	🕶 🌑
 dart	🎯
-dash	💨
-date	📅
-de	🇩🇪
+dash	– — 〰 ‐ -
+dashed	⇠ ⇡ ⇢ ⇣
+dashing	💨
+data	📈 📉 📊
+date	💘 😗 😙 😚 💄
+dating	💑 😗 😙 😚 💏
+daughter	👧
+david	✡
+day	🌞 🧖 🧖‍♀ 🧖‍♂
+daydream	💭
+daze	🫨
+dazed	😳
+de	⚜ 🪅
+dead	😑 😳 😵 ⚰ 💀
+deadlift	🏋 🏋‍♀ 🏋‍♂
+deadpan	😐
+deaf	🧏 🧏‍♀ 🧏‍♂
+deal	🤝
+death	⚰ 💀 ⚱ ☠
+debate	🫯
+deciduous	🌳
+decisions	💭
+decor	🪴
+decorated	📔
+decoration	🎍 💟
+decorative	📔
+decreasing	📉
 deer	🦌
-denmark	🇩🇰
-desert	🏜️
-detective	🕵️
-diamonds	♦️
-disappointed	😞
+definitely	💯
+deg	🪯
+degree	°
+deja	🔄
+dejected	😔 😞 😅
+delete	🪌
+delicious	😋 🍴
+delivering	📨
+delivery	🚚 📦 🥡
+demon	👿 😈
+demonstration	🪧
+denim	👖
+dental	🪥
+dentist	😬 😷 🦷
+department	🏬
+departure	🛫
+departures	🛫
+depressed	🫥
+derelict	🏚
+dermatologist	😷
+desert	🏜 🏝 🌵 🐪 🐫
+desktop	🖥
+dessert	🍡 🍩 🍪 🍬 🍭
+detective	🕵 🕵‍♀ 🕵‍♂ 🫆
+developer	🧑‍💻 👨‍💻 👩‍💻
+devil	👿 😈 👹
+dharma	☸
+diaeresis	¨
+diagonal	⋰ ⋱ ▩ 🫤
+dialog	💬 🗨
+diamond	♦ ◆ ◇ 🔶 🔷
+diaper	🧷
+dice	🎲
+die	🎲
+died	😔
+diesel	⛽
+diesis	♯
+diet	🍎
+difference	⊖
+differential	∂
+difficult	☯
+dig	🪏
+dim	🔅
+dinkus	⁂
+dinner	🐟 🍴 🍽
+dinosaur	🦕 🦖
+dionysus	🍇
+diplodocus	🦕
+direct	🎯
+direction	🧭 ➡ ⬅ ⬆ ⬇
+disability	🩼
+disagreement	🫯
+disappear	🫠 🫥
+disappointed	😞 😔 😥 🫤 🙍
+disapproval	🤨
+disaster	🛘
+disbelief	😳 🤨 🤦 🤦‍♀ 🤦‍♂
+disc	🥏
+disco	🪩
+discount	🈹
+disease	🦟 🪰
+disgruntled	🙍 🙍‍♀ 🙍‍♂
+disguise	🥸
 disguised	🥸
+dish	🧫 📡
+disjunction	⋁
+disk	💽 💾 💿 📀
+dislike	👎
+dismiss	🫳
+dissolve	🫠
 distorted	🫪
-divide	➗
-dizzy	💫 😵
-djibouti	🇩🇯
+distraught	😖
+distrust	🤨
+disturbed	🙍 🙍‍♀ 🙍‍♂
+dive	🥽
+divide	➗ ÷
+dividers	🗂
+divides	∣
+diving	🤿 🦪
+division	÷ ∕ ⊘ ➗
+divisor	∣
+diya	🪔
+dizzy	💫 🥴 😵‍💫 😵 🌀
+dièse	♯
+djinn	🧞 🧞‍♀ 🧞‍♂
 dna	🧬
+do	📋 ⛔
+doctor	😷 🏥 💉 💊 🩺
+document	🪪 📃 📄
 dodo	🦤
-dog	🐶 🐕
-dollar	💵
-dolls	🎎
+does	⊁ ⊮ ⋭
+dog	🐶 🐕 🌭 🐕‍🦺 🦮
+dogs	🐕
+doll	🎎 🪆
+dollar	$ 💵 💲 🪙 💰
+dolls	🎎 🪆
 dolphin	🐬
-dominica	🇩🇲
-done	✅
+donation	🩸
+done	⌛ ⏳ ✔ 💅 ✅
 donkey	🫏
+donut	🍩
+doo	💩
 door	🚪
+dope	👌
+dot	· ⋅ ⊙ ・ 💠
+dots	… ・
+dotted	🫥 ◌ 🔯
+double	″ ∬ ⋒ ‡ ‼
+doubt	🫤 🤷 🤷‍♀ 🤷‍♂
+doubtful	🫤
 doughnut	🍩
-dove	🕊️
-dragon	🐉 🐲
-dress	👗
+dove	🕊
+down	⬇ 👎 ↓ ↕ ↘
+downcast	😓
+downtrodden	🙎 🙎‍♀ 🙎‍♂
+downward	📉
+downwards	🔽 ↯ ⇊ ⇓ ⇣
+dr	😷 🥼
+dracula	🧛
+dragon	🐲 🐉 🀄
+drained	🪫
+drawing	🪌
+dream	💭
+dreams	🌜 🌒
+dress	👗 👛 👜 🥻 👚
+dressage	🐴
+dressed	👖 👗 👕 👚
+dribble	⛹ ⛹‍♀ ⛹‍♂
+drink	🍹 🍶 🏺 🧉 🫖
+drinking	🍷 🍸 🍹 🍺 🚰
+drinks	🍷 🍸 🍹 🍺 🍻
+drip	🫟 💦
+drive	🚐 🚕 🚚 🚛 🚙
+driving	🚗 🏌 🏌‍♀ 🏌‍♂
+dromedary	🐪
 drooling	🤤
-droplet	💧
-drum	🥁
-duck	🦆
+drop	💧 🩸 ☔ 🫳
+droplet	💧 💦
+droplets	💦
+dropped	🫳
+drops	☔ 💦
+drought	🌵 🪾
+drove	🚖 🚘 🚦
+drugs	💊
+drum	🥁 🛢 🪘
+drumstick	🍗
+drumsticks	🥁
+drunk	🥴 🍹
+dry	🚱
+dua	🤲
+duck	🦆 🪿
+duckling	🦢
+duel	🤼‍♀ 🤼‍♂ 🤼
 dumpling	🥟
-dvd	📀
+dung	💩
+dunno	😕 🤷 🤷‍♀ 🤷‍♂
+dupe	♟
+dusk	🌆 🌇
+dvd	📀 💿
+dying	🥵 🥀
+dynamite	🧨
 eagle	🦅
-ear	👂
-earth	🌍
-ecuador	🇪🇨
-egg	🍳 🥚
+ear	👂 🌽 🦻 🌾 👯‍♀
+earbud	🎧
+ears	👯 👯‍♀ 👯‍♂ 👂 🙉
+earth	🌎 🌐 🌍 🌏
+earthquake	🫨 🛘
+earthworm	🪱
+east	⇗ ⇘ ➡
+easy	🍳
+eat	😋 🍔 🥄 🍴 🍽
+edamame	🫛
+edge	📏
+education	🎒 📚 🎓 📕 📖
+eek	😰
+eet	⊥
+egg	🥚 🍳 🐣 🪺
 eggplant	🍆
-egypt	🇪🇬
-eight	8️⃣
-eject	⏏️
+eggs	🪺
+egp	£
+eight	🕗 🕣 ✳ ✴ 8⃣
+eighteen	🔞
+eighth	♪
+eject	⏏
+elderly	👴 👵 🧓
+electric	🔌 🔦 ⚡ 💡 🚃
+electrician	🧑‍🔧 👨‍🔧 👩‍🔧
+electricity	⚡ 🔌
+electronic	🪫
+elegant	🌹 💃 🕺
+element	∈ ∉ ∋
 elephant	🐘
 elevator	🛗
-elf	🧝
-email	📧
-end	🔚
-england	🏴󠁧󠁢󠁥󠁮󠁧󠁿
+eleven	🕚 🕦
+elf	🧝 🧝‍♀ 🧝‍♂
+elk	🫎
+ellipsis	… ⋮ ⋯ ⋰ ⋱
+elves	🧝 🧝‍♀ 🧝‍♂
+em	—
+email	✉ 📤 📥 📧 📨
+embarrass	🫣 🫢
+embarrassed	😳 🫠 🥹 🙈
+emblem	🔱
+embrace	🫂
+embroidery	🪡
+emerge	🐦‍🔥
+emergency	🚑 🦺 🚨
+emoji	🤨
+emotion	♥ ❤ 💓 💔 💖
+empanada	🥟
+employed	👔
+empty	∅ 🪹 🫙 🫗
+en	–
+enchantment	🧝 🧝‍♀ 🧝‍♂
+end	🔚 ∎
+energy	🪫
+engaged	💍
+engagement	💍 💎
+engine	🚒 🚂
+engineer	🧑‍🔬 👨‍🔬 👩‍🔬
+enlightenment	🛙
 enraged	😡
-envelope	✉️
+ensnare	🪝
+entertainer	🧑‍🎤 👨‍🎤 👩‍🎤
+entertainment	🎆 🎯 📻 🎠 🎣
+entry	⛔ 🚫
+envelope	✉ 📩 📨 🧧
+epic	😯 😜 😱
+equal	= ≃ ≅ ≈ ≌
+equality	≅ ≌ ≣ ⊇ ≖
+equals	🟰 = ≤ ≥
+equestrian	🐎
+equine	🐴
+equivalent	≣ ≳
+erase	🪌
 eraser	🪌
-eritrea	🇪🇷
-es	🇪🇸
-estonia	🇪🇪
-eswatini	🇸🇿
-ethiopia	🇪🇹
-eu	🇪🇺
-euro	💶
+erosion	⊖
+error	🪌
+eruption	🌋
+escargot	🐌
+et	&
+eur	€
+euro	€ 💶 🪙
+europe	🌍
+european	🏰 🏤
+evening	🌆
+evergreen	🌲
+everyone	👥
+evidence	🧾
+evil	🖤 👿 😈 🙈 🙉
+evolution	🧬
+ew	🤮
 ewe	🐑
-exclamation	❗
-expressionless	😑
-eye	👁️
+exact	≡
+exasperation	🤦 🤦‍♀ 🤦‍♂
+exchange	💱
+excited	💖 💗 🥳 😅 👻
+exclamation	! ❣ ¡ ‼ ⁉
+exercise	🙆 🙆‍♀ 🙆‍♂
+exhalation	🫁
+exhale	😮‍💨
+exhaling	😮‍💨
+exhausted	😮‍💨 🫩
+exists	∃
+expendable	♟
+expensive	🫰
+experiment	🔬 🥼 🧪
+expert	🤓
+explode	💥 🤯
+exploding	🤯
+explosion	💣
+explosive	🧨
+expressionless	😑 😐 😶
+extinction	🦣 🦤
+extinguish	🧯
+extinguisher	🧯
+extra	🛸
+extraterrestrial	👽 🔭 👾
+eye	👁 👀 😍 😻 🤪
+eyebrow	🥸 🤨
+eyed	👦 👧 🧒 🤩
 eyeglasses	👓
-eyes	👀
-facepalm	🤦
-facepunch	👊
-factory	🏭
-fairy	🧚
-falafel	🧆
-family	👪
-farmer	🧑‍🌾
+eyeroll	🙄
+eyes	👀 🤪 🥴 🥺 😆
+eyewear	👓 🕶
+face	😮‍💨 🤮 😋 😛 😶
+faced	🥵 🥶
+facepalm	🤦 🤦‍♀ 🤦‍♂
+facepalming	🤦 🤦‍♀ 🤦‍♂
+facing	📄 🤛 🤜 🐥
+factory	🏭 🧑‍🏭 👨‍🏭 👩‍🏭
+fail	😞 😩 ⛔
+fairy	🧚 🐲 👿 😇 😈
+fairytale	🐲 👿 😇 😈 🐉
+faithful	💯
+falafel	🧆 🥙
+fall	🍂
+fallen	🍂
+falling	🪋 🌠 🍁 🍂
+falsum	⊥
+family	👪 👑 🧑‍🧒 🧑‍🧑‍🧒 🧑‍🧒‍🧒
+fan	🪭
+fancy	🧐 👗 👛 🎩
+fangs	🧛 🧛‍♀ 🧛‍♂
+fantasy	👿 😇 😈 🐦‍🔥 👸
+farewell	🫂
+farm	🐮 🐴 🐷 🐂 🐄
+farmer	🧑‍🌾 👨‍🌾 👩‍🌾
+farming	🧺
+fart	💨
+fashion	👠
+fast	⏩ ⏪ ⏫ ⏬ 🍔
+fateh	🪯
+father	🎅 👨‍🍼
+fatigued	🫩
+fatima	🪬
+favor	🙇 🙇‍♀ 🙇‍♂
 fax	📠
-fearful	😨
+fear	😨 😱 🫦
+fearful	😨 😱
 feather	🪶
-feet	🐾
-female	♀️
-ferry	⛴️
-fiji	🇫🇯
+feed	🍴 👨‍🍼 👩‍🍼 🧑‍🍼
+feeding	🤱 👨‍🍼 👩‍🍼 🧑‍🍼
+feelings	🥹
+feels	😍 😖 😠 😡 😢
+feet	🦶 🐾 👞
+feline	🐈‍⬛
+female	♀ 🐑
+fencer	🤺
+fencing	🤺
+ferment	🫝
+ferris	🎡
+ferry	⛴
+festival	🎎 🥮
+festive	🪅 💃 🕺
+fetch	💁 💁‍♀ 💁‍♂
+fever	🤧 🦟
+feverish	🥵
+fi	🛜
+field	🏑
+fife	🪈
+fight	🫯 🥷
+fighter	🥷
+file	📁 🗄 📂 🗃
+filing	🗄
+fill	▤ ▥ ▦ ▩ ◍
+filled	■ ▬ ▰ ◆ ●
+filling	🥧
+film	🎞 📽 🎦 🎥
+fine	😐 😑 😒
+finger	🖕 🖖 🤞 ☝ 🫰
 fingerprint	🫆
-finland	🇫🇮
-fire	🔥
+fingers	🤌 🤞 🖐 🤏 🤟
+finish	🏁
+fire	🔥 🧑‍🚒 🧨 🚒 🧯
+fireball	🪋
+firebird	🐦‍🔥
 firecracker	🧨
-firefighter	🧑‍🚒
-fireworks	🎆
-fish	🐟
-fist	✊
-five	5️⃣
-flag	🏁
-flags	🎏
+firefighter	🧑‍🚒 👨‍🚒 👩‍🚒
+firetruck	🧑‍🚒 👨‍🚒 👩‍🚒
+fireworks	🎆 🎇 🧨
+first	🌛 🌓 🥇
+fish	🐟 🐠 🍥 ♓ 🐡
+fishes	🐟 🐠
+fisheye	◉
+fishing	🎣 🐟 🦦 🚣 🚣‍♀
+fist	✊ 👊 🤛 🤜
+five	🕔 🕠 5⃣ ✋ 🙏
+fix	👷 👷‍♀ 👷‍♂
+fixed	✅
+flag	🏁 🏳 🏳‍⚧ 🏳‍🌈 🏴
+flags	🎌 🏁
+flair	💃 🕺
+flamboyant	🦩
+flame	🔥
+flamenco	💃 🕺
 flamingo	🦩
+flash	📸
 flashlight	🔦
-flatbread	🫓
+flat	♭ 🥿
+flatbed	🛻
+flatbread	🫓 🥙
+flathead	🪛
+flats	🥿
+flautist	🪈
+flavor	🧂
+flavoring	🧄 🧅
+fleek	💯 👌
+fleur	⚜
+flex	💪
+flexed	💪
+flick	💁 💁‍♀ 💁‍♂
+flight	🪶
+flip	🩴 🤸 🤸‍♀ 🤸‍♂ 💁
 flipper	🐬
+flirt	😉 😏 😗 😘 😙
+flirting	🫦
+float	🛟
+floating	🫧
+flock	🪿
+floor	🤣
+flop	🩴
+floppy	💾
+flower	💮 🥀 🎴 🌷 🌹
+flowing	⏳
+flu	🤧 💉
+fluctuate	🪀
+fluffy	🐑 🐩
 flushed	😳
 flute	🪈
-fly	🪰
-fog	🌫️
+flutter	🍃 🪭
+fluttering	🍃
+fly	🪰 ✈ 🕊 🪁 🪽
+flying	🛸 🥏 ✈ 🪽
+fml	💩
+focus	😣
+fog	🌫 🌁 😶‍🌫
 foggy	🌁
+folded	🙏
+folder	📁 📂
+folding	🪭
+folklore	🧜 🧜‍♀ 🧜‍♂ 🧝 🧝‍♀
 fondue	🫕
-food	🍽️
-foot	🦶
-football	🏈
+food	🥫 🍲 😋 🥘 🍅
+foot	🦶 🦵 👞
+football	🏈 🏉 ⚽
+footprint	👣
 footprints	👣
-fountain	⛲
-four	4️⃣
+forbidden	🚫 ⛔ 🚭 🚯 🚳
+force	⊮ 🪠
+forensics	🫆
+forest	🌲 🌳 🫈
+forever	♾
+forgive	🙇 🙇‍♀ 🙇‍♂
+forgot	😧 😮 🙈
+fork	🍴 🍽
+formal	🎩 🤵 🤵‍♀ 🤵‍♂
+fortune	🥠 🪬 🔮 🔯
+forward	⏩
+fosho	👌
+fountain	⛲ 🖋
+four	🕓 🕟 🍀 4⃣
+fowl	🪿
 fox	🦊
-fr	🇫🇷
-france	🇫🇷
-free	🆓
+fraction	⁄
+fragile	🫌
+frame	🪟 🖼
+framed	🖼
+frames	🎞
+franc	₣
+frankfurter	🌭
+free	🆓 🈶 🈚
+freedom	⛓‍💥
+freestyle	🏊 🏊‍♀ 🏊‍♂
+freezing	🥶
+french	₣ 🍟 🥐 🥖
+fresh	🪟 💈
+fried	🍤
+friend	👥
+friends	👥 👬 👭 🧑‍🤝‍🧑 👫
+friendship	🫂
 fries	🍟
 frog	🐸
-frowning	☹️ 😦
-fu	🖕
+front	🐥 🚪
+frostbite	🥶
+frown	☹ 😕 🙁 😦 🙍
+frowning	☹ 😦 🙍 🙍‍♀ 🙍‍♂
+fruit	🥝 🍅 🍇 🍈 🍉
+frustrated	😖 😠 🫤 🙍 🙍‍♀
+frustration	🫤
+fry	🍳
+frying	🍳
+fuel	⛽
 fuelpump	⛽
-gabon	🇬🇦
-gambia	🇬🇲
+fuji	🗻
+full	🌝 😋 🌕 . 。
+fume	😤
+fuming	😤
+funeral	⚱
+fungi	🍄‍🟫
+fungus	🍄 🍄‍🟫
+funny	😜 😂 🤣
+furious	😤
+fury	😤
+futbol	⚽
+future	🔮
+gaggle	🪿
+gains	💪
+gait	🚶 🚶‍♀ 🚶‍♂
+gamble	🎰
+gambling	🎰
+game	♥ 🎮 🎲 🏏 🃏
+gamer	👾
+games	👾
+gander	🪿
+gang	🚲
+garbage	🗑
+garden	🏡 🐌 🐛 🐜 🪏
+gardener	🧑‍🌾 👨‍🌾 👩‍🌾
 garlic	🧄
-gb	🇬🇧
-gear	⚙️
-gem	💎
+garnish	🍋‍🟩
+gas	⛽
+gasoline	⛽
+gasp	😮‍💨 🫢
+gay	🌈 🏳‍🌈
+gbp	£
+gear	⚙
+geek	🤓
+geese	🪿
+geez	😳
+gem	💎 🪎
 gemini	♊
-genie	🧞
-georgia	🇬🇪
-germany	🇩🇪
-ghana	🇬🇭
+genderqueer	🌈 🏳‍🌈
+gene	🧬
+genetics	🧬
+genie	🧞 🧞‍♀ 🧞‍♂
+geometric	⚪ ⚫ 🔘 🔴 🔵
+german	₰
+germs	😷
+gesture	🤟 🤌 🙈 🙉 🙊
+gesturing	🙅 🙅‍♀ 🙅‍♂ 🙆 🙆‍♀
+gesundheit	🤧
+getting	💆 💆‍♀ 💆‍♂ 💇 💇‍♀
+gherkin	🫝
 ghost	👻
-gibraltar	🇬🇮
-gift	🎁
+giant	🫈
+gibbous	🌔 🌖
+gift	🎁 🧧
+gifted	🤓
+giggle	🤭
+giggling	🤭
+ginger	🫚 🦰
 giraffe	🦒
 girl	👧
-glasses	👓
+girls	👭
+given	∀
+glad	🥲 😊
+glass	🍷 🍸 🥃 🥛 🔍
+glasses	👓 🤓 🥸 🥂 🕶
+glbt	🌈 🏳‍🌈
+glbtq	🌈 🏳‍🌈
+glide	🪂
+glitter	🪩
+glittery	🌟
+globe	🌎 🌐 🌍 🌏
+glory	🐦‍🔥
+glove	🥊 🥎
 gloves	🧤
-goat	🐐
+glow	🌟
+glowing	🌟
+go	💨
+goal	🥅 🥍
+goat	🐐 ♑
+gobble	🦃
 goblin	👺
 goggles	🥽
-golf	⛳
-golfer	🏌️
-golfing	🏌️
+gold	🪙 🏅 💰 🪎 🥇
+golf	🚩 ⛳ 🏌 🏌‍♀ 🏌‍♂
+golfing	🏌 🏌‍♀ 🏌‍♂
+gondola	🚠 🚡
+gone	💨
+goo	👶
+good	💖 😪 😴 🫡 💤
+goodbye	🫂
+goodnight	😴 🥱 💤 🛌
+goofy	🤪
+googly	👀
 goose	🪿
+gordita	🫓
 gorilla	🦍
+gossip	💁 💁‍♀ 💁‍♂
+got	👌
+gotcha	👌
+gotta	💨
+grade	🈴
+graduate	🧑‍🎓 👨‍🎓 👩‍🎓
+graduation	🎓
+grain	🍞 🌾
+grains	🌾
+gramps	👴
+grandchild	🧒
+granddaughter	👧
+grandfather	👴
+grandma	👵
+grandmother	👵
+grandpa	👴
+grandparent	🧓
+grandson	👦
+granny	👵
+grape	🍇
 grapes	🍇
-greece	🇬🇷
-greenland	🇬🇱
-grenada	🇬🇩
+graph	📈 📉 📊 💹
+grapple	🤼‍♀ 🤼‍♂ 🤼
+grasshopper	🦗
+grateful	🥲 🥹
+gratitude	🥹
+grave	` 🪦
+graveyard	🪦
+gravity	🪋
+gray	🩶 🦳
+great	👏
+greater	> ≫ ≯ ≳ ≥
+green	🍏 💚 📗 🟢 🟩
+greetings	👋
+grey	🩶
+grimace	😬 🙎 🙎‍♀ 🙎‍♂
 grimacing	😬
-grin	😁
-grinning	😀
-guadeloupe	🇬🇵
-guam	🇬🇺
-guard	💂
-guardsman	💂‍♂️
-guardswoman	💂‍♀️
-guatemala	🇬🇹
-guernsey	🇬🇬
-guinea	🇬🇳
+grin	😀 😁 😃 😄 😸
+grinning	😀 😆 😅 😃 😄
+grip	🫹 🫺
+grizzly	🐻
+groan	😮‍💨
+groom	🪮 💇 💇‍♀ 💇‍♂ 🤵‍♂
+groove	💃 🕺
+gross	🤢 🤮 😝
+ground	⛱
+group	⋭
+grow	🪴
+growing	💗
+growl	🐻
+growth	🌷 📈 💹
+gtg	👋
+gua	👲
+guanaco	🦙
+guapi	👲
+guard	💂 💂‍♀ 💂‍♂ 😦
+guess	🤷 🤷‍♀ 🤷‍♂
+guidance	🛙
+guide	🦮 🪬
+guillemet	« »
 guitar	🎸
+gullwing	{ }
 gun	🔫
-guyana	🇬🇾
-haircut	💇
-haiti	🇭🇹
+gym	💪
+gymnastics	🤸 🤸‍♀ 🤸‍♂
+gyro	🥙
+gyōza	🥟
+habitat	🌳
+haha	🫠 😆 😂 🤣
+hahaha	😆
+hail	🚖
+hair	🦰 🦱 🦳 🪮 👱
+haircut	💇 💇‍♀ 💇‍♂ 💈
+haired	👱 👱‍♀ 👱‍♂
+hairless	🦲
+hairy	🫈
+hajj	🕋
+half	◠ ◡ ◐ ◑ ◒
+halloween	🍬 👻 🧛 🧟 🍫
+halmos	∎
+halo	😇
+halt	🫷 🫸
 hamburger	🍔
-hammer	🔨
+hammer	🔨 ⚒ 🛠 ⛏
 hamsa	🪬
 hamster	🐹
-hand	✋
-handbag	👜
-handshake	🤝
-hankey	💩
-happy	😊
-harambe	🦍
+hand	🤝 ✋ ✌ ✍ 👋
+handbag	👜 👛 👝
+handball	🤾 🤾‍♀ 🤾‍♂
+handgun	🔫
+handicap	♿
+handle	🍵 🪍 🤹 🤹‍♀ 🤹‍♂
+hands	👏 👐 🙌 🙏 🫶
+handshake	🤝 🫱 🫲
+handy	🪛
+hang	🪂 🤙
+hanukkah	🕎
+happy	☺ 😀 🥳 😆 🙂
+hard	🦻
+hardhat	👷 👷‍♀ 👷‍♂
 harp	🪉
-hash	#️⃣
+harpoon	↼ ↽ ↾ ↿ ⇀
+hash	#
+hashi	🥢
+hashtag	#
+hat	🥳 🎩 👒 🤠 ^
+hatchet	🪓
+hatching	🐣
+hats	👒
+haunting	👻
+head	😶‍🌫 🗣 🤯 🙂‍↔ 🙂‍↕
+headache	😣 😓 💆 💆‍♀ 💆‍♂
+headed	↞ ↟ ↠ ↡
 headphone	🎧
-headphones	🎧
+headscarf	🧕
 headstone	🪦
-heart	❤️
-heartbeat	💓
+healing	☮
+health	🧑‍⚕ 👨‍⚕ 👩‍⚕ 🍎 🫚
+healthcare	🧑‍⚕ 👨‍⚕ 👩‍⚕
+healthier	❤‍🩹
+hear	🙉 👂 🧏 🧏‍♀ 🧏‍♂
+hearing	🦻 👂
+heart	♥ ❣ 💟 💘 💝
+heartbeat	💓 🫀
+heartbreaker	😉
+heartbroken	💔
+hearth	💟
 heartpulse	💗
-hearts	♥️
+hearts	😍 ♥ 💕 💞 🥰
+heat	😳 🥵 🫠 🌞
+heavenly	🪽
+heavy	❣ 💲 🟰 ➖ ➗
 hedgehog	🦔
+heel	👠
+heeled	👠
+heels	👠
+hehe	🙃 😂 🤣
 helicopter	🚁
-hello	👋
-herb	🌿
+hello	👋 🫂
+helmet	🪖 ⛑ 💂 💂‍♀ 💂‍♂
+help	🩼 🆘
+herb	🌿 🫚
+herd	🦬
+here	🈁 🙋 🙋‍♀ 🙋‍♂
+hermitian	⊹
+hero	🦸 🦸‍♀ 🦸‍♂
+heroine	🦸‍♀
+hey	👋
 hi	👋
 hibiscus	🌺
+hidden	🫥 🥷
+hide	🫥 🫣 🙈
+hiding	🫣
+high	⚡ 👠 🔊 🚄 🚅
+highway	🛣
+hijab	🧕
+hike	🚶 🚶‍♀ 🚶‍♂
+hiking	🥾
+hilarious	😂 🤣
+hindu	🛕 🕉
+hinduism	🪷
+hinny	🫏
+hippo	🦛
 hippopotamus	🦛
+hit	🎯
+hitched	💒
+hm	😕
+hmm	🤔 🤨
 hocho	🔪
-hole	🕳️
-home	🏠
-honduras	🇭🇳
+hockey	🏑 🏒
+hoist	🛗
+hold	🤌 🫱 🫲 👬 👭
+holding	👬 👭 🧑‍🤝‍🧑 🥹 👫
+hole	🕳 ⛳ 🪏
+holi	🫟
+holiday	🎅 🤶 🧑‍🎄
+hollow	□ ▭ ◇ ○ ◦
+hollywood	🎥
+home	🏠 🔧 🔨 🛖 🏚
+homie	😏 🔝 👏
+honey	🐝 🍯 🐻 🦡
 honeybee	🐝
+honeypot	🍯
+honk	🪿
 hook	🪝
-horse	🐎 🐴
+hoop	🏀
+hooray	🥳 🎉 🙌
+hope	🛙 🫌
+horizontal	― ⋯ 🚥 ▤
+horizontally	🙂‍↔
+horn	🥳 📯
+horns	👿 😈 🤘 🐏
+horoscope	♈ ♉ ♊ ♋ ♌
+horrible	😝
+horror	🧟 🧟‍♀ 🧟‍♂
+horse	🐴 🐎 🎠 🏇
+horses	🐴
+horseshoe	🧲
 hospital	🏥
-hot	🥵
+hot	🥵 😳 🫠 ☕ ♨
+hotcake	🥞
 hotdog	🌭
-hotel	🏨
-hotsprings	♨️
-hourglass	⌛
-house	🏠
-houses	🏘️
-hug	🤗
-hugging	🤗
-hugs	🤗
-hungary	🇭🇺
+hotel	🏨 🏩 🛏 🛍 🛎
+hotspot	🛜
+hotsprings	♨
+hour	°
+hourglass	⌛ ⏳
+hours	⏰ 🏪 ⏳
+house	🏠 🏘 🏚 🏡 🛖
+houses	🏘
+hrs	⏰
+hug	🤗 👐 🫂
+hugging	🫂 🤗
+huh	🤌
+human	👱
+hump	🐫 🐪
+hundred	💯
+hungry	😩 😋 🍔 🍕 🍗
+hurl	🤾 🤾‍♀ 🤾‍♂
+hurricane	🌀
+hurry	🏃 🏃‍♀ 🏃‍♂
+hurt	🤕 🩼
 hushed	😯
 hut	🛖
 hyacinth	🪻
-ice	🧊
+hygiene	🪥
+hyphen	‐ - ‧
+hyphenation	‧
+hypnotized	😵‍💫
+hóngbāo	🧧
+ice	🧊 ⛸ 🍧 🍨 🏒
+iceberg	🧊
 icecream	🍦
-iceland	🇮🇸
-id	🆔
-idea	💡
+icicles	🥶
+id	🆔 🪪
+idea	💡 💭
+identical	≡ 👯‍♀ 👯‍♂ 👯
+identification	🪪
+identity	🫆 🆔
+ideograph	㊗ ㊙ 🈯 🈲 🈳
+ideographic	、 。
+idk	🤷 🤷‍♀ 🤷‍♂
+ignorance	🤷 🤷‍♀ 🤷‍♂
+ill	🤒
+ily	😍 💓 💖 💗 💙
+image	≒
+immortal	🐦‍🔥
 imp	👿
-india	🇮🇳
-indonesia	🇮🇩
-infinity	♾️
-information	ℹ️
+impressed	😳
+improvement	🔧 🔨 🔩
+improving	❤‍🩹
+inbox	📥
+incognito	🥸
+incoming	📨
+increasing	📈 💹
+increment	∆
+indecisive	🧇
+index	📇 ☝ 🗂 👆 👇
+indian	₹
+indifference	🤷 🤷‍♀ 🤷‍♂
+indigo	🪻
+industrial	🧑‍🏭 👨‍🏭 👩‍🏭
+inequality	≠ ≪ ≫ ≮ ≯
+inequation	≠
+inexpressive	😑
+infant	👶 🍼
+infinity	♾ ∞
+information	ℹ
+inhalation	🫁
+injured	🩼
+injury	🤕 🩸
+ink	🫟 🔏
 innocent	😇
-interrobang	⁉️
-iphone	📱
-iran	🇮🇷
-iraq	🇮🇶
-ireland	🇮🇪
-israel	🇮🇱
-it	🇮🇹
-italy	🇮🇹
-jamaica	🇯🇲
-japan	🇯🇵 🗾
-jar	🫙
+input	🔢 🔣 🔠 🔡 🔤
+insect	🐛 🐜 🐝 🕷 🦋
+instructor	🧑‍🏫 👨‍🏫 👩‍🏫
+instrument	🎷 🎸 🎺 🎻 🪇
+integral	∫ ∬ ∮
+intelligent	🤓 🧠
+interabang	‽
+intercardinal	↖ ↗ ↘ ↙
+interior	⨼
+interlocking	🧩
+internet	🛜 🌐
+interpunct	· ・
+interrobang	‽ ⁉
+interrogation	🤌
+intersection	∩ ⋒ ⋂ 🚥 🚦
+intoxicated	🥴
+introvert	🫥
+invent	💭
+invention	💭
+inventor	🧑‍💻 👨‍💻 👩‍💻
+inverse	◘ ◙
+invertebrate	🪼
+inverted	¡ ¿ ∾
+invisible	🫥
+invoice	🧾
+irish	☘ 🍀
+iron	🧇
+ironic	😼
+irritated	🙍 🙍‍♀ 🙍‍♂
+islam	🕋 🕌 ☪
+island	🏝
+isomorphism	≅
+jack	🎃
+jacked	💪
+jacket	🧥 🥼
+japan	🗾
+japanese	🎎 🏯 ㊗ ㊙ 🈁
+jar	🫙 🍯
+jazz	🪊 👐
+jealous	😐 😑 😒
 jeans	👖
+jeez	😳
+jel	😒
+jelly	🪼 😒
 jellyfish	🪼
-jersey	🇯🇪
+jeotgarak	🥢
+jet	✈
+jew	🕍 ✡
+jewel	💎
+jewels	🪎
+jewish	🕍 🕎 ✡ 🔯
+jiaozi	🥟
 jigsaw	🧩
+jinn	🧞 🧞‍♀ 🧞‍♂
+job	🏢 👏
+jockey	🏇
+joey	🦘
+join	⋈
+joke	😜
 joker	🃏
-jordan	🇯🇴
-joy	😂
-joystick	🕹️
-jp	🇯🇵
-judge	🧑‍⚖️
+jolly	🏴‍☠
+journey	🛄
+joy	🥲 🥹 😂 😹 🤣
+joystick	🕹
+jpy	¥
+judaism	🕍 🕎 ✡ 🔯
+judge	🧑‍⚖ 👨‍⚖ 👩‍⚖
+judo	🥋
+jug	🏺
+juggle	🤹 🤹‍♀ 🤹‍♂
+juggling	🤹 🤹‍♀ 🤹‍♂
+juice	🧃 🥤
+jump	🦘
+justice	♎ 🧑‍⚖ ⚖ 👨‍⚖ 👩‍⚖
 kaaba	🕋
+kale	🥬
 kangaroo	🦘
-kazakhstan	🇰🇿
-kenya	🇰🇪
-key	🔑
-keyboard	⌨️
+karaoke	🎤
+karate	🥋
+katakana	・ 🈁 🈂
+kebab	🍢 🥙
+keep	🤐 💯
+kerchief	🧕
+key	🔑 🗝 🔐 🍋‍🟩
+keyboard	⌨ 🎹
+keycap	0⃣ 1⃣ 2⃣ 3⃣ 4⃣
+keys	🔑
+khalsa	🪯
 khanda	🪯
+kick	🛴 🦵 🦶 👞 👟
+kid	👦 👧 🧒
+kidding	😏
+kidney	🫘
 kimono	👘
-kiribati	🇰🇮
-kiss	😘 💏 💋
-kissing	😗
+king	👑 🤴
+kiss	💏 💑 😗 💋 😙
+kisses	😍 💖 💗 💝 😙
+kissing	😗 😙 😚 😽 👄
+kitchen	🔪
 kite	🪁
-knife	🔪
+kitten	🐱 🐈
+kitty	🐱
+kiwi	🥝
+knee	🦵
+kneel	🧎 🧎‍♀ 🧎‍♂
+kneeling	🧎 🧎‍♀ 🧎‍♂
+knees	🧎 🧎‍♀ 🧎‍♂
+knife	🔪 🍴 🗡 🍽
+knights	🐉 ⚜
+knit	🧶
+knobs	🎛
+knocked	😵
 knot	🪢
+know	🙋 🙋‍♀ 🙋‍♂ 🫴
+knowledge	📚 📖
+knows	🤷 🤷‍♀ 🤷‍♂
+knuckle	👊
 koala	🐨
-koko	🈁
-kosovo	🇽🇰
-kr	🇰🇷
-kuwait	🇰🇼
-kyrgyzstan	🇰🇬
-label	🏷️
+kpw	₩
+krw	₩
+kuaizi	🥢
+lab	🥼 🔬 🧪 🧫 🔍
+label	🏷
 lacrosse	🥍
 ladder	🪜
+lady	🐞 👜 👚 👩 👵
+ladybird	🐞
+ladybug	🐞
+lai	🧧
+lake	🚤 🚣 🚣‍♀ 🚣‍♂
+lamb	🐑
+lambchop	🥩
+lamp	🪔 🛋 🧞 🧞‍♀ 🧞‍♂
+landing	🛬
+landscape	🌆
 landslide	🛘
-lantern	🏮
-laos	🇱🇦
+lantern	🎃 🏮
 laptop	💻
-latvia	🇱🇻
-laugh	😂
-laughing	😆
-leaves	🍃
-lebanon	🇱🇧
+large	🤪 ◯ ⬛ ⬜ 🔶
+last	🌜 ⏮ 🌗
+late	🫩 ⏰
+later	👋
+lather	🧼
+latin	✝ 🔠 🔡 🔤
+laugh	😀 😆 😂 😄 😹
+laughing	🤣 😹
+launch	🚀
+laundry	🧺
+lavash	🫓
+lavatory	🚻 🚹 🚺 🚾
+lavender	🪻
+law	🧑‍⚖ 👮 👨‍⚖ 👩‍⚖ 👮‍♀
+lazy	∾ 🦥
+lb	#
+leaf	🍁 🍂 🍀 🍃 🌿
+leafless	🪾
+leafy	🥬
+lecturer	🧑‍🏫 👨‍🏫 👩‍🏫
 ledger	📒
-leg	🦵
+leer	😏
+left	⬅ « ‘ 🛅 “
+leftward	🫲 🫷
+leftwards	🫲 ↚ ↜ ↢ ↫
+leg	🦵 🍗 🦿
+legged	🧘 🧘‍♀ 🧘‍♂
+legit	👌
+legs	🧘 🧘‍♀ 🧘‍♂
+legume	🫘 🫛
 lemon	🍋
-leo	♌
+lens	【 】 〖 〗
+lenticular	【 】 〖 〗
+leo	♌ 🦁
 leopard	🐆
-lesotho	🇱🇸
-liberia	🇱🇷
-libra	♎
-libya	🇱🇾
-liechtenstein	🇱🇮
+lesbian	🌈 🏳‍🌈
+less	< ≪ ≮ ≤ ≦
+letter	💌 ✉ 📤 📥 📧
+letters	🔤 🔠 🔡
+lettuce	🥬
+level	🎚
+levitating	🕴
+lgbt	🌈 🏳‍🌈
+lgbtq	🌈 🏳‍🌈
+lgbtqia	🌈 🏳‍🌈
+liar	🤥
+liberty	🗽
+libra	♎ ⚖
+library	📚 📖 📗 📘 📙
+license	🪪
+lick	👅
+lie	🤥
+life	🧬 🪼 🛟
+lifesaver	🛟
+lift	🛗 🚠 🫴
+lifter	🏋 🏋‍♀ 🏋‍♂
+lifting	🏋 🏋‍♀ 🏋‍♂
+light	🛙 💡 🚈 🚥 🚦
 lighthouse	🛙
+lightning	🌩 ⛈ ⚡
+like	🩷 🩵 ⊞ ⊟ 👍
+lilac	🪻
+limb	🦵
 lime	🍋‍🟩
-link	🔗
-lion	🦁
-lips	👄
-lipstick	💄
-lithuania	🇱🇹
+line	_ | 🫥 ⪚ ―
+link	🔗 🖇
+linked	🖇
+links	🔗
+lion	🦁 ♌ 🦭
+lip	🫦
+lips	👄 💋
+lipstick	💄 👄 🫦
+liquid	🫠 🫗 🫟
+liquor	🥃
+lira	₤
+lis	⚜
+list	📋
+listen	👂 🙉
+listening	👂
+lit	🔥
+litaf	🔥
+litter	🚮 🚯
+litterbin	🚮
+littering	🚯
+little	🤏
+lives	☯
+livre	₶
 lizard	🦎
 llama	🦙
+lmao	😂 💀 🤣
+loaf	🍞
+lob	🤾 🤾‍♀ 🤾‍♂
 lobster	🦞
-lock	🔒
-locked	🔒
+location	📍
+lock	🔒 🔑 🔓 🗝 🔏
+locked	🔒 🔏 🔐
+locker	🛅
 locomotive	🚂
-lol	😂
+log	🪵
+logic	∴ ∵ ∏ ⋁
+logical	∧ ⋁ ⩣
+lol	🫠 😆 😂 😄 😹
 lollipop	🍭
-loop	➿
-lotus	🪷
+london	💂 💂‍♀ 💂‍♂
+lonely	💔
+long	🪘 ↸
+look	👀
+looking	👀
+loop	➰ ↫ ↬ ➿
+loopy	😜
+loose	🤙
+loot	🪎
+lorry	🚛
+losing	😔 😞
+lost	😔
+lotion	🧴
+lotus	🪷 🧘 🧘‍♀ 🧘‍♂
+loud	📢 🔊
+loudly	😭
 loudspeaker	📢
-love	❤️
-luggage	🧳
+love	😍 ❤ 💓 💙 💚
+lover	😘
+loving	💕
+low	_ 🪫 ‚ 🔈 „
+lower	◡ ◿ ◒ ◢ ◣
+lowercase	🔡
+lowered	📪 📭
+lozenge	◊
+luck	🫡 🤞 🧧
+lucky	🍀
+luge	🛷
+luggage	🧳 🛅
+lumber	🪵 🪚
+lunch	🍴
+lung	🫁
 lungs	🫁
-luxembourg	🇱🇺
+lupine	🪻
+lure	🪤
+lust	❤‍🔥
+luxurious	🧖 🧖‍♀ 🧖‍♂
+luxury	🚤
 lying	🤥
-macau	🇲🇴
-macedonia	🇲🇰
-madagascar	🇲🇬
-mag	🔍
-mage	🧙
+machine	🎰 📠
+mad	😖 😠 😡 😩 😤
+maddening	😠 😡
+mage	🧙 🧙‍♀ 🧙‍♂
+maggot	🪰
+magic	🪄 ✨ 🧙 🧝 🎩
+magical	🧝 🧝‍♀ 🧝‍♂
+magician	🪄
 magnet	🧲
+magnetic	🧭 🧲
+magnifying	🔍 🔎
 mahjong	🀄
-mailbox	📫
-malawi	🇲🇼
-malaysia	🇲🇾
-maldives	🇲🇻
-male	♂️
-mali	🇲🇱
-malta	🇲🇹
+mai	🍹
+mail	📧 ✉ 📮 💌 📤
+mailbox	📮 📪 📫 📬 📭
+maize	🌽
+major	🔑
+makeup	💄 🪞 💅
+malaria	🦟
+male	♂ 🐏
+malt	🥤
+mammal	🫎 🫏
 mammoth	🦣
-man	👨
-mandarin	🍊
+man	👨 🏃‍♂ 🏄‍♂ 🏊‍♂ 🏌‍♂
+manage	🤹 🤹‍♀ 🤹‍♂
+manager	🧑‍💼 👨‍💼 👩‍💼
+mane	🦁
 mango	🥭
+manicure	💅
+mantelpiece	🕰
+mantilla	🧕
+manual	🦽 👨‍🦽 👩‍🦽 🧑‍🦽
+mao	👲
+map	🗺 🗾 📍
+maple	🍁
 maracas	🪇
-marine	🫡
-martinique	🇲🇶
-mask	😷
-massage	💆
+marathon	🏃 🏃‍♀ 🏃‍♂
+marching	🪈
+margarita	🍋‍🟩
+marine	🪼 🫍
+maritime	🛙
+mark	❣ ! ? ¶ ※
+marker	📑
+market	💹
+married	💍
+marsupial	🐨 🦘
+martial	🥋
+martini	🍸
+mary	🪬
+masjid	🕌
+mask	🤿 😷 👹 👺 🎭
+masking	🫫
+massage	💆 💆‍♀ 💆‍♂
 mate	🧉
-mauritania	🇲🇷
-mauritius	🇲🇺
-mayotte	🇾🇹
-mechanic	🧑‍🔧
-medical	⚕️
-mega	📣
+math	➖ ➗ 📏 📐 🟰
+mathematician	🧑‍🔬 👨‍🔬 👩‍🔬
+mathematics	≺ ≻ ⊃ ∅ ∟
+matrix	⊹
+matryoshka	🪆
+maybe	🤷 🤷‍♀ 🤷‍♂
+mayo	🪅
+maze	🌽
+me	🤙 🙋 🙋‍♀ 🙋‍♂ 🫴
+mean	👺
+measure	µ
+meat	🍖 🥩 🥓 🥧
+meatball	🧆
+meatballs	🍝
+mechanic	🧑‍🔧 👨‍🔧 👩‍🔧 🧰
+mechanical	🦾 🦿
+medal	🎖 🏅 🥇 🥈 🥉
+media	📝
+medical	⚕ 😷 🩻
+medicated	💊
+medicine	😷 🏥 💉 💊 🩺
+medieval	👑
+meditate	🙇 🙇‍♀ 🙇‍♂
+meditation	🙇 🙇‍♀ 🙇‍♂ 🧘 🧘‍♀
+medium	◻ ◼ 🔉 ◽ ◾
+meeting	🤝
 megaphone	📣
+meh	😐 😑 😕 🫥 🫤
 melon	🍈
+melt	🫠
+melted	🫕
 melting	🫠
+member	∋
+membership	∈
 memo	📝
+memorial	🪦
+men	🤼‍♂ 👬 👯‍♂ 🍸
+mending	❤‍🩹
 menorah	🕎
-mens	🚹
-mermaid	🧜‍♀️
-merman	🧜‍♂️
+menstruation	🩸
+meow	🐈‍⬛
+mercy	🥺
+meridians	🌐
+mermaid	🧜‍♀
+merman	🧜‍♂
 merperson	🧜
-metal	🤘
+merry	🎅 🤶 🧑‍🎄
+merwoman	🧜‍♀
+mesh	🪍
+mess	🫟
+message	💬
+metal	🪙
+metamorphosis	🫌
 meteor	🪋
 metro	🚇
-mexico	🇲🇽
+mexican	🌮 🌯 🫔
+mic	🎤 🎙
+micro	µ
 microbe	🦠
-micronesia	🇫🇲
-microphone	🎤
+microphone	🎤 🎙
 microscope	🔬
+middle	· 🖕 ・
+middot	· ・
+midline	⋯
+migration	🫌
+mil	₥ ‰
+mild	🤨
+military	🎖 🪖
+milk	🐮 🥛 🐄 🐐 🍼
+milky	🌌
+mill	₥
+mille	‰
+million	💰 💲 💸
+millionaire	🚤
+mind	🤯
+mindblown	🤯
 minibus	🚐
-minidisc	💽
-minus	➖
-mirror	🪞
+minidisk	💽
+mining	⛏
+minus	➖ - ± ⁻ −
+miriam	🪬
+mirror	🪞 🪩
+mischievous	👿
+miss	😢 😘
+mistake	🪌
 moai	🗿
-moldova	🇲🇩
-monaco	🇲🇨
-money	💰
+mobile	📱 📴 📵 📲 📳
+mobility	🩼
+mode	📳
+moisturizer	🧴
+mojito	🍋‍🟩
+mollusk	🦑
+mom	🤱 👩‍🍼
+monarch	🫌 🫅
+money	🤑 💰 💸 $ 🪙
 moneybag	💰
-mongolia	🇲🇳
-monkey	🐒 🐵
+monitor	🖥
+monkey	🐵 🐒 🙈 🙉 🙊
 monocle	🧐
-monorail	🚝
-montenegro	🇲🇪
-montserrat	🇲🇸
-moon	🌙 🌔
+monorail	🚝 🚈
+monster	👾 👹 👺 👻 👽
+monthly	🈷
+moo	🐮 🐄
+moon	🌑 🌕 🌙 🥮 🌒
 moose	🫎
-morocco	🇲🇦
+morning	💖 🌅 ☕ 🌄
+mortar	🧱
 mosque	🕌
 mosquito	🦟
-motorcycle	🏍️
-motorway	🛣️
-mountain	⛰️
-mouse	🐁 🐭
-mouth	👄
+mother	🤱 🤶 👩‍🍼
+motor	🛥 🛵
+motorboat	🛥
+motorcycle	🏍
+motorized	🦼 👨‍🦼 👩‍🦼 🧑‍🦼
+motorway	🛣
+mount	🗻
+mountain	⛰ 🚞 🚠 🏔 🚵
+mountains	🌄
+mouse	🐭 🐁 🖱 🪤
+mousetrap	🪤
+moustache	🥸
+mouth	👄 🥴 😆 😅 😰
+mouthless	😶
+move	🚛 🏃 🏃‍♀ 🏃‍♂
+movie	🎥 🍿 🎦 🎞 🎬
 moyai	🗿
-mozambique	🇲🇿
-multiply	✖️
+mrs	🤶
+muah	💗 😘
+much	≪ ≫ ⋘ ⋙
+mudslide	🛘
+mug	🍺
+mugs	🍻
+mule	🫏
+multiplication	× ✖ ❌ ❎
+multiply	✖ × ❌ ❎
+multitask	🤹 🤹‍♀ 🤹‍♂
+munch	😱
 muscle	💪
-mushroom	🍄
-music	🎵
-mute	🔇
-myanmar	🇲🇲
-namibia	🇳🇦
-nauru	🇳🇷
+museum	🎨 🖼
+mushroom	🍄 🍄‍🟫
+music	♭ ♯ 🎤 🎷 🎸
+musical	🎵 🎶 🎹 🎼
+muslim	🕋 🕌 ☪
+mustache	🥸
+mute	😶 🔇 🔕
+muted	🔇
+mwah	💏
+mx	🧑‍🎄
+mysterious	👤
+mystery	🫆
+myth	🧚 🧝 🧞 🧚‍♀ 🧚‍♂
+mythology	🪽
+naan	🫓
+nabla	∇
+nail	💅
+name	📛
+nanny	👨‍🍼 👩‍🍼 🧑‍🍼
+nap	😫 😴 🥱 🛌
+nasty	🤢
+national	🏞
+natural	⋈ 🫚
+nature	🌅 🌈 🌋 🌵 🐌
 nauseated	🤢
+navigation	🛙 🧭
+nazar	🧿
+neck	🧣
+necklace	📿
 necktie	👔
-nepal	🇳🇵
+nectarine	🍊
+needle	🪡 💉 🧵
+negation	¬
+negative	🧲 📉
+neptune	🧜‍♂
 nerd	🤓
-netherlands	🇳🇱
-neutral	😐
-new	🆕
-newspaper	📰
+nerves	😟
+nervous	💗 😟 😅 😓 😰
+nest	🪹 🪺
+nesting	🪆 🪹 🪺
+net	🥅 🪍 ⛹ ⛹‍♀ ⛹‍♂
+network	🛜
+neutral	😐 🫹 🫺
+new	🌚 🆕 🌑 🗽
+newborn	👶 🍼 🐥 👨‍🍼 👩‍🍼
+news	📰 🗞
+newspaper	📰 🗞
+next	⏭
 ng	🆖
-nicaragua	🇳🇮
-niger	🇳🇪
-nigeria	🇳🇬
-nine	9️⃣
+nib	✒ 🔏
+nice	😀 😛 😁 👏
+night	💖 😪 😴 🥱 😙
+nine	🕘 🕤 9⃣
 ninja	🥷
-niue	🇳🇺
-no	👎
-norway	🇳🇴
-nose	👃
-notebook	📓
-notes	🎶
-ocean	🌊
+no	😲 ⛔ 🚭 🚯 🚳
+noble	🫅
+nod	🙂‍↕
+non	🚱
+noodle	🍜
+nooo	😩
+nope	👎
+normal	⋭
+north	⇖ ⇗ ↸ ⬆
+northeast	↗
+northwest	↖
+nose	👃 🥸 🐽 😤 🚅
+noses	👃
+nosey	👃
+not	😑 😕 🥺 😥 ≠
+note	♪ 🎵 ♭ ♯ 🎶
+notebook	📓 📔 📒
+notepad	🗒
+notes	🎶 📋 📝
+nothing	🫙
+notice	🪧
+novels	📚 📖
+number	#
+numbers	🔢
+nuptials	💒
+nurse	🧑‍⚕ 👨‍⚕ 👩‍⚕
+nursing	🤱 👨‍🍼 👩‍🍼 🧑‍🍼
+nurturing	🪴
+nut	🔩 🥜
+nutty	😜
+ny	🗽
+nyc	🗽
+oar	🚣 🚣‍♀ 🚣‍♂
+oatmeal	🥣
+obelisk	† ‡
+obelus	÷ † ‡
+oberon	🧚‍♂
+oblique	/
+ocean	🐋 🐙 🐬 🦭 🧜
+octagonal	🛑
+octoberfest	🍺
 octopus	🐙
 oden	🍢
-office	🏢
+odor	👃
+off	📆 📴 ☑
+offer	🫴
+office	🏢 🏤 🧑‍💼 🏣 👨‍💼
+officer	👮 👮‍♀ 👮‍♂
 ogre	👹
-ok	👌 🆗
+oh	😐 😑 🙀 🤦 🤦‍♀
+oil	🛢 🪔
+ok	🫡 🆗 👌 🙆 🙆‍♀
+okay	🆗 👌
+oktoberfest	🍺
+old	👴 👵 🗝 📼 📇
+older	🧓
 olive	🫒
-om	🕉️
-oman	🇴🇲
-on	🔛
-one	1️⃣
+om	🕉
+omg	😑 😯 😲 🫨 😝
+omission	…
+omw	👣 🔜
+once	🔂
+oncoming	👊 🚍 🚖 🚘 🚔
+one	¹ 🕐 🕜 🩱 🔞
 onion	🧅
-ophiuchus	⛎
-orange	🍊
+oolong	🍵
+oops	🫗 🙊 🤭
+open	😆 😅 😰 👐 📖
+opening	🪟
+operator	∗ ∘ ∙ ∼ ⋅
+ophiuchus	⛎ 🐍
+optical	💿 📀 💽
+orange	📙 🟠 🟧 🧡 🔶
 orangutan	🦧
 orca	🫍
+orchestra	🪈 🪉
+order	🦁
+organ	🫀 🫁
+orienteering	🧭
+original	⊶
+ornithology	🐓 🐔 🐦 🐧 🕊
+orthodox	☦
+orthogonal	▦
+orthoptera	🦗
+ostentatious	🦚
 otter	🦦
+ouch	🤕 🪼
+out	😛 😜 😝 😵
+outbox	📤
+outdoors	🌻 🥾
+outgoing	📩
+outlined	☺ ❔ ❕ 🔳
+outtie	👋
+over	🌄 ≦ ≧ 🍳 ↹
+overeat	🫃 🫄
+overline	‾
+overstrike	‾
 owl	🦉
-ox	🐂
-oyster	🦪
+ox	🐂 ♉
+oyster	🦪 🥡
+pace	🚶 🚶‍♀ 🚶‍♂
 package	📦
+packing	🛃 🧳 🛄
+pad	🗒 🗓
+paddle	🏓 🚣 🚣‍♀ 🚣‍♂
+paella	🥘
+page	📃 📄
 pager	📟
-paintbrush	🖌️
-pakistan	🇵🇰
-palau	🇵🇼
-panama	🇵🇦
+paid	🤑 💰
+pail	🪣 🥡
+pain	🥲
+paint	🫟
+paintbrush	🖌
+painter	🎨
+painting	🖌 🎨 🖼
+pair	👯‍♀ 👯‍♂ 👯
+paired	⇇ ⇈ ⇉ ⇊
+palace	💂 💂‍♀ 💂‍♂
+palette	🎨 🧑‍🎨 👨‍🎨 👩‍🎨
+palm	🌴 🫳 🫴 🥥 🪬
+palms	🤲
+pamonha	🫔
+pamper	🧖 🧖‍♀ 🧖‍♂
+pan	🥘 🍳
+pancake	🥞
 pancakes	🥞
 panda	🐼
-paperclip	📎
-paperclips	🖇️
+panic	🫨 🫪
+panting	🥵
+pants	👖 🩳
+paper	🏮 🧻 ✂ 📜 📰
+paperclip	📎 🖇
+paperclips	🖇
 parachute	🪂
-paraguay	🇵🇾
-parking	🅿️
+paragraph	¶ §
+parallel	∥
+parallelogram	▰
+paraph	¶
+parasail	🪂
+parasite	🪱
+parcel	📦
+paren	)
+parens	)
+parent	🧑‍🍼
+parenthesis	)
+park	🏞 🎡 🎢 🛝
+parking	🅿
+parlor	💇 💇‍♀ 💇‍♂
 parrot	🦜
-party	🎉
-partying	🥳
-peace	☮️
+part	〽 §
+partial	∂
+party	🥳 😛 😜 🎉 🪅
+partying	🥳 👯‍♀ 👯‍♂ 👯
+pass	⛔
+passenger	🛳 ⛴ 🚢
+passing	🈴
+passport	🛂
+password	🔑
+pasta	🍝
+pastry	🍰 🥧 🎂 🍥
+patience	🤌
+patrol	🚓
+pause	⏸ ⏯ 🫷 🫸
+paw	🐾
+pawn	♟
+paws	🐾
+pay	💳 💲 💸
+paying	💰
+pc	💻
+pea	🫛
+peace	😌 ☮ 🕊 🪷 ✌
+peaceful	😇 ☮
 peach	🍑
 peacock	🦚
+peahen	🦚
+peanut	🥜
 peanuts	🥜
 pear	🍐
-pen	🖊️
-pencil	📝 ✏️
+pearl	🦪 🫧 🧋
+pearly	🦷
+pedestrian	🚷 🚸 🚶 🚶‍♀ 🚶‍♂
+pedestrians	🚷
+peek	🫣
+peeking	🫣
+peep	🫣 👀
+pen	🖊 🖋 🔏 ✒
+penalty	🟥 🟨
+pencil	✏ 📝
 penguin	🐧
+penny	₰
 pensive	😔
+people	🤼 🫂 🧑‍🤝‍🧑 👯 👥
+pepper	🌶 🫑
+pepperoni	🍕
+per	% ‰
+percent	%
+percussion	🪇
+perfect	💯
+performing	🎭
+period	. 。
+permil	‰
+permille	‰
 persevere	😣
 persevering	😣
-person	🧑
-peru	🇵🇪
-philippines	🇵🇭
+person	🧑 💑 🥸 🏃 🏄
+personal	💻
+peso	₱ $
+pest	🦟 🪰 🪳
+pester	🦡
+pet	🐰 🐱 🐶 🐇 🐈
+petri	🧫
+pfennig	₰
+pga	🏌 🏌‍♀ 🏌‍♂
+pho	🍜
 phoenix	🐦‍🔥
-phone	📱 ☎️
-pick	⛏️
-pickle	🫝
+phone	📱 📴 📲 ☎ 🤳
+phones	📵
+photo	📷
+physicist	🧑‍🔬 👨‍🔬 👩‍🔬
+pi	👲
+piano	🎹
+piccolo	🪈
+pick	⛏ 🪮 ⚒ 🛻 🙋
+picket	🪧
+pickle	🫝 🥒
+pickup	🛻
+picnic	🧺
+picture	🖼
 pie	🥧
-pig	🐖 🐷
+piece	🧩 🩱 🩲
+pierogi	🥟
+pig	🐷 🐖 🐽 🐗
+pike	|
+pilcrow	¶
+pile	💩
 pill	💊
-pilot	🧑‍✈️
+pills	💊
+pilot	🧑‍✈ 👨‍✈ 👩‍✈
+pin	🧷 📌 📍
+pina	🍍
+pinada	🪅
 pinata	🪅
+pinch	👌
+pinched	🤌
+pinching	🤏
+pine	🎍 🌲
 pineapple	🍍
-pisces	♓
-pizza	🍕
+ping	🏓
+pingpong	🏓
+pink	🩷 🏳‍⚧
+pinocchio	🤥
+pint	🍺
+pipe	🪈 |
+pirate	🏴‍☠ 🦜
+pisces	♓ 🐟
+pissed	😒 🤬
+pistol	🔫
+pita	🫓
+pitch	🤾 🤾‍♀ 🤾‍♂
+pity	🙇 🙇‍♀ 🙇‍♂
+pixelated	👾
+pixie	🧚 🧚‍♀ 🧚‍♂
+pizza	🍕 🍄‍🟫
+piña	🥥
+piñata	🪅
 placard	🪧
-plane	✈️
+place	🛐 🥇 🥈 🥉
+plane	✈ 🧑‍✈ 🛄 🛩 🛫
+planet	🪐
+plankton	🪼
+plant	🪴 ☘ 🌰 🌱 🌵
+plaque	🪧
+plate	🍽
+play	▶ ⏯ 🧙 🛝 🧙‍♀
+player	⛹ ⛹‍♀ ⛹‍♂
+playful	🦦
+playground	🛝
+playing	🎴 🤾 🤾‍♀ 🤾‍♂ 🤽
+plaything	🧸
 pleading	🥺
+please	🥺 🥹 🙏
+plug	🔌
+plumage	🪶
+plumber	🧑‍🔧 🪠 👨‍🔧 👩‍🔧
+plunder	🏴‍☠
 plunger	🪠
-plus	➕
-poland	🇵🇱
-policeman	👮‍♂️
-policewoman	👮‍♀️
+plus	➕ + ± ⊕ ⊞
+plush	🧸
+pod	🫛
+point	‧ 🪝 ! 💯 ¡
+pointed	✴ 🔯 🔺 🔻
+pointer	► ▻ ◄ ◅ ^
+pointing	← ↑ → ↓ ☝
+points	💯
+pointy	〈 〉
+poke	🫵
+polar	🐻‍❄
+pole	🎣 💈
+police	👮 🚓 👮‍♀ 👮‍♂ 🚔
+polish	💅
+polo	🤽 🤽‍♀ 🤽‍♂
+ponder	🤔
+pondering	🤔
+pong	🏓
+poo	💩
 poodle	🐩
-poop	💩
+pool	🎱 👙
+poop	🪠 💩
+pop	🍿 🧨
 popcorn	🍿
-portugal	🇵🇹
-postbox	📮
-potato	🥔
+popper	🎉
+popping	🍾 🧨
+pork	🐷 🐖
+porkchop	🥩
+porous	🧽
+porridge	🥣
+portobello	🍄‍🟫
+poseidon	🧜‍♂ 🔱
+position	🧘 🧘‍♀ 🧘‍♂
+positive	🧲
+post	🏤 🏣 📯 🚩
+postal	📯
+postbox	📮 📪 📫 📬 📭
+pot	🍯 🍲 🫕 🫖 💰
+potable	🚰 🚱
+potassium	🍌
+potato	🥔 🍠
+potsticker	🥟
+potted	🪴
 pouch	👝
-pound	💷
-pout	😡
-pouting	🙎
-pray	🙏
+poultry	🍗
+pound	£ 💷 # 👊
+pounds	💷
+pour	🫗
+pouring	🫗
+pouting	😡 😾 🙎 🙎‍♀ 🙎‍♂
+power	^ 🪫
+powerlifting	🏋 🏋‍♀ 🏋‍♂
+praise	🙌
+prawn	🍤
+pray	🛐 🤲 🙏
+prayed	👏
+prayer	📿 🤲
+precedes	≺ ⊰
+predator	🐯 🐅 🐆
+pregnant	🤰 🫃 🫄 👶
+present	🎁
+preserver	🛟
+press	💪
+pretty	🥺 🦋 🦚
 pretzel	🥨
+previous	⏮
+pride	🌈 🏳‍🌈
+prime	′ ″ ‴
 prince	🤴
 princess	👸
-printer	🖨️
-prohibited	🚫
-punch	👊
-purse	👛
-pushpin	📌
-qatar	🇶🇦
-question	❓
-rabbit	🐇 🐰
+print	👣 🫆 🐾
+printer	🖨
+prints	🐾
+privacy	🔏
+private	🔒
+prize	🏆 🪎
+probing	🦯 👨‍🦯 👩‍🦯 🧑‍🦯
+product	⨼ ∏ ⨯ ⊗
+professor	🧑‍🏫 👨‍🏫 👩‍🏫
+prohibit	🙅 🙅‍♀ 🙅‍♂
+prohibited	🚫 ⛔ 🚭 🚯 🚳
+projector	📽
+proof	∎ ° 🧾
+prophecy	🥠
+proportion	∷
+proportional	∝
+proportionality	∝ ∷
+prosthetic	🦾 🦿
+protect	🪬
+protection	🥽 🪬
+protest	🪧
+proud	🥲 🥹 🦚
+public	📢
+puck	🏒 🧚‍♂
+pudding	🍮
+puke	🤮
+pulled	👮 👮‍♀ 👮‍♂
+pulsating	💓
+pulse	💓 💗 🫀
+pump	⛽
+pumpkin	🥧 🎃
+punch	✊ 👊
+punctuation	❣ 〰 ‼ ⁉ ❓
+punk	🧷
+puppies	🐶
+puppy	🐶 🥺
+purity	🪷
+purple	💟 👿 😈 💜 🟣
+purse	👛 👜 👝
+push	🫷 🫸
+pushing	🫷 🫸
+pushpin	📌 📍
+putt	🏌 🏌‍♀ 🏌‍♂
+puzzle	🧩
+qed	∎
+quadrant	◔ ◜ ◝ ◞ ◟
+quarter	🌓 🌗 🌛 🌜
+queen	👑 👸
+queer	🌈 🏳‍🌈
+quench	🧯
+question	? ¿ ؟ ⁉ ❓
+quick	🏃 🏃‍♀ 🏃‍♂
+quiet	🤫 😶 🤐 🔇 🔕
+quotation	“ ” „
+quote	' « » ‘ ’
+rabbit	🐰 🐇
 raccoon	🦝
-racehorse	🐎
-radio	📻
-radioactive	☢️
-rage	😡
-rain	🌧️
-rainbow	🌈
-ram	🐏
+race	🏁 🏃 🏃‍♀ 🏃‍♂
+racehorse	🐎 🏇
+racing	🏇 🏎 🏍 🐎 🏁
+racquet	🎾 🏸
+rad	😎 👌
+radical	√
+radio	📻 🔘
+radioactive	☢
+radish	🫜
+radix	√
+raft	🚣 🚣‍♀ 🚣‍♂
+rage	😠 😡
+rail	🚈
+railway	🚃 🚞 🚟 🛤 🚂
+rain	🌈 🌧 ☔ 🌦 ☂
+rainbow	🌈 🏳‍🌈
+raise	🙋 🙋‍♀ 🙋‍♂
+raised	✊ ✋ 🤚 🤨 📫
+raising	🙌 🙋 🙋‍♀ 🙋‍♂
+ram	🐏 ♈
+ramadan	🌙 ☪
 ramen	🍜
+ranch	🏠 🏡
+rancher	🧑‍🌾 👨‍🌾 👩‍🌾
+range	🏌 🏌‍♀ 🏌‍♂
 rat	🐀
+ratio	∶
+rattle	🪇
 raven	🐦‍⬛
+rawr	🦁
+ray	🩻 📀 💿
+rays	☀
 razor	🪒
+reach	🫱 🫲
+reading	📚 📖 📗 📘 📙
+ready	🛄
+real	🫀
+realization	🤭
+realize	💭
+rebirth	🐦‍🔥
+rebound	🪃
+rebuild	👷 👷‍♀ 👷‍♂
 receipt	🧾
-recycle	♻️
-recycling	♻️
-registered	®️
-relaxed	☺️
-relieved	😌
-repeat	🔁
-restroom	🚻
-reunion	🇷🇪
+receive	📥 📨 📲
+receiver	📞
+record	⏺ 🎥
+recorder	🪈
+recording	℗
+recovering	❤‍🩹
+recreational	🚙
+rectangle	▬ ▭ ▮
+recuperating	❤‍🩹
+recycle	♻
+recycling	♻
+red	🫀 😡 🥵 ❤ 🍎
+redhead	🦰
+reef	🪸
+reference	※
+reflection	🪞
+reflector	🪞
+refresh	🔃 🔄
+refreshing	🍋‍🟩
+refuse	🫷 🫸
+regal	🫅
+registered	®
+regret	🙇 🙇‍♀ 🙇‍♂
+reincarnation	🐦‍🔥
+reinvent	🐦‍🔥
+relation	⊰ ⊱
+relationship	💑
+relax	🤌 💆 💆‍♀ 💆‍♂ 🧖
+relaxed	☺ 😎
+relaxing	💆 💆‍♀ 💆‍♂
+relief	😌 😮‍💨
+relieved	😌 🥲 😥
+religion	⛪ 🕉 🕋 🕌 🕍
+relish	🫝
+reload	🔃
+reminder	🎗
+remodel	👷 👷‍♀ 👷‍♂
+remove	🪌
+renewal	🐦‍🔥
+repair	👷 👷‍♀ 👷‍♂
+repairs	🔨
+repeat	🔁 🔂
+repercussion	🪃
+reptile	🦎
+rescue	⛑ 🛟
+reserved	🈯
+resilience	🫫
+resist	🥹
+resort	⛵
+respect	🫡
+respiration	🫁
+restaurant	🍝 🍞 🍢 🍬 🍭
+restriction	🔞
+restroom	🚻 🚹 🚺 🚾
+reveal	🫫
+reverse	◀ ⏪ \
+reversed	∽
+revival	🐦‍🔥
+revive	🐦‍🔥
+revolver	🔫
+revolving	💞 🚨
 rewind	⏪
+rewindershins	🔄
+rex	🦖
 rhinoceros	🦏
-ribbon	🎀
-rice	🍚
-ring	💍
+rhombus	◊
+rhythm	🪘
+rial	﷼
+ribbon	🎀 🎗 💝
+rice	🍘 🍙 🍚 🍛 🌾
+rich	🧐 🪙 💰 💶
+rickshaw	🛺
+ride	🚲
+riding	🏇 🚴 🚴‍♀ 🚴‍♂ 🚵
+right	➡ » ’ ∟ ⊿
+rightward	🫱 🫸
+rightwards	🫱 ↛ ↝ ↣ ↬
+ring	💍 ∘ 🛟 ≖ ⊚
+ringed	🪐
+ringlets	🦱
+rip	🪦
+ripe	🍎
+ripped	💪
+rise	🐦‍🔥 💹
+river	🚣 🚣‍♀ 🚣‍♂
+roach	🪳
+road	🛣
+roar	🦁
+roasted	🍠
 robot	🤖
-rock	🪨
-rocket	🚀
-rofl	🤣
-romania	🇷🇴
+rock	🪨 🧑‍🎤 🪋 👊 🥌
+rocket	🚀 🧑‍🚀 👨‍🚀 👩‍🚀
+rockets	🚀
+rocks	🛘
+rockstar	🧑‍🎤 👨‍🎤 👩‍🎤
+rofl	😆 😂 🤣
+roflcopter	🚁
+roflmao	😂 🤣
+roger	🏴‍☠
+roll	🧻 🥐
+rolled	🗞
+roller	🎢 🛼 🧳
+rolling	🙄 🤣
+rolodex	📇
+romance	😍 💙 💑 💘 🥰
+romantic	😍 💚 😘
 rook	🐦‍⬛
+room	🚹 🚺 🧖 🧖‍♀ 🧖‍♂
 rooster	🐓
+root	√ 🫚 🫜
+rope	🪢
+ropeway	🚡
 rose	🌹
-rosette	🏵️
-rowboat	🚣
-ru	🇷🇺
-runner	🏃
-running	🏃
-russia	🇷🇺
-rwanda	🇷🇼
-sa	🈂️
-sad	😢
-sagittarius	♐
+rosette	🏵
+rotting	🪰
+round	📍 )
+rounded	▢
+roundhouse	🛖
+router	🛜
+row	🚣 🚣‍♀ 🚣‍♂
+rowboat	🚣 🚣‍♀ 🚣‍♂
+rowing	🚣 🚣‍♀ 🚣‍♂
+royal	👑 👸 🤴 🫅
+royalty	👑 👸 🤴 🫅
+rub	🧞 🪌 🧞‍♀ 🧞‍♂
+ruble	₽
+rucksack	🎒
+ruckus	🫯
+rugby	🏉
+rule	📐
+ruler	📏 📐
+run	🏃 🏃‍♀ 🏃‍♂
+rung	🪜
+running	🎽 🏃 🏃‍♀ 🏃‍♂ 👟
+rupee	₨ ₹
+rush	🏃 🏃‍♀ 🏃‍♂
+rushed	😰
+russia	🪆
+sacred	❤‍🔥
+sad	😥 💔 ☹ 😔 😕
+safari	🦁
+safety	🦺 🧷 🫆 🛟
+sagittarius	♐ 🏹
 sailboat	⛵
+sailing	⛵
 sake	🍶
+salad	🥗 🥬 🫜
+salon	💆 💆‍♀ 💆‍♂
+salsa	🍋‍🟩 💃 🕺
 salt	🧂
-salute	🫡
+salty	🧂
+salute	🫡 🖖
 saluting	🫡
-samoa	🇼🇸
-sandal	👡
+sand	⌛ ⏳
+sandal	👡 🩴
+sandals	🩴
 sandwich	🥪
-santa	🎅
+santa	🎅 🤶 🧑‍🎄
+sapling	🌱
+sarcasm	🫠 💁 💁‍♀ 💁‍♂
+sarcastic	🫠 🤌 💁 💁‍♀ 💁‍♂
 sari	🥻
-sark	🇨🇶
-satellite	🛰️ 📡
-satisfied	😆
+sash	🎽
+sasquatch	🫈
+sassy	💁 💁‍♀ 💁‍♂
+satchel	🎒
+satellite	🛰 📡
+satisfied	😊
+saturn	🪐
+saturnine	🪐
+sauce	🫙
+saucer	🛸
+sauna	🧖 🧖‍♀ 🧖‍♂
 sauropod	🦕
+sausage	🌭
+save	🛟
+saver	🛟
+savor	😋
+savoring	😋
+saw	🪚
+sax	🎷
 saxophone	🎷
-scales	⚖️
+scale	⚖ 🧗 🧗‍♀ 🧗‍♂
+scales	♎ 🧑‍⚖ ⚖ 👨‍⚖ 👩‍⚖
+scared	😧 😨 😓 😰 😱
 scarf	🧣
-school	🏫
-scientist	🧑‍🔬
-scissors	✂️
-scorpio	♏
-scorpion	🦂
-scorpius	♏
-scotland	🏴󠁧󠁢󠁳󠁣󠁴󠁿
+scary	😧 😦 👹 👻 🧛
+scene	⏭ ⏮
+schmear	🥯
+scholar	🎓
+school	🏫 🎒 📚 📼 🚌
+science	🔬 🔭 🦠 📡 🧪
+scientist	🧑‍🔬 👨‍🔬 👩‍🔬 🥼
+scissors	✂
+scoop	🪏
+scooter	🛴 🛵
+score	🎼 💯
+scorpio	♏ 🦂
+scorpion	🦂 ♏
+scorpius	♏ 🦂
+scotch	🥃
+scowl	🙎 🙎‍♀ 🙎‍♂
 scream	😱
+screamer	😱
+screaming	😱
+screw	🪛
 screwdriver	🪛
 scroll	📜
+scuba	🥽 🤿
+sea	🦭 ⛵ 🛙 🧜 🧜‍♀
+seafood	🍢 🦞
 seal	🦭
-seat	💺
-secret	㊙️
+search	🔍 🔎
+seat	💺 🪑
+second	🥈
+secret	😶 🤐 🥷 ㊙ 🙈
+section	§
+secure	🔐
+security	🪪
+see	🙈 👀 🧧
 seedling	🌱
-selfie	🤳
-senegal	🇸🇳
-serbia	🇷🇸
-seven	7️⃣
-seychelles	🇸🇨
-shaking	🫨
-shamrock	☘️
+seeing	👀
+self	⊹
+selfie	🤳 📷
+selling	🪝
+semi	; ؛ 🚛
+semicircle	↶ ↷
+semicolon	; ؛
+send	📩
+sent	📤 📨 📩
+serenity	🪷 🧘 🧘‍♀ 🧘‍♂
+serious	👔
+seriously	💁 💁‍♀ 💁‍♂
+serpent	⛎ 🐍
+serve	🍦
+service	🐕‍🦺 🈂
+set	∅ ∩ ∪ ≺ ≻
+settle	🏠 🏡
+seven	🕖 🕢 7⃣
+sew	🪡
+sewing	🪡 🧵
+sexy	😉 💋 🫦
+shade	😏 😐 😠 😡 👿
+shades	😎
+shadow	👤
+shaka	🤙
+shake	🤝 🪇 🙂‍↔ 🫱 🫲
+shaker	🧂 🪇
+shaking	🫨 🙂‍↔ 🙂‍↕
+shallow	🥘
+shampoo	🧴
+shamrock	☘
+shape	🧲
 shark	🦈
-sheep	🐑
-shell	🐚
-shield	🛡️
-ship	🚢
-shirt	👕
-shit	💩
-shoe	👞
-shopping	🛍️
+sharp	♯ 🪒
+shave	🪒 💈
+shaved	🍧
+shaven	🦲
+sheaf	🌾
+shears	💇 💇‍♀ 💇‍♂
+shedding	🌳
+sheep	🐏 🐑
+sheffer	|
+shell	🐚 〔 〕
+shellfish	🦐
+shelter	🛖
+shh	🤫 🙉
+shield	🛡
+shiitake	🍄‍🟫
+shine	🌞
+shining	💫 🌟
+shinkansen	🚅 🚄
+shinto	⛩
+shiny	💍
+ship	🚢 🛳 ⚓ 🔱
+shipping	📦
+shirt	🎽 👕 👔 👚
+shock	🫨 🤭 🤦 🤦‍♀ 🤦‍♂
+shocked	😲 🫪 😮 😱 🤯
+shoe	👞 👟 🥿 👠 👡
+shoes	🩰 👞 👟 👢 👠
+shoo	🫳
+shooting	🌠 💫
+shopping	🛍 🛒 👖 👗 👛
 shortcake	🍰
 shorts	🩳
+shot	💉 🥃
 shovel	🪏
 shower	🚿
-shrimp	🦐
-shrug	🤷
+showing	🌎 🌍 🌏
+shrimp	🦐 🍤
+shrine	⛩
+shroom	🍄‍🟫
+shrub	🪻
+shrug	🤷 🤷‍♀ 🤷‍♂
+shrugging	🤷 🤷‍♀ 🤷‍♂
+shuffle	🔀
+shush	🤫
 shushing	🤫
-singapore	🇸🇬
-singer	🧑‍🎤
-six	6️⃣
+shut	🤐
+shuttlecock	🏸
+shy	🫣 🪭
+sick	🤢 🤧 🤮 🤒 😷
+side	🍳
+sigh	😮‍💨
+sign	# + @ µ ×
+signal	🛙 📶 🚥 🚦
+sikh	🪯
+sikhism	🪯
+silcrow	§
+silence	😶
+silent	😶 🔇 🔕
+silhouette	👤 👥 🗣
+silly	👻 🪿
+silver	🩶 🪙 🪎 🥈
+similar	⪍
+simple	🏠 🏡
+sing	🎤
+singer	🧑‍🎤 👨‍🎤 👩‍🎤
+single	🔂 ' ‘ ’
+sir	🫡
+siren	🧜 🧜‍♀ 🧜‍♂ 🚨
+sisters	👭
+sit	🪑
+six	🕕 🕡 🔯 6⃣
+skate	🛹 ⛸ 🛼
 skateboard	🛹
-ski	🎿
-skier	⛷️
+skater	🛹
+skates	🛼
+skating	⛸
+skeleton	🦴 🩻
+skeptic	🤨
+skeptical	🤨 🫤
+skepticism	🤨
+skewer	🍡 🍢
+ski	⛷ 🎿 🏂 🫕 🚠
+skier	⛷
+skill	🤹 🤹‍♀ 🤹‍♂
+skills	🥷
 skis	🎿
-skull	💀
+skull	💀 ☠ 🩻
+skullcap	👲
 skunk	🦨
+sky	🩵
+skydive	🪂
+slanted	⩽
+slap	🫷 🫸
+slash	/ ⁄ ∕ ⊘ 🔕
+slate	🩶
+slay	😎 🏆
 sled	🛷
-sleep	😴
-sleeping	😴
-sleepy	😪
+sledge	🛷
+sleep	😪 😴 🥱 💤 🛏
+sleeping	😴 😪 💤
+sleepy	😪 😩 🥱 🫩 💤
+sleigh	🛷
+sleuth	🕵 🕵‍♀ 🕵‍♂
+slice	🍕 🍰 🥧
+slick	😏
+slide	😉 🛝 🪊 📐
+slider	🎚
+sliding	🛝
+slightly	🙁 🙂
+slip	🥿
+slipper	🥿
+slot	🎰
 sloth	🦥
-slovakia	🇸🇰
-slovenia	🇸🇮
-smile	😀 😄
-smiley	😃
-smiling	☺️
+slots	🎰
+slow	🦥
+slug	🐌
+slurp	👅
+sly	😏 🥷 🦝
+small	🤪 🛩 ▪ ▫ 🔸
+smart	🤓 🧠 ‘ ’ “
+smartphone	🛜
+smell	👃 🐽
+smells	👃
+smelly	💩
+smh	😒 💩 🙈 🤦 🤦‍♀
+smile	😍 😻 ☺ 😀 😬
+smiley	😮‍💨 😵‍💫 🥲
+smiling	☺ 😇 😈 😎 🥰
 smirk	😏
 smirking	😏
-smoking	🚬
+smoke	😮‍💨 🚫 💨 🚭
+smoking	🚭 🚬
+smooch	😗 😘
+smooches	😗 😚
+sms	💬
+smug	😏
 snail	🐌
-snake	🐍
+snake	🐍 ⛎
+snap	📷 🫰
+snapdragon	🪻
+snare	🪤
+sneaker	👟
+sneeze	😫 🤧
 sneezing	🤧
-snow	❄️
+snicker	😏
+snorkeling	🤿
+snout	🐽
+snow	☃ ❄ 🏂 ⛄ 🌨
+snowboard	🏂
 snowboarder	🏂
-snowflake	❄️
-snowman	☃️ ⛄
-soap	🧼
+snowflake	❄
+snowman	☃ ⛄
+soak	🧽
+soap	🧼 🫧
+soapdish	🧼
+soar	🪁 🪽
 sob	😭
 soccer	⚽
 socks	🧦
+soda	🥤
+soft	🍦 🔈 🥤
 softball	🥎
-somalia	🇸🇴
+software	🧑‍💻 👨‍💻 👩‍💻
+soldier	🥷 🪖
+solid	🪨
+solidarity	✊
+solidus	/ \
+somersault	🤸 🤸‍♀ 🤸‍♂
+son	👦
 soon	🔜
+soothe	💆 💆‍♀ 💆‍♂
+sorcerer	🧙 🧙‍♀ 🧙‍♂
+sorceress	🧙 🧙‍♀ 🧙‍♂
+sorcery	🧙 🧙‍♀ 🧙‍♂
+sorry	😕 🙇 🙇‍♀ 🙇‍♂
+sort	🤏
 sos	🆘
-sound	🔉
-spades	♠️
+soulmate	👯‍♀ 👯‍♂ 👯
+sound	℗ 🎤 🎧 👂 📢
+soup	🍜 🍲
+sour	🍋 🍋‍🟩
+south	⇘ ⇙ ⬇
+southeast	↘
+southwest	↙
+sow	🐖
+soybean	🫛
+spa	💆 💆‍♀ 💆‍♂ 🧖 🧖‍♀
+space	🌚 🌛 ☀ ☄ 👽
+spade	♠ 🪏
 spaghetti	🍝
-spain	🇪🇸
-sparkle	❇️
+spanner	🔧 🛠
+spark	🧨
+sparkle	❇ ✨ 🎇 💖 🌟
 sparkler	🎇
 sparkles	✨
-speaker	🔈
+sparkling	💖 💍
+speak	🙊 🗣
+speaker	🔇 🔈 🔉 🔊
+speaking	🗣
+special	🩶 🩷 🩵
+speculum	🪞
+speech	💬 🗨 👁‍🗨
+speechless	😶
+speed	🚄 🚅 🏃 🏃‍♀ 🏃‍♂
 speedboat	🚤
-spider	🕷️
+spell	🧙 🧙‍♀ 🧙‍♂
+spesmilo	₷
+spew	🤮
+spice	🫚
+spider	🕷 🕸
+spill	🫟 🫗
+spin	🚲
+spinning	🚲
+spiny	🦔
+spiral	🐚 🗒 🗓 😵‍💫
+spirit	😇
+splashing	💦
 splatter	🫟
+splayed	🖐
+split	🪓
+spoked	✳
 sponge	🧽
-spoon	🥄
+spool	🧵
+spoon	🥄 🥣
+spore	🍄‍🟫
+sport	🚙 ⚾ 🎳 🎾 🎿
+sports	🏅 🥍 🥎
+sportutility	🚙
+spots	🦒
+spouting	🐳
+spring	🐝 🪻 🌸
+springs	♨
+springtime	🌸
+sprinkles	🧁
+sprout	🌱 🍄‍🟫
+spy	🥸 🕵 🕵‍♀ 🕵‍♂
+square	√ ■ □ 🟥 🟦
+squared	⊞ ⊟ ²
+squeeze	🪗
+squeezebox	🪗
 squid	🦑
-stadium	🏟️
-star	⭐
-stars	🌠
-station	🚉
+squiggle	⇜ ⇝
+squinting	😝 😆
+squirrel	🐿
+squirt	💦
+stadium	🏟
+staff	⚕
+stain	🫟
+stand	🧍 🧍‍♀ 🧍‍♂
+standing	🧍 🧍‍♀ 🧍‍♂
+star	⭐ ⋆ 🌟 🌠 🤩
+stare	🫣
+starry	🤩
+stars	🌃 ⁂ ⭐ 💫
+station	🚉 ⛽
+statue	🗽 🗿
+steak	🥩
+stealth	🥷 🙊
+steam	🚂 😤 🧖 🧖‍♀ 🧖‍♂
+steambath	🧖 🧖‍♀ 🧖‍♂
+steaming	🍜 ☕ ♨
+steamy	🧖 🧖‍♀ 🧖‍♂
+stein	🍺
+step	🪜
 stethoscope	🩺
 stew	🍲
-stop	🛑
-stopwatch	⏱️
+stick	🍡 🍢 🥍 🩼 |
+stiletto	👠
+sting	🪼
+stinger	🪼
+stink	🦨 💩
+stinks	💩
+stinky	💩
+stitches	🪡
+stocking	🧦
+stomp	🦶
+stone	💎 🥌 🪨
+stoneface	🗿
+stop	⏹ 🚏 🛑 . 。
+stoplight	🚥 🚦
+stopwatch	⏱
+store	🏪 🏬 🫙
+straight	😐 😑 📏
+straightedge	📏
+strat	🎸
+straw	🥤 🧃
 strawberry	🍓
-strong	💪
-student	🧑‍🎓
-sudan	🇸🇩
-sun	☀️
+streamer	🎏
+stress	😟 😅
+stressed	😟 😧 😅
+strictly	≣
+stride	🚶 🚶‍♀ 🚶‍♂
+strike	🎳
+string	🧵
+stringed	🪕
+stripe	🦓
+stroke	🥵 ↚ ↛ ↮ ⇍
+stroll	🚶 🚶‍♀ 🚶‍♂
+strong	🦁 💪
+struck	🤩
+strudel	@
+stub	🎫
+stubborn	🫏
+stuck	😛 😜 😝
+student	🧑‍🎓 👨‍🎓 👩‍🎓
+studio	🎙
+study	📚
+stuffed	🥙 🧸 🫄
+stuffy	🧐
+stunned	😯
+style	😎 💇 💇‍♀ 💇‍♂
+suave	😏
+subgroup	⋭
+subscript	⨧
+subset	⊂ ⊆
+subtract	−
+subtraction	⊟
+suburban	🏠 🏡
+suburbia	🏠 🏡
+subway	🚇
+subzero	🥶
+succeed	⊁
+succeeds	≻ ⊱ ⪺
+sucks	😔
+suction	🪠
+sudden	🤭
+sugar	🧁
+suit	♠ ♣ ♥ ♦ 🕴
+suitcase	🧳
+sulk	🙎 🙎‍♀ 🙎‍♂
+summation	∑
+summer	🚤 🍺
+summon	🧙 🧙‍♀ 🧙‍♂
+sun	🌞 ☀ 🌅 🌇 🌻
 sunflower	🌻
-sunglasses	😎 🕶️
-sunny	☀️
-sunrise	🌅
-sunset	🌇
-sunshine	☀️
-superhero	🦸
-supervillain	🦹
-surfer	🏄
-suriname	🇸🇷
+sunglasses	🕶 😎
+sunny	🌞 ☀ 🍳
+sunrise	🌅 🌄
+sunscreen	🧴
+sunset	🌇 🌆
+sunshine	🌞
+super	🏈
+superhero	🦸 🦸‍♀ 🦸‍♂
+supernatural	🧛 🧛‍♀ 🧛‍♂
+superpower	🦸 🦹 🦸‍♀ 🦸‍♂ 🦹‍♀
+superscript	² ³ ¹ ⁻
+superset	⊃ ⊇
+supervillain	🦹 🦹‍♀ 🦹‍♂
+surd	√
+sure	😕 👌
+surf	🌊 🏄 🏄‍♀ 🏄‍♂
+surfer	🌊 🏄 🏄‍♀ 🏄‍♂
+surfing	🏄 🏄‍♀ 🏄‍♂ 🌊
+surprise	😧 🫨 🤨 😦 🎁
+surprised	😟 😯 🫪 😮 😱
 sushi	🍣
+suspension	🚟
+suspicious	😏
+sutures	🪡
+swag	😏 😎
 swan	🦢
-swaziland	🇸🇿
-sweat	😓
-sweden	🇸🇪
-swimmer	🏊
-switzerland	🇨🇭
-symbols	🔣
+swearing	🤬
+sweat	😥 💦 😅 😓 😰
+sweating	🥵
+sweeping	🧹
+sweet	🩷 😛 🍠 🍡 🍩
+swell	🏄 🏄‍♀ 🏄‍♂
+swerve	👐
+swim	👙 🛟 🏊 🏊‍♀ 🏊‍♂
+swimmer	🏊 🏊‍♀ 🏊‍♂
+swimming	🏊 🏊‍♀ 🏊‍♂ 🥽 🤽
+swimsuit	🩱 🩲 🩳
+swirl	🍥
+sword	🤺
+swords	⚔
+symbol	☮ ♻ ♿ ⚕ ⚛
+symbols	🔣 🤬
+symmetric	⊖
+sympathy	😮
 synagogue	🕍
-syria	🇸🇾
 syringe	💉
+table	🏓
+tableware	🥄
+tabs	📑
+tache	🥸
+tack	⊥
 taco	🌮
 tada	🎉
-taiwan	🇹🇼
-tajikistan	🇹🇯
+taekwondo	🥋
+tag	🏷 < >
+tai	🍹
+tail	↢ ↣
+tailoring	🪡
+takeout	🥡
+taking	🛀
+tale	🐲 👿 😇 😈 🐉
+talisman	🧿
+talk	🦜 💬
 tamale	🫔
+tanabata	🎋
 tangerine	🍊
-tanzania	🇹🇿
-taurus	♉
-taxi	🚕
-tea	🍵
-teacher	🧑‍🏫
+tangled	🪢
+tango	💃 🕺
+tangy	🍋‍🟩
+tao	☯
+taoist	☯
+tape	📼
+target	🎯 ◎
+tash	🥸
+taste	😝 🧂
+tasty	😋
+taurus	♉ 🐂
+taxi	🚕 🚖
+tbt	📷 📻 📹
+tea	🫖 🧋 ☕ 🍵
+teacher	🧑‍🏫 👨‍🏫 👩‍🏫
+teacup	🍵
+teal	🩵
 teapot	🫖
-technologist	🧑‍💻
-telephone	☎️
+tear	😢 😭 😂 📆 🥲
+tears	😭 🥹 😂 😹
+tease	😉
+technologist	🧑‍💻 👨‍💻 👩‍💻
+teddy	🧸
+tee	🏌 🏌‍♀ 🏌‍♂
+teeth	😀 🥶 😁 😃 🦫
+tegh	🪯
+telephone	☎ 📞 📱 📳 📶
 telescope	🔭
 television	📺
-ten	🔟
-tennis	🎾
-tent	⛺
-thailand	🇹🇭
-thank	🙏
-thanks	🙏
-thermometer	🌡️
+tell	🫴
+teller	🏧
+temple	🛕 🕍
+tempura	🍤
+ten	🕙 🕥
+tennis	🎾 🏓 👟
+tension	🫫 💆 💆‍♀ 💆‍♂
+tensor	⊗
+tent	⛺ 🎪
+tentacles	🪼
+tequila	🍋‍🟩
+terrapin	🐢
+terrestrial	🛸
+test	🧪
+text	💬
+than	< > ≪ ≫ ≮
+thanks	🙏 🫂
+thanksgiving	🦃
+that	🫹 🫺
+theater	🎭
+theatre	🎭
+theme	🎡 🎢 🛝
+theory	⋭
+therapist	🧑‍⚕ 👨‍⚕ 👩‍⚕
+therapy	💆 💆‍♀ 💆‍♂
+there	∃
+therefore	∴
+thermometer	🌡 🤒
+thespian	🎭
+think	💭
 thinking	🤔
-thread	🧵
-three	3️⃣
-thumbsdown	👎
-thumbsup	👍
-ticket	🎫
-tickets	🎟️
-tiger	🐅 🐯
-tired	😴 😫
-tm	™️
-togo	🇹🇬
-toilet	🚽
-tokelau	🇹🇰
+third	🥉
+thirty	🕜 🕝 🕞 🕟 🕠
+this	☝ 🫹 🫺
+thong	🩴
+thongs	🩴
+thought	💭
+thoughts	💭
+thread	🧵 🪡
+three	³ 🕒 🕞 3⃣ 👌
+throw	🤮 ⛹ ⛹‍♀ ⛹‍♂ 🤾
+thumb	🫹 🫺 👍 👎 🫰
+thumbs	👍 👎
+thunder	⚡ ⛈
+thunderbolt	⚡
+thunderstorm	⛈
+thx	🙏
+tichel	🧕
+tick	✔ ✅ ☑
+ticket	🎫 🎟
+tickets	🎟
+tie	👔 🪢
+tiger	🐯 🐅
+tilde	~ ∼ ∽
+tilted	🔍 🔎
+timber	🪵
+time	😥 ⌚ ⏱ ⌛ ⏰
+timer	⏲ ⌛ ⏳
+times	⊗ ×
+tip	↰ ↱ ↲ ↳
+tipping	💁 💁‍♀ 💁‍♂
+tipsy	🥴
+tire	🛞
+tired	😫 😩 😪 😴 🥱
+titania	🧚‍♀
+tm	™
+tmi	🙉
+toadstool	🍄
+toast	🍞
+toboggan	🛷
+together	💑 🤲 💏
+toilet	🚽 🚻 🪠 🚹 🚺
+toiletry	🪥
+tokyo	🗼
 tomato	🍅
-tonga	🇹🇴
-tongue	👅
+tomb	🪦
+tombstone	🪦 ∎
+tone	` ´
+tongue	👅 🥵 😛 😜 😝
+tool	🧰 ⚓ ⚗ ⚙ ⛏
 toolbox	🧰
-tooth	🦷
+tooth	🦷 🍬 🍫
 toothbrush	🪥
-top	🔝
+top	🔝 🎩 ↶ ↷
 tophat	🎩
-tornado	🌪️
-tr	🇹🇷
-trackball	🖲️
+toppings	🍄‍🟫
+torch	🔦
+tornado	🌪
+tortoise	〔 〕 🐢
+toss	🤾 🤾‍♀ 🤾‍♂
+total	☯
+totally	😲
+touched	🥲
+tough	🪨
+tournament	🤼‍♀ 🤼‍♂ 🤼
+tournois	₶
+towels	🧻
+tower	🗼
+toy	🧸 🪀
+trace	🫆
+track	🛤 ⏭ ⏮
+trackball	🖲
+tracks	🔀
 tractor	🚜
-train	🚆 🚋
-tram	🚊
-transgender	⚧️
-trident	🔱
+trade	™
+trademark	™
+tradesperson	🧑‍🔧 👨‍🔧 👩‍🔧
+traffic	🚥 🚦 ⛔ 🚸
+train	🚆 🚅 🚄 🚂 🚉
+trains	🚂
+tram	🚊 🚋 🚎 🚃
+tramway	🚡
+trans	🌈 🏳‍🌈
+transform	🐦‍🔥
+transformation	🫫 🫌
+transgender	⚧ 🏳‍⚧ 🌈 🏳‍🌈
+transparent	🪟
+transportation	🛻
+trap	🪤 🪍
+trash	🗑
+travel	✈ 🗿 🚀 🚁 🚂
+tray	📤 📥
+treasure	🪎 🪙 🏴‍☠
+treat	🧁
+treatment	💆 💆‍♀ 💆‍♂
+tree	🌲 🌳 🌴 🎄 🎋
+trend	📈 📉 💹
+triangle	⊿ ◿ ▲ △ ▷
+triangular	📐 🚩
+triathlon	🏊 🏊‍♀ 🏊‍♂
+trident	🔱 🧜 🧜‍♀ 🧜‍♂
+trim	🪚
+trip	📷 🚞 🛄
+triple	‴ ⇚ ⇛ ≡
+triste	😢
+triton	🧜‍♂
 triumph	😤
 troll	🧌
-trolleybus	🚎
+trolley	🚎 🚋 🛒
+trolleybus	🚎 🚊 🚃 🚋
+trolling	🧌
 trombone	🪊
+troops	🫡
 trophy	🏆
-truck	🚚
+tropical	🍹 🐠 🍋‍🟩 🍍 🥭
+tropics	🍹
+trouble	😵‍💫 🫝
+trousers	👖
+truck	🚚 🛻 🚒 🚛
+true	💯
+truffle	🍄‍🟫
 trumpet	🎺
+trunk	🪾
+truth	💯
+tréma	¨
 tshirt	👕
+ttfn	👋
+ttyl	👊 👋
+tub	🛀
+tube	🧪
+tuk	🛺
 tulip	🌷
-tunisia	🇹🇳
-turkey	🇹🇷 🦃
-turkmenistan	🇹🇲
+tumbler	🥃
+tuple	〈 〉
+turban	👳 👳‍♀ 👳‍♂
+turd	💩
+turkey	🦃 🍗
+turn	🛞
+turnip	🫜
 turtle	🐢
-tuvalu	🇹🇻
+tusk	🦣
+tuxedo	🤵 🤵‍♀ 🤵‍♂
 tv	📺
-two	2️⃣
-uganda	🇺🇬
-uk	🇬🇧
-ukraine	🇺🇦
-umbrella	☂️ ☔
-unamused	😒
+twelve	🕛 🕧
+twin	👯‍♀ 👯‍♂ 👯
+twine	🪢
+twins	♊ 👬 👭 🧑‍🤝‍🧑 👫
+twinsies	👯‍♀ 👯‍♂ 👯
+twist	🪢
+twisted	🥨
+twister	🌀
+two	² 💕 🕑 🕝 ⨧
+type	🅰 🅱 🅾 🆎
+typewriter	'
+typhoon	🌀
+typing	💬
+tyrannosaurus	🦖
+ufo	👽 👾 🛸
+ugh	😒 🙄 🤌
+ugly	🦢
+uh	😑
+uhh	😒
+ultimate	🥏
+um	😋
+umbrella	☂ 🌂 ⛱ 🏖 ☔
+umlaut	¨
+umrah	🕋
+unamused	😒 😐
+unbelievable	😮
+unbounded	♾
+uncomfortable	🫦
+undead	🧛 🧟 🧛‍♀ 🧛‍♂ 🧟‍♀
+under	⊰ ⊱ 🔞 🐨 🫩
 underage	🔞
+underarm	🥎
+underbar	⩣
+undercover	👮 👮‍♀ 👮‍♂
+underdash	_
+underline	_
+underwater	🫧
+underwear	🩲 🩳
+undo	🪌
+uneven	🥴
+unhappy	😐 😑 😒 😞 😠
 unicorn	🦄
-unlock	🔓
+uniform	🥋
+unimpressed	😐 😑
+union	∪ ⋃
+universal	♾ ∀
+unlock	🔓 🔑
 unlocked	🔓
-up	🆙
-uruguay	🇺🇾
-us	🇺🇸
-usa	🇺🇸
-uzbekistan	🇺🇿
-vampire	🧛
-vanuatu	🇻🇺
-venezuela	🇻🇪
+unlucky	🐈‍⬛
+unreal	😮
+unsure	🫤
+unwind	🧖 🧖‍♀ 🧖‍♂
+up	⬆ 🤮 ⊥ 👍 ↑
+upper	◠ ◓ ◤ ◥ ◔
+uppercase	🔠
+upset	😠 😡 🧂 💢 🙍
+upside	🙃
+upward	📈 💹
+upwards	🔼 ⇈ ⇑ ⇡ ⇧
+urn	⚱
+usd	$
+utility	🚙
+vacancy	🈳 🈵
+vaccination	💉
+valentine	💘 💝 🌹 💌
+valuables	🪎
+vampire	🧛 🧛‍♀ 🧛‍♂ ⚰ 🦇
+van	🚐
+vat	🪣
+vbar	|
+vcr	📼
+vector	⨯
+vegetable	🫜 🍅 🍆 🥒 🥔
+vegetarian	🍄‍🟫 🫜
+veggie	🍄‍🟫 🫛
+vehicle	🚙 🚁 🚌 🚐 🚑
+veil	👰 👰‍♀ 👰‍♂
+versus	🆚
+vertical	| ⋮ ▮ 🔃 🚦
+vertically	🙂‍↕
+very	⋘ ⋙
+vest	🦺
 vhs	📼
+vibrate	🫨
+vibration	📳
+vice	🗜
+victory	✌ 🏆
+vicuña	🦙
+video	📼 🎮 📹 📷 📺
 videocassette	📼
-vietnam	🇻🇳
+videogame	🕹
+view	🪟
+viewer	🫵
+viewing	🎑
+villain	🦹 🦹‍♀ 🦹‍♂
+vinculum	‾
+violet	🪻
 violin	🎻
-virgo	♍
+virgo	♍ 👧
+virgule	/ ⁄ ∕
+virus	🦟 🦠
+vitamin	🍊 💊
+voip	📞
 volcano	🌋
 volleyball	🏐
+voltage	⚡
+volume	🔈 🔉 🔊
+vomit	🤢 🤮
 vomiting	🤮
 vs	🆚
+vu	🔄
+vulcan	🖖
+vulnerable	🫪
+wacky	😜
 waffle	🧇
-wales	🏴󠁧󠁢󠁷󠁬󠁳󠁿
-walking	🚶
-warning	⚠️
-wastebasket	🗑️
-watch	⌚
+wait	🫷 🫸
+waiting	⏰ ⏳
+walk	👣 🚶 🚶‍♀ 🚶‍♂
+walking	🚶 🚶‍♀ 🚶‍♂ 🧟 🧟‍♀
+wall	🧱
+wand	🪄
+waning	🌖 🌘
+war	🥷 🪖
+ward	◉
+warning	⚠
+warrior	🪖
+waste	🗑
+wastebasket	🗑
+watch	⌚ 🙈
+water	🌊 🐃 🔫 🚰 🚾
 watermelon	🍉
-wave	👋
-wc	🚾
-weary	😩
-wedding	💒
-whale	🐳 🐋
-wheel	🛞
-wheelchair	♿
-wind	🌬️
+waterpolo	🤽 🤽‍♀ 🤽‍♂
+wave	🌊 ↜ ↝ ↭ 👋
+waves	🏄 🏄‍♀ 🏄‍♂
+waving	👋 🏳 🏴
+wavy	🥴 〰
+waxing	🌒 🌔
+way	😲 🌌 🤯
+wc	🚻 🚹 🚺 🚾
+wealth	🪎
+wealthy	🧐
+weapon	🏺 🗡 🛡 🪃 ⚔
+wearing	👳 👳‍♀ 👳‍♂
+weary	😩 🙀 🫩
+weather	🌞 ☀ ☁ ❄ 🌀
+web	🕸 🌐
+wedding	💒 💍 💎 👰 👰‍♀
+wedge	🧀 ^ ∧
+weekend	👖 👕
+weight	⚖ 🏋 🏋‍♀ 🏋‍♂
+weightlift	💪
+weightlifter	🏋 🏋‍♀ 🏋‍♂
+weights	🏋 🏋‍♀ 🏋‍♂
+weird	😒
+weirdo	😜
+welding	🥽
+well	❤‍🩹 👏
+west	⇖ ⇙ ↸ ⬅
+wet	💦
+whack	/ \
+whale	🐋 🐳 🫍
+what	😧 😳 🤨 😦 🤌
+whatever	😐 😑 😒 😴 🥱
+wheat	🍞
+wheel	🛞 🎡 ☸
+wheelchair	♿ 🦼 🦽 👨‍🦼 👨‍🦽
+wheels	🛹
+where	🏠 🏡
+whew	😥
+whine	🙎 🙎‍♀ 🙎‍♂
+whirlwind	🌪
+whiskers	🧔 🧔‍♀ 🧔‍♂
+whiskey	🥃
+whisky	🥃
+whisper	😮‍💨
+whistle	😮‍💨
+white	💟 ⚪ 🏳 💮 🤍
+who	🤷 🤷‍♀ 🤷‍♂
+whoa	😯 🫨 😮 😵‍💫
+whoops	🤭
+why	🥺
+wi	🛜
+wicked	🖤
+wifi	🛜
+wild	🥦
+wildcard	* 🃏
+wilted	🥀
+win	😎 🏆 👑 🌟 🏁
+wind	🌬 🎐 🍃
 window	🪟
+wine	🍷
 wing	🪽
-wink	😉
-winking	😉
+wings	💸 🧚 🧚‍♀ 🧚‍♂
+wink	😉 😜
+winking	😉 😜
+winks	😉
+winner	🏅
+winning	🏆
+winter	🪾
 wireless	🛜
+wise	🦉 👴 👵 🧓
+wisent	🦬
+wish	🤲
+wishbone	🦴
+wishes	🧞 🧞‍♀ 🧞‍♂
+witch	🧙 🧹 🪄 🧙‍♀ 🧙‍♂
+without	⛄ 🍵 😶
+witness	👁‍🗨
+wizard	🧙 🪄 🧙‍♀ 🧙‍♂
+wlan	🛜
+woah	😯 😱 😵‍💫
 wolf	🐺
-woman	👩
-womens	🚺
-wood	🪵
-woozy	🥴
-world	🌍
+woman	👩 🏃‍♀ 🏄‍♀ 🏊‍♀ 🏌‍♀
+women	🤼‍♀ 👭 👯‍♀
+won	₩ 😤
+wonder	💭
+wondering	🤔
+wood	🪵 🪓 🪾
+woodwind	🪈
+woodwose	🫈
+woohoo	🎉 🎊
+wool	🐑 🦙
+wooly	🦣
+woozy	🥴 😵‍💫
+work	👷 💦 👷‍♀ 👷‍♂
+worker	👷 🧑‍⚕ 🧑‍🏭 🧑‍💼 👨‍⚕
+workout	💦 🏋 🏋‍♀ 🏋‍♂
+world	🗺 🌎 🌐 🌍 🌏
+worldwide	🌐
 worm	🪱
-worried	😟
-wow	😮
-wrench	🔧
-wrestling	🤼
+worried	😟 😨 🫦
+worry	😟 🫦
+worship	🛐
+wow	😧 😳 🫨 😮 😦
+wrap	🌯
+wrapped	🎁 🫔
+wrapper	🍬
+wrench	🔧 🛠
+wrestle	🤼‍♀ 🤼‍♂ 🫯 🤼
+wrestling	🤼 🤼‍♀ 🤼‍♂
+write	✍
+writing	✍ 🪌 📔
+wry	😼
+wtv	🫥 🫤
+xmas	🎅 🤶 🧑‍🎄
+xnor	⊙
+xor	^
+xoxo	😍 💖 💗 💝 😗
+xray	🩻
+yacht	⛵
+yang	☯
 yarn	🧶
+yawn	😴 🥱
 yawning	🥱
-yemen	🇾🇪
-yen	💴
-yes	👍
-yum	😋
-zambia	🇿🇲
+yay	😃 👏
+yellow	💛 🟡 🟨 🚕 🚖
+yen	¥ 💴 💹
+yes	🫡 👍 🙂‍↕
+yeti	🫈
+yikes	😓 😰
+yin	☯
+yinyang	☯
+yo	🪀 👋
+yoga	🧘 🧘‍♀ 🧘‍♂
+yogi	🧘 🧘‍♀ 🧘‍♂
+yolo	😜 😝 🎆 💀 ⏳
+york	🗽
+young	🌱 👦 👧 👶 🧒
+younger	👦 👧 🧒
+yuan	¥
+yum	😋 🍴
+yummy	😋 🍴
+yup	💯
+yurt	🛖
+yuèbǐng	🥮
 zany	🤪
 zap	⚡
 zebra	🦓
-zero	0️⃣
-zimbabwe	🇿🇼
-zombie	🧟
-zzz	💤
+zen	😌 🧘 🧘‍♀ 🧘‍♂
+zero	0⃣ 📥
+zest	🍋‍🟩
+zigzag	↯
+zip	🤐 🤌
+zipper	🤐
+zodiac	♈ ♉ ♊ ♋ ♌
+zombie	🧟 🧟‍♀ 🧟‍♂
+zoo	🐅 🐆 🐊 🐏 🐃
+zoom	🏎
+zzz	💤 😴 🥱 🛌
+zōri	🩴
