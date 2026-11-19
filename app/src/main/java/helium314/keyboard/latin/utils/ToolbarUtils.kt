@@ -86,6 +86,7 @@ fun getCodeForToolbarKey(key: ToolbarKey) = Settings.getInstance().getCustomTool
     CAMERA -> KeyCode.ATTACH_CAMERA
     DOCUMENT -> KeyCode.ATTACH_DOCUMENT
     CONTACT -> KeyCode.ATTACH_CONTACT
+    LOCATION -> KeyCode.ATTACH_LOCATION
     LEFT -> KeyCode.ARROW_LEFT
     RIGHT -> KeyCode.ARROW_RIGHT
     UP -> KeyCode.ARROW_UP
@@ -128,7 +129,7 @@ enum class ToolbarKey {
     VOICE, CLIPBOARD, NUMPAD, DPAD, UNDO, REDO, SETTINGS, SELECT_ALL, SELECT_WORD, COPY, CUT, PASTE, ONE_HANDED, FLOATING, SPLIT,
     INCOGNITO, AUTOCORRECT, CLEAR_CLIPBOARD, CLOSE_HISTORY, EMOJI, LEFT, RIGHT, UP, DOWN, WORD_LEFT, WORD_RIGHT,
     PAGE_UP, PAGE_DOWN, FULL_LEFT, FULL_RIGHT, PAGE_START, PAGE_END, BACKGROUND_GATHERING, TEXT_REPLACEMENT, LANGUAGE,
-    PHOTO, CAMERA, DOCUMENT, CONTACT
+    PHOTO, CAMERA, LOCATION, DOCUMENT, CONTACT
 }
 
 enum class ToolbarMode {
@@ -139,7 +140,7 @@ val toolbarKeyStrings = entries.associateWithTo(EnumMap(ToolbarKey::class.java))
 
 /** What the (+) button opens. Short, and in the order used on an iOS keyboard. */
 val standardPlusMenu = listOf(
-    PHOTO, CAMERA, DOCUMENT, CONTACT, EMOJI, CLIPBOARD, TEXT_REPLACEMENT, SETTINGS,
+    PHOTO, CAMERA, LOCATION, DOCUMENT, CONTACT, EMOJI, CLIPBOARD, TEXT_REPLACEMENT, SETTINGS,
 )
 
 /** The old (+) row: cursor arrows and select-word, which is not the iOS set. */
@@ -182,9 +183,14 @@ fun previousPlusMenu() = listOf(
     EMOJI, CLIPBOARD, TEXT_REPLACEMENT, SETTINGS, LANGUAGE, ONE_HANDED, UNDO, REDO, SELECT_ALL, COPY, PASTE,
 )
 
+/** The attach row before Location was inserted between Camera and Document. */
+fun plusMenuBeforeLocation() = listOf(
+    PHOTO, CAMERA, DOCUMENT, CONTACT, EMOJI, CLIPBOARD, TEXT_REPLACEMENT, SETTINGS,
+)
+
 fun upgradeToolbarPrefs(prefs: SharedPreferences) {
     val enabled = if (prefs.contains(Settings.PREF_TOOLBAR_KEYS)) getEnabledToolbarKeys(prefs) else emptyList()
-    if (isLegacyPlusMenu(enabled) || enabled == previousPlusMenu())
+    if (isLegacyPlusMenu(enabled) || enabled == previousPlusMenu() || enabled == plusMenuBeforeLocation())
         prefs.edit { putString(Settings.PREF_TOOLBAR_KEYS, defaultToolbarPref) }
     upgradeToolbarPref(prefs, Settings.PREF_TOOLBAR_KEYS, defaultToolbarPref)
     upgradeToolbarPref(prefs, Settings.PREF_PINNED_TOOLBAR_KEYS, defaultPinnedToolbarPref)

@@ -20,9 +20,10 @@ import helium314.keyboard.latin.R
  * Hold-to-talk dictation. Press starts recording in the isolated ASR process, release transcribes
  * on device and hands the text to [onText]. Everything stays on the phone.
  */
-class PushToTalkController(
+class PushToTalkController @JvmOverloads constructor(
     private val context: Context,
     private val onText: (String) -> Unit,
+    private val onFinished: (Boolean) -> Unit = {},
 ) {
     private val handler = Handler(Looper.getMainLooper())
     private var service: Messenger? = null
@@ -38,6 +39,9 @@ class PushToTalkController(
     private var pressedAt = 0L
     private var awaiting = false // a dictation session is open: only then is incoming text accepted
     private var committedAny = false // this hold already inserted text; the Done state is shown once, at the end
+    /** New holds of the mic. A second press must increment this; a stuck hold must not. */
+    var pressesForTest: Int = 0
+        private set
 
     private val replyTo = Messenger(Handler(Looper.getMainLooper()) { message ->
         when (message.what) {
@@ -57,8 +61,12 @@ class PushToTalkController(
                     committedAny = true
                     onText(text)
                 }
-                if (isLast && committedAny) {
-                    Toast.makeText(context, R.string.voice_dictation_done, Toast.LENGTH_SHORT).show()
+                if (isLast) {
+                    val produced = committedAny
+                    if (produced) {
+                        Toast.makeText(context, R.string.voice_dictation_done, Toast.LENGTH_SHORT).show()
+                    }
+                    onFinished(produced)
                 }
                 true
             }
@@ -78,6 +86,7 @@ class PushToTalkController(
                 held = false
                 sessionStarted = false
                 showError(message.data.getInt(AsrService.KEY_CODE))
+                onFinished(false)
                 true
             }
             else -> false
@@ -109,7 +118,12 @@ class PushToTalkController(
             return false
         }
         if (held) return true // repeated down events must not start a second session
+        // A previous hold that never delivered its last message must not block this one.
+        awaiting = false
+        committedAny = false
+        sessionStarted = false
         held = true
+        pressesForTest++
         pressedAt = System.currentTimeMillis()
         DictationLog.add(context, "press, service ready=" + (service != null))
         if (service != null) startSession() else bind()

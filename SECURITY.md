@@ -13,9 +13,10 @@ Source manifests and the release APK are allowlisted.
 | `RECORD_AUDIO` | `:asr` manifest, merged into the APK | Push-to-talk dictation. `AsrService` opens the microphone on `MSG_START` and stops it on `MSG_STOP`, unbind, or process death. The keyboard only sends start while the mic key is held. |
 | `VIBRATE` | app manifest | Key and dictation haptics. |
 | `RECEIVE_BOOT_COMPLETED` | app manifest | `SystemBroadcastReceiver` restores the pre-Android 10 setup icon after boot. It now returns immediately for any other action. |
+| `ACCESS_COARSE_LOCATION`, `ACCESS_FINE_LOCATION` | app manifest | Asked only when Location is tapped. One `LocationManager` fix, inserted as a maps link. Not stored or sent. `ACCESS_BACKGROUND_LOCATION` is rejected by the privacy gate. |
 | `DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION` | merged APK only, added by AndroidX | Signature permission so the library's non-exported receivers stay app-private. It is not in our source. |
 
-There is no `INTERNET` permission. `securekeyboard-project/ci/check_privacy_sources.py` fails the build if a source manifest adds any other permission or a new exported component. `securekeyboard-project/ci/check_no_internet.sh` fails the release APK the same way. Both ran successfully in this review (`PASS` on the source check).
+There is no `INTERNET` permission and no `ACCESS_BACKGROUND_LOCATION` permission. `securekeyboard-project/ci/check_privacy_sources.py` fails the build if a source manifest adds any other permission or a new exported component. `securekeyboard-project/ci/check_no_internet.sh` fails the release APK the same way. Both ran successfully in this review (`PASS` on the source check).
 
 ### Native code and models
 

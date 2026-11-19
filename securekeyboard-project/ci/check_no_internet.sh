@@ -18,8 +18,12 @@ for apk in "$@"; do
   if grep -Fq "android.permission.INTERNET" <<<"$permissions"; then
     echo "FAIL: INTERNET permission found in $apk" >&2; exit 1
   fi
+  if grep -Fq "android.permission.ACCESS_BACKGROUND_LOCATION" <<<"$permissions"; then
+    echo "FAIL: ACCESS_BACKGROUND_LOCATION found in $apk" >&2; exit 1
+  fi
   # Only these permissions may ever ship. RECORD_AUDIO is for push-to-talk dictation (on device).
-  unexpected="$(grep -Ev '^(android\.permission\.(RECEIVE_BOOT_COMPLETED|VIBRATE|RECORD_AUDIO)|.*\.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION)$' <<<"$permissions" || true)"
+  # Location is requested only when the user taps Location, and never in the background.
+  unexpected="$(grep -Ev '^(android\.permission\.(RECEIVE_BOOT_COMPLETED|VIBRATE|RECORD_AUDIO|ACCESS_COARSE_LOCATION|ACCESS_FINE_LOCATION)|.*\.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION)$' <<<"$permissions" || true)"
   if [[ -n "$unexpected" ]]; then
     echo "FAIL: unexpected permissions in $apk:" >&2; echo "$unexpected" >&2; exit 1
   fi

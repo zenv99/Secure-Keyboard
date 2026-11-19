@@ -396,6 +396,9 @@
     <string name="camera" translatable="false">Camera</string>
     <string name="document" translatable="false">Document</string>
     <string name="contact" translatable="false">Contact</string>
+    <string name="location" translatable="false">Location</string>
+    <string name="location_denied" translatable="false">Location permission was not granted</string>
+    <string name="location_unavailable" translatable="false">Location is not available</string>
     <string name="attach_not_accepted" translatable="false">This app doesn\'t accept that file from a keyboard</string>
     <string name="attach_camera_unavailable" translatable="false">No camera app is available</string>
     <string name="language" translatable="false">Languages</string>

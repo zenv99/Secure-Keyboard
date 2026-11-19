@@ -484,6 +484,10 @@ public class LatinIME extends InputMethodService implements
         mPushToTalk = new helium314.keyboard.voice.PushToTalkController(this, text -> {
             onDictatedText(text);
             return kotlin.Unit.INSTANCE;
+        }, produced -> {
+            if (produced) autoSendAfterDictation();
+            updateVoiceKeyMode();
+            return kotlin.Unit.INSTANCE;
         });
         mIsHardwareAcceleratedDrawingEnabled = this.enableHardwareAcceleration();
         Log.i(TAG, "Hardware accelerated drawing: " + mIsHardwareAcceleratedDrawingEnabled);
@@ -1286,6 +1290,22 @@ public class LatinIME extends InputMethodService implements
         ic.performEditorAction(actionId);
     }
 
+    /**
+     * After a non-empty dictation, perform the field's editor action.
+     * This never inserts a newline and never sends a raw enter key.
+     */
+    private void autoSendAfterDictation() {
+        final android.view.inputmethod.EditorInfo ei = getCurrentInputEditorInfo();
+        final android.view.inputmethod.InputConnection ic = getCurrentInputConnection();
+        if (ei == null || ic == null) return;
+        if (!helium314.keyboard.voice.DictationSendPolicy.INSTANCE.shouldPerformAction(ei.inputType, ei.imeOptions)) {
+            return;
+        }
+        final int actionId = helium314.keyboard.voice.DictationSendPolicy.INSTANCE.actionId(
+                ei.imeOptions, ei.actionId, ei.actionLabel != null);
+        ic.performEditorAction(actionId);
+    }
+
     /** The big mic key becomes the send key while the field contains text, including text just dictated. */
     private void updateVoiceKeyMode() {
         if (!hasSuggestionStripView()) return;
@@ -1614,10 +1634,53 @@ public class LatinIME extends InputMethodService implements
 
     /** Opens the system picker for a plus-menu attachment. The activity is not exported. */
     public void launchAttach(final String mode) {
+        helium314.keyboard.latin.attach.AttachBridge.INSTANCE.setListener(result -> {
+            handleAttachResult(result);
+            return kotlin.Unit.INSTANCE;
+        });
         final android.content.Intent intent = new android.content.Intent(this, helium314.keyboard.latin.attach.AttachPickerActivity.class);
         intent.putExtra(helium314.keyboard.latin.attach.AttachPickerActivity.EXTRA_MODE, mode);
         intent.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK | android.content.Intent.FLAG_ACTIVITY_NO_ANIMATION | android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
         startActivity(intent);
+    }
+
+    /** One location fix, inserted as a maps link. The activity is not exported. */
+    public void launchLocation() {
+        helium314.keyboard.latin.attach.AttachBridge.INSTANCE.setListener(result -> {
+            handleAttachResult(result);
+            return kotlin.Unit.INSTANCE;
+        });
+        final android.content.Intent intent = new android.content.Intent(this, helium314.keyboard.latin.attach.LocationTrampolineActivity.class);
+        intent.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK | android.content.Intent.FLAG_ACTIVITY_NO_ANIMATION | android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+        startActivity(intent);
+    }
+
+    private void handleAttachResult(final helium314.keyboard.latin.attach.AttachResult result) {
+        if (result instanceof helium314.keyboard.latin.attach.AttachResult.Text) {
+            onTextInput(((helium314.keyboard.latin.attach.AttachResult.Text) result).getText());
+            return;
+        }
+        if (!(result instanceof helium314.keyboard.latin.attach.AttachResult.File)) return;
+        final helium314.keyboard.latin.attach.AttachResult.File file =
+                (helium314.keyboard.latin.attach.AttachResult.File) result;
+        try {
+            final android.view.inputmethod.EditorInfo ei = getCurrentInputEditorInfo();
+            final String[] mimes = ei == null ? null : androidx.core.view.inputmethod.EditorInfoCompat.getContentMimeTypes(ei);
+            if (ei == null || !helium314.keyboard.latin.attach.AttachCommit.INSTANCE.accepts(mimes, file.getMime())) {
+                android.widget.Toast.makeText(this, helium314.keyboard.latin.R.string.attach_not_accepted, android.widget.Toast.LENGTH_SHORT).show();
+                return;
+            }
+            final android.view.inputmethod.InputConnection ic = getCurrentInputConnection();
+            if (ic == null) return;
+            final androidx.core.view.inputmethod.InputContentInfoCompat info =
+                    new androidx.core.view.inputmethod.InputContentInfoCompat(
+                            file.getUri(),
+                            new android.content.ClipDescription("", new String[]{file.getMime()}),
+                            null);
+            mInputLogic.mConnection.commitContent(info, ei);
+        } finally {
+            file.getCacheFile().delete();
+        }
     }
 
     public void launchTextReplacements() {

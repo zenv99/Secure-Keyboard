@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 package helium314.keyboard.latin.attach
 
+import java.util.Locale
+
 /**
  * Decides whether an editor can take a photo, camera shot, or document from the keyboard.
  * Editors advertise this with [android.view.inputmethod.EditorInfo.getContentMimeTypes].
@@ -11,6 +13,16 @@ object AttachCommit {
         if (contentMime.isBlank() || editorMimeTypes.isNullOrEmpty()) return false
         val mime = contentMime.lowercase()
         return editorMimeTypes.any { pattern -> matches(pattern.lowercase(), mime) }
+    }
+
+    /**
+     * One location, as text. Five decimal places. Nothing about the fix is stored.
+     * The link is text only: opening it is the other app's choice.
+     */
+    fun locationLink(latitude: Double, longitude: Double): String {
+        val lat = String.format(Locale.US, "%.5f", latitude)
+        val lng = String.format(Locale.US, "%.5f", longitude)
+        return "https://maps.google.com/?q=$lat,$lng"
     }
 
     /** Name and phone from a one-shot contact pick. Empty fields are omitted. */

@@ -1,6 +1,6 @@
 # Secure Keyboard privacy policy
 
-Last updated: November 16, 2026
+Last updated: November 19, 2026
 
 **Secure Keyboard collects no data. Nothing you type, say or copy leaves your device.**
 
@@ -20,6 +20,7 @@ Last updated: November 16, 2026
 ## Permissions
 
 - **Microphone (RECORD_AUDIO):** only while you hold the dictation button.
+- **Location (ACCESS_COARSE_LOCATION and ACCESS_FINE_LOCATION):** only when you tap Location in the plus menu. The keyboard asks then, takes one fix while the screen is open, and inserts a maps link as text. The fix is not stored, logged, or sent. Background location is never requested.
 - **Vibrate:** key and dictation feedback.
 - **Receive boot completed:** lets the keyboard restore its state after the phone restarts.
 

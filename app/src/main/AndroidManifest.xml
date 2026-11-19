@@ -10,6 +10,9 @@ SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
 
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.VIBRATE" />
+    <!-- Asked only when Location is tapped. Never background. -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
     <application android:label="@string/english_ime_name"
             android:name="helium314.keyboard.latin.App"
@@ -92,6 +95,9 @@ SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
             android:theme="@style/TransparentActivityTheme" android:excludeFromRecents="true" android:noHistory="true"/>
 
         <activity android:name="helium314.keyboard.latin.attach.AttachPickerActivity" android:exported="false"
+            android:theme="@style/TransparentActivityTheme" android:excludeFromRecents="true" android:noHistory="true"/>
+
+        <activity android:name="helium314.keyboard.latin.attach.LocationTrampolineActivity" android:exported="false"
             android:theme="@style/TransparentActivityTheme" android:excludeFromRecents="true" android:noHistory="true"/>
 
         <!-- Broadcast receivers -->

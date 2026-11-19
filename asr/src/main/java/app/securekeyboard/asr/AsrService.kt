@@ -72,9 +72,9 @@ class AsrService : Service() {
         if (!pendingStart || token != startToken) return // released or superseded while waiting: this start was cancelled
         pendingClient = client
         if (recorder != null) {
-            // The previous recording is still closing (pressed again within a moment): retry shortly instead of
-            // silently ignoring this press.
-            if (attempt < 8) main.postDelayed({ handleStart(client, token, attempt + 1) }, 100)
+            // A new hold must not wait out the previous recording. Cancel it and open the mic again.
+            recorder?.cancel()
+            if (attempt < 8) main.postDelayed({ handleStart(client, token, attempt + 1) }, 40)
             else { pendingStart = false; pendingClient = null; reply(client, MSG_ERROR, code = ERR_AUDIO) }
             return
         }

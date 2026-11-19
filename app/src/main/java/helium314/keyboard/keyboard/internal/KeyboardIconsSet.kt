@@ -162,6 +162,7 @@ class KeyboardIconsSet private constructor() {
                     ToolbarKey.CAMERA -> R.drawable.ic_attach_camera
                     ToolbarKey.DOCUMENT -> R.drawable.ic_attach_document
                     ToolbarKey.CONTACT -> R.drawable.ic_attach_contact
+                    ToolbarKey.LOCATION -> R.drawable.ic_attach_location
                     ToolbarKey.LANGUAGE -> R.drawable.sym_keyboard_language_switch_lxx
                 })
             }
@@ -232,6 +233,7 @@ class KeyboardIconsSet private constructor() {
                     ToolbarKey.CAMERA -> R.drawable.ic_attach_camera
                     ToolbarKey.DOCUMENT -> R.drawable.ic_attach_document
                     ToolbarKey.CONTACT -> R.drawable.ic_attach_contact
+                    ToolbarKey.LOCATION -> R.drawable.ic_attach_location
                     ToolbarKey.LANGUAGE -> R.drawable.sym_keyboard_language_switch_lxx
                 })
             }
@@ -302,6 +304,7 @@ class KeyboardIconsSet private constructor() {
                     ToolbarKey.CAMERA -> R.drawable.ic_attach_camera
                     ToolbarKey.DOCUMENT -> R.drawable.ic_attach_document
                     ToolbarKey.CONTACT -> R.drawable.ic_attach_contact
+                    ToolbarKey.LOCATION -> R.drawable.ic_attach_location
                     ToolbarKey.LANGUAGE -> R.drawable.sym_keyboard_language_switch_lxx
                 })
             }

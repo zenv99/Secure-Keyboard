@@ -63,6 +63,29 @@ class DictationSendPolicyTest {
         assertEquals(42, DictationSendPolicy.actionId(EditorInfo.IME_ACTION_NONE, 42, true))
     }
 
+    @Test fun whatsAppStyleFieldSendsAndDoesNotReturnEnter() {
+        val options = EditorInfo.IME_ACTION_SEND or EditorInfo.IME_FLAG_NO_ENTER_ACTION or EditorInfo.IME_FLAG_NO_EXTRACT_UI
+        val input = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_CAP_SENTENCES or InputType.TYPE_TEXT_FLAG_MULTI_LINE
+        assertTrue(DictationSendPolicy.shouldPerformAction(input, options))
+        val action = DictationSendPolicy.actionId(options, 0, false)
+        assertEquals(EditorInfo.IME_ACTION_SEND, action)
+        assertNotEquals(66, action) // KEYCODE_ENTER is not an editor action this button performs
+    }
+
+    @Test fun passwordAndBareUrlDoNotAutoSend() {
+        val password = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
+        assertEquals(false, DictationSendPolicy.shouldPerformAction(password, EditorInfo.IME_ACTION_DONE))
+        val url = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_URI
+        assertEquals(false, DictationSendPolicy.shouldPerformAction(url, EditorInfo.IME_ACTION_GO))
+    }
+
+    @Test fun searchPerformsSearch() {
+        val input = InputType.TYPE_CLASS_TEXT
+        val options = EditorInfo.IME_ACTION_SEARCH
+        assertTrue(DictationSendPolicy.shouldPerformAction(input, options))
+        assertEquals(EditorInfo.IME_ACTION_SEARCH, DictationSendPolicy.actionId(options, 0, false))
+    }
+
     @Test fun aPlainNoteFieldStillUsesNewlineOnTheEnterKey() {
         val info = editor(EditorInfo.IME_ACTION_NONE, InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_MULTI_LINE)
         assertEquals(EditorInfo.IME_ACTION_NONE, InputTypeUtils.getImeOptionsActionIdFromEditorInfo(info))

@@ -12,6 +12,7 @@ class PlusMenuTest {
             listOf(
                 ToolbarKey.PHOTO,
                 ToolbarKey.CAMERA,
+                ToolbarKey.LOCATION,
                 ToolbarKey.DOCUMENT,
                 ToolbarKey.CONTACT,
                 ToolbarKey.EMOJI,

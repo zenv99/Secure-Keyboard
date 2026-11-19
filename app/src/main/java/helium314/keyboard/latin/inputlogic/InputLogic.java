@@ -754,6 +754,9 @@ public final class InputLogic {
             case KeyCode.ATTACH_CONTACT:
                 mLatinIME.launchAttach(helium314.keyboard.latin.attach.AttachPickerActivity.MODE_CONTACT);
                 break;
+            case KeyCode.ATTACH_LOCATION:
+                mLatinIME.launchLocation();
+                break;
             case KeyCode.ACTION_NEXT:
                 performEditorAction(EditorInfo.IME_ACTION_NEXT);
                 break;
