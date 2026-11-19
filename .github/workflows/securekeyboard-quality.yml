@@ -261,6 +261,8 @@ jobs:
           What changed
           - Hold the big button to dictate. Release transcribes on the device and leaves the text in the field. The keyboard stays open.
           - A short tap sends once the field has text. A hold appends more dictation and does not send.
+          - Holding the space bar turns the keyboard into a trackpad. The key labels fade, and releasing it does not type a space.
+          - The plus menu is Photos and Video, Camera, Location, Contact, Document, Emoji, Clipboard, Text shortcuts, and Settings, including after an update from an older menu.
 
           Privacy
           No INTERNET permission. No background location. Backup is off. Voice and learned words stay on the device.

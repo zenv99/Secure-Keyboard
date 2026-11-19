@@ -3,11 +3,11 @@ package helium314.keyboard.smoke
 
 import android.content.ComponentName
 import android.content.Intent
+import android.os.ParcelFileDescriptor
 import android.view.inputmethod.EditorInfo
 import helium314.keyboard.latin.settings.Settings
 import helium314.keyboard.latin.utils.DeviceProtectedUtils
 import helium314.keyboard.latin.utils.upgradeToolbarPrefs
-import java.io.File
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
@@ -176,11 +176,13 @@ class GestureFieldTest {
     }
 
     private fun shot(name: String) {
-        val dir = File(instrumentation.targetContext.filesDir, "shots")
-        dir.mkdirs()
-        val file = File(dir, "$name.png")
-        val wrote = device.takeScreenshot(file)
-        println("SHOT $name wrote=$wrote bytes=${file.length()} path=${file.absolutePath}")
+        // App-private dirs are not visible to a non-root adb pull on this image.
+        // screencap writes a world-readable file under /data/local/tmp.
+        val remote = "/data/local/tmp/sk-$name.png"
+        ParcelFileDescriptor.AutoCloseInputStream(
+            instrumentation.uiAutomation.executeShellCommand("screencap -p $remote"),
+        ).use { it.readBytes() }
+        println("SHOT $name remote=$remote")
     }
 
     private fun shown(ime: LatinIME): Boolean {
