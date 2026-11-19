@@ -161,13 +161,7 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
         }
 
         // toolbar keys setup (no need to hide them any more when locked, because then suggestion strip is gone anyway
-        for (key in getEnabledToolbarKeys(context.prefs())) {
-            if (key == ToolbarKey.VOICE) continue // the one big hold-to-talk mic lives in the top bar (below)
-            val button = createToolbarKey(context, key)
-            button.layoutParams = toolbarKeyLayoutParams
-            setupKey(button, colors)
-            toolbar.addView(button)
-        }
+        addToolbarKeys(colors)
         for (pinnedKey in getPinnedToolbarKeys(context.prefs())) {
             if (pinnedKey == ToolbarKey.EMOJI) continue
             val button = createToolbarKey(context, pinnedKey)
@@ -552,6 +546,22 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
         applyPinnedKeysVisibility()
         leftKeys.visibility = suggestionsStrip.visibility
         isExternalSuggestionVisible = false
+    }
+
+    /** Rebuilds the (+) row from preferences. Tests use this after upgrading an old menu. */
+    fun rebuildToolbarKeys() {
+        toolbar.removeAllViews()
+        addToolbarKeys(Settings.getValues().mColors)
+    }
+
+    private fun addToolbarKeys(colors: helium314.keyboard.latin.common.Colors) {
+        for (key in getEnabledToolbarKeys(context.prefs())) {
+            if (key == ToolbarKey.VOICE) continue
+            val button = createToolbarKey(context, key)
+            button.layoutParams = toolbarKeyLayoutParams
+            setupKey(button, colors)
+            toolbar.addView(button)
+        }
     }
 
     private fun addKeyToPinnedKeys(pinnedKey: ToolbarKey) {

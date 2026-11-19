@@ -4,6 +4,10 @@ package helium314.keyboard.smoke
 import android.content.ComponentName
 import android.content.Intent
 import android.view.inputmethod.EditorInfo
+import helium314.keyboard.latin.settings.Settings
+import helium314.keyboard.latin.utils.DeviceProtectedUtils
+import helium314.keyboard.latin.utils.upgradeToolbarPrefs
+import java.io.File
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
@@ -55,6 +59,7 @@ class GestureFieldTest {
             ime.mKeyboardActionListener.onTouchpadDelta(-80f, 0f, System.nanoTime())
         }
         Thread.sleep(80)
+        shot("trackpad")
         instrumentation.runOnMainSync {
             ime.mKeyboardActionListener.onCustomRequest(KeyboardActionListener.CustomAction.TOUCHPAD_OFF)
         }
@@ -87,12 +92,25 @@ class GestureFieldTest {
 
     @Test fun plusMenuShowsTheWhatsAppSet() {
         open(KeyboardTestActivity.FIELD_PLAIN)
+        val ime = LatinIME.instanceForTest ?: throw AssertionError("keyboard service was not created")
+        instrumentation.runOnMainSync {
+            val prefs = DeviceProtectedUtils.getSharedPreferences(instrumentation.targetContext)
+            prefs.edit().putString(
+                Settings.PREF_TOOLBAR_KEYS,
+                "SETTINGS:true|UNDO:true|REDO:true|LEFT:true|RIGHT:true|NUMPAD:true",
+            ).commit()
+            upgradeToolbarPrefs(prefs)
+            ime.reloadToolbarForTest()
+        }
         val plus = device.wait(Until.findObject(By.desc("More keys")), 15000)
             ?: throw AssertionError("plus button not shown")
         plus.click()
+        Thread.sleep(400)
+        shot("plus-menu")
         for (label in listOf("Photos and Video", "Camera", "Location", "Contact", "Document", "Emoji", "Clipboard", "Text shortcuts", "Settings")) {
             assertTrue("missing $label", scrollToMenuLabel(label))
         }
+        shot("plus-menu-scrolled")
         assertFalse(device.hasObject(By.desc("Undo")))
     }
 
@@ -159,6 +177,12 @@ class GestureFieldTest {
         var value = 0
         instrumentation.runOnMainSync { value = KeyboardTestActivity.instance!!.field.selectionStart }
         return value
+    }
+
+    private fun shot(name: String) {
+        val dir = instrumentation.targetContext.getExternalFilesDir("shots") ?: return
+        dir.mkdirs()
+        device.takeScreenshot(File(dir, "$name.png"))
     }
 
     private fun shown(ime: LatinIME): Boolean {

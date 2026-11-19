@@ -1050,6 +1050,11 @@ public class LatinIME extends InputMethodService implements
     /** The running service, so an instrumented chat field can see the real keyboard. */
     public static LatinIME instanceForTest;
 
+    /** Reloads the (+) row from preferences. The emulator test uses this after an old menu is upgraded. */
+    public void reloadToolbarForTest() {
+        if (mSuggestionStripView != null) mSuggestionStripView.rebuildToolbarKeys();
+    }
+
     @Override
     public void hideWindow() {
         hideWindowsForTest++;

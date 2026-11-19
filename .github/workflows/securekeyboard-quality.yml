@@ -209,6 +209,13 @@ jobs:
           name: emulator-test-report
           path: app/build/reports/androidTests
           if-no-files-found: ignore
+      - name: Upload emulator screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: emulator-screenshots
+          path: emulator-screenshots
+          if-no-files-found: ignore
 
   publish:
     # Only builds that passed the unit tests AND the emulator smoke tests are ever published.
