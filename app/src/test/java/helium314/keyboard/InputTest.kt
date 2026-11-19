@@ -88,8 +88,8 @@ class InputTest {
     private fun touchKey(code: Int, action: Int, eventTime: Long = 0L) {
         val kb = keyboardSwitcher.keyboard!!
         val key = kb.getKey(code)!!
-        val x = key.x + key.height / 2
-        val y = key.y + key.width / 2
+        val x = key.x + key.width / 2
+        val y = key.y + key.height / 2
         val me = MotionEvent.obtain( // todo: there are many more parameters, also related to pointers
             0L,
             eventTime,

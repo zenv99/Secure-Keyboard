@@ -145,11 +145,112 @@ object ProximityAutocorrect {
 
     fun maxRawCost(length: Int): Float = when {
         length <= 1 -> 0f
-        length == 2 -> 0.35f
+        // One adjacent slip on a two-letter word ("iw" → "is"). A far substitution still costs ~2.4.
+        length == 2 -> 1.15f
         length == 3 -> 1.05f
         length == 4 -> 1.70f
         length <= 6 -> 2.40f
         else -> 3.50f
+    }
+
+    /**
+     * The space bar landed where a nearby letter belonged: "gobi g" → "going",
+     * "havi g" → "having". [fragment] is the short token typed after the space.
+     * Returns null when both pieces are already real words, so "the cat" stays.
+     */
+    fun spaceSlip(
+        previous: String,
+        fragment: String,
+        words: WordSource,
+        distance: (Char, Char) -> Float = KeyGeometry::qwertyDistance,
+    ): String? {
+        val left = AutocorrectPolicy.lettersOf(previous)
+        val right = AutocorrectPolicy.lettersOf(fragment)
+        if (left.length !in 2..16 || right.length !in 1..4) return null
+        if (AutocorrectPolicy.isLiteralToken(previous) || AutocorrectPolicy.isLiteralToken(fragment)) return null
+        val leftKnown = isExactVocabularyWord(previous, words, distance)
+        val rightKnown = right.length >= 2 && isExactVocabularyWord(fragment, words, distance)
+        if (leftKnown && rightKnown) return null
+        var best: String? = null
+        var bestRaw = INF
+        for (extra in SPACE_SLIP_LETTERS) {
+            val glued = if (extra == ' ') left + right else left + extra + right
+            if (glued.length !in 2..MAX_LENGTH) continue
+            val exact = knownWord(glued, words, distance)
+            val candidate: String
+            val raw: Float
+            if (exact != null) {
+                candidate = exact
+                raw = 0f
+            } else {
+                val fixed = correct(glued, words, distance) ?: continue
+                val fixedLetters = AutocorrectPolicy.lettersOf(fixed)
+                raw = alignmentCost(glued, fixedLetters, distance, 2.2f)
+                if (raw > 1.15f) continue
+                candidate = fixed
+            }
+            if (candidate.last().lowercaseChar() != right.last()) continue
+            if (AutocorrectPolicy.lettersOf(candidate).length < left.length) continue
+            if (raw < bestRaw) {
+                bestRaw = raw
+                best = candidate
+            }
+        }
+        return best?.let { applyCase(previous, it, false) }
+    }
+
+    /**
+     * A missing space inside one token: "isgoing" → "is going".
+     * A token that is itself a word ("something", "today") is left alone.
+     */
+    fun missingSpace(
+        typed: String,
+        words: WordSource,
+        distance: (Char, Char) -> Float = KeyGeometry::qwertyDistance,
+    ): String? {
+        val letters = AutocorrectPolicy.lettersOf(typed)
+        if (letters.length !in 5..18) return null
+        if (AutocorrectPolicy.isLiteralToken(typed)) return null
+        if (isExactVocabularyWord(typed, words, distance)) return null
+        var best: String? = null
+        var bestScore = 0
+        for (cut in 2 until letters.length - 1) {
+            val a = letters.substring(0, cut)
+            val b = letters.substring(cut)
+            if (b.length < 2) continue
+            val left = knownEntry(a, words, distance) ?: continue
+            val right = knownEntry(b, words, distance) ?: continue
+            if (left.second < 80 || right.second < 80) continue
+            val score = left.second + right.second
+            if (score > bestScore) {
+                bestScore = score
+                best = applyCase(a, left.first, false) + " " + right.first
+            }
+        }
+        return best
+    }
+
+    private val SPACE_SLIP_LETTERS = charArrayOf(' ', 'n', 'b', 'v', 'm', 'h', 'g', 'j', 'y', 'u')
+
+    private fun knownWord(typed: String, words: WordSource, distance: (Char, Char) -> Float): String? =
+        knownEntry(typed, words, distance)?.first
+
+    private fun knownEntry(typed: String, words: WordSource, distance: (Char, Char) -> Float): Pair<String, Int>? {
+        val letters = AutocorrectPolicy.lettersOf(typed)
+        if (letters.isEmpty()) return null
+        val indexes = words.indexesNear(letters[0], distance)
+        var best: Pair<String, Int>? = null
+        for (index in indexes) {
+            val word = words.word(index)
+            val same = word.equals(letters, ignoreCase = true)
+                    || (word.none { it == '\'' || it == '’' }
+                    && AutocorrectPolicy.lettersOf(word) == letters
+                    && word.length == letters.length)
+            if (!same) continue
+            val probability = words.probability(index)
+            if (best == null || probability > best.second) best = word to probability
+        }
+        return best
     }
 
     private fun isExactVocabularyWord(typed: String, words: WordSource, distance: (Char, Char) -> Float): Boolean {

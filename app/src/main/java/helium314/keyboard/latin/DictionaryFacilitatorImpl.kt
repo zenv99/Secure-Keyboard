@@ -554,8 +554,10 @@ class DictionaryFacilitatorImpl : DictionaryFacilitator {
                 val corrected = helium314.keyboard.latin.glide.GlideTyping.proximityCorrection(
                     main, typedForFuzzy, keyboard, sentenceStart
                 ) ?: helium314.keyboard.latin.glide.GlideTyping.neighbourKeyCorrection(main, typedForFuzzy, keyboard)
-                if (corrected != null) {
-                    suggestionResults.add(SuggestedWordInfo(corrected, "", SuggestedWordInfo.MAX_SCORE - 100,
+                val merged = corrected
+                    ?: helium314.keyboard.latin.glide.GlideTyping.missingSpace(main, typedForFuzzy, keyboard)
+                if (merged != null) {
+                    suggestionResults.add(SuggestedWordInfo(merged, "", SuggestedWordInfo.MAX_SCORE - 100,
                         SuggestedWordInfo.KIND_WHITELIST, main, SuggestedWordInfo.NOT_AN_INDEX, SuggestedWordInfo.NOT_A_CONFIDENCE))
                 }
             }
@@ -628,6 +630,16 @@ class DictionaryFacilitatorImpl : DictionaryFacilitator {
     // Spell checker is using this, and has its own instance of DictionaryFacilitatorImpl,
     // meaning that it always has default mConfidence. So we cannot choose to only check preferred
     // locale, and instead simply return true if word is in any of the available dictionaries
+    override fun spaceSlipCorrection(previous: String, fragment: String): String? {
+        val main = dictionaryGroups.getOrNull(0)?.getDict(Dictionary.TYPE_MAIN) ?: return null
+        val keyboard = try {
+            helium314.keyboard.keyboard.KeyboardSwitcher.getInstance().keyboard
+        } catch (_: Exception) {
+            null
+        } ?: return helium314.keyboard.latin.glide.GlideTyping.spaceSlip(main, previous, fragment, null)
+        return helium314.keyboard.latin.glide.GlideTyping.spaceSlip(main, previous, fragment, keyboard)
+    }
+
     override fun isValidSpellingWord(word: String): Boolean =
         dictionaryGroups.any { isValidWord(word, DictionaryFacilitator.ALL_DICTIONARY_TYPES, it) }
 

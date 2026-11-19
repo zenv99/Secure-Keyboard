@@ -140,6 +140,14 @@ public interface DictionaryFacilitator {
         return false;
     }
 
+    /**
+     * "gobi" + "g" → "going" when the space replaced a nearby letter.
+     * Null when the two tokens should stay separate.
+     */
+    default String spaceSlipCorrection(String previous, String fragment) {
+        return null;
+    }
+
     boolean isValidSpellingWord(final String word);
 
     boolean isValidSuggestionWord(final String word);

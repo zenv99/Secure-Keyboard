@@ -131,6 +131,80 @@ class ProximityAutocorrectTest {
         assertEquals("correct", correct("xoredrt"))
     }
 
+    @Test fun shortWordsAndSpaceSlipsFromZen() {
+        val words = ProximityAutocorrect.ListWords(VOCAB + listOf(
+            w("going", 210), w("having", 170), w("something", 190), w("today", 160),
+        ))
+        assertEquals("is", ProximityAutocorrect.correct("iw", words))
+        assertEquals("the", ProximityAutocorrect.correct("thw", words))
+        assertEquals("going", ProximityAutocorrect.spaceSlip("gobi", "g", words))
+        assertEquals("having", ProximityAutocorrect.spaceSlip("havi", "g", words))
+        assertEquals("something", ProximityAutocorrect.spaceSlip("somethi", "g", words))
+        assertEquals("is going", ProximityAutocorrect.missingSpace("isgoing", words))
+        assertNull(ProximityAutocorrect.spaceSlip("the", "cat", words))
+        assertNull(ProximityAutocorrect.missingSpace("something", words))
+        assertNull(ProximityAutocorrect.missingSpace("today", words))
+    }
+
+    @Test fun largeCorpusStaysAccurateAndFast() {
+        val base = VOCAB.map { it.word }.filter { it.length >= 4 && it.all { ch -> ch.isLetter() } }.distinct()
+        val extras = COMMON.filter { it !in base }
+        val all = (base + extras).distinct()
+        val words = ProximityAutocorrect.ListWords(all.map { w(it, if (it.length <= 5) 180 else 120) })
+        val typos = ArrayList<Pair<String, String>>()
+        val rng = java.util.Random(7)
+        for (word in all) {
+            if (typos.size >= 320) break
+            if (word.length < 4) continue
+            val chars = word.toCharArray()
+            val i = 1 + rng.nextInt(word.length - 2)
+            val neighbor = neighborOf(chars[i])
+            if (neighbor != null && neighbor != chars[i]) {
+                chars[i] = neighbor
+                typos.add(String(chars) to word)
+            }
+            if (typos.size < 320 && word.length >= 5) {
+                val swapped = word.toCharArray()
+                val j = rng.nextInt(word.length - 1)
+                val tmp = swapped[j]
+                swapped[j] = swapped[j + 1]
+                swapped[j + 1] = tmp
+                if (String(swapped) != word) typos.add(String(swapped) to word)
+            }
+        }
+        val keep = all.take(520)
+        assertTrue(typos.size >= 300, "typos ${typos.size}")
+        assertTrue(keep.size >= 500, "keep ${keep.size}")
+        val started = System.nanoTime()
+        var fixed = 0
+        for ((typed, expected) in typos) {
+            val got = ProximityAutocorrect.correct(typed, words) ?: typed
+            if (got.equals(expected, ignoreCase = true)) fixed++
+        }
+        var falseCount = 0
+        for (typed in keep) {
+            val got = ProximityAutocorrect.correct(typed, words)
+            if (got != null && !got.equals(typed, ignoreCase = true)) falseCount++
+        }
+        val ms = (System.nanoTime() - started) / (typos.size + keep.size).toDouble() / 1_000_000.0
+        val fixRate = fixed.toDouble() / typos.size
+        val falseRate = falseCount.toDouble() / keep.size
+        println("AUTOCORRECT_CORPUS typos=${typos.size} fixed=$fixed rate=${"%.3f".format(fixRate)} " +
+            "keep=${keep.size} false=$falseCount rate=${"%.4f".format(falseRate)} ms=$ms")
+        assertTrue(fixRate >= 0.90, "fix rate $fixRate")
+        assertTrue(falseRate < 0.01, "false rate $falseRate")
+        assertTrue(ms < 1.0, "latency $ms")
+    }
+
+    private fun neighborOf(ch: Char): Char? {
+        val row = arrayOf("qwertyuiop", "asdfghjkl", "zxcvbnm")
+        for (r in row) {
+            val i = r.indexOf(ch)
+            if (i >= 0) return if (i + 1 < r.length) r[i + 1] else r[i - 1]
+        }
+        return null
+    }
+
     private fun correct(typed: String, sentenceStart: Boolean = false): String? =
         ProximityAutocorrect.correct(typed, vocab, sentenceStart = sentenceStart)
 
@@ -335,5 +409,42 @@ class ProximityAutocorrectTest {
         )
 
         private fun w(word: String, probability: Int) = ProximityAutocorrect.VocabWord(word, probability)
+
+        private val COMMON = """
+            about above across after again against almost along already also always among another answer
+            around asked available away because become before began behind being believe below beside
+            between beyond board bring build built called cannot cause change children city close coming
+            common company could country course create decided different doing done during early earth
+            either enough every example family feeling finally first follow found friend front future
+            general given going great group grown having heard heart hence house however human idea
+            important include inside instead itself known large later learn least leave letter light
+            likely little living local looking major making matter maybe means might model moment money
+            morning mother moved music myself name nation nature nearly needs never night north nothing
+            number often older once order other others outside paper parent party people period person
+            phone place plant playing please point power present pretty problem public question quick
+            quite rather reached reading ready really reason received remember report result return
+            right river school second seems several shall short should shown similar simple since single
+            small social something sometimes sound south space special spring stand start state still
+            story strong student study stuff style summer system table taken talking their there these
+            thing think those though thought three through today together toward tried trying under
+            until using usually value various voice waiting wanted water weeks which while whole whose
+            window within without woman women world would write written young
+            alpha bravo charlie delta echo foxtrot golf hotel india juliet kilo lima mike november
+            oscar papa quebec romeo sierra tango uniform victor whiskey xray yankee zulu
+            amber bailey carter dylan finn harper indigo jordan kai logan mason nora owen parker
+            quinn riley sage taylor umber violet wesley xander yara zoe
+            apple banana cherry grape lemon mango olive peach pear plum berry melon
+            monday tuesday wednesday thursday friday saturday sunday january february march april
+            august september october november december spring summer autumn winter morning evening
+            red blue green yellow purple orange black white brown pink gray silver gold
+            one two three four five six seven eight nine ten eleven twelve twenty thirty forty fifty
+            happy sad angry calm brave quiet loud fast slow soft hard warm cold wet dry
+            book chair table phone lamp clock door floor wall roof garden street river ocean mountain
+            cloud rain snow wind storm beach island forest desert valley bridge castle village city
+            music dance paint photo movie story poem song voice guitar piano drum violin
+            coffee water juice bread cheese butter sugar salt pepper honey milk rice pasta soup
+            doctor teacher driver farmer baker artist writer singer dancer player coach judge
+            happy little brown fox jumps over lazy dog while people watch from the garden gate
+        """.trimIndent().split(Regex("\\s+")).map { it.lowercase() }.filter { it.length >= 3 }.distinct()
     }
 }

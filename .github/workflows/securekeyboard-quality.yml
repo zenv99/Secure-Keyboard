@@ -106,14 +106,16 @@ jobs:
             export SK_KEYSTORE_FILE="$RUNNER_TEMP/sk.jks"
             export SK_KEYSTORE_PASSWORD="$PW"
             export SK_VERSION_CODE=$((4300 + GITHUB_RUN_NUMBER))
-            # v1.0.88 shipped as versionCode 4388. Stay above it so this APK installs as an update.
-            if [ "$SK_VERSION_CODE" -le 4388 ]; then
-              export SK_VERSION_CODE=4389
+            # v1.0 shipped as versionCode 4394. Stay above it so this APK installs as an update.
+            if [ "$SK_VERSION_CODE" -le 4394 ]; then
+              export SK_VERSION_CODE=4395
             fi
-            if GH_TOKEN="$GITHUB_TOKEN" gh release view v1.0 --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
-              export SK_VERSION_NAME="1.0.${GITHUB_RUN_NUMBER}"
-            else
+            if ! GH_TOKEN="$GITHUB_TOKEN" gh release view v1.0.1 --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+              export SK_VERSION_NAME="1.0.1"
+            elif ! GH_TOKEN="$GITHUB_TOKEN" gh release view v1.0 --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
               export SK_VERSION_NAME="1.0"
+            else
+              export SK_VERSION_NAME="1.0.${GITHUB_RUN_NUMBER}"
             fi
             echo "SK_SIGNED=1" >> "$GITHUB_ENV"
             echo "SK_VERSION_NAME=$SK_VERSION_NAME" >> "$GITHUB_ENV"
@@ -238,14 +240,35 @@ jobs:
           mkdir -p release
           export GH_REPO="$GITHUB_REPOSITORY"
           cp apk/*.apk release/SecureKeyboard.apk
-          (cd release && sha256sum SecureKeyboard.apk > SHA256SUMS.txt)
           VERSION_NAME="$(tr -d '[:space:]' < buildinfo/version_name || true)"
-          if [ "$VERSION_NAME" = "1.0" ]; then
-            TAG="v1.0"
+          if [ "$VERSION_NAME" = "1.0" ] || [ "$VERSION_NAME" = "1.0.1" ]; then
+            TAG="v${VERSION_NAME}"
           else
             TAG="v1.0.${GITHUB_RUN_NUMBER}"
           fi
-          if [ "$TAG" = "v1.0" ]; then
+          cp release/SecureKeyboard.apk "release/SecureKeyboard-${TAG}.apk"
+          (cd release && sha256sum "SecureKeyboard-${TAG}.apk" > SHA256SUMS.txt)
+          if [ "$TAG" = "v1.0.1" ]; then
+            cat > release/notes.md <<EOF
+          Secure Keyboard v1.0.1 (commit ${GITHUB_SHA:0:8}). Not yet independently audited.
+
+          What changed
+          - The keyboard follows the iPhone layout used in WhatsApp: small corner radius, light and dark colors, no number hints on the letter keys, a wide space bar labeled space, and 123 plus emoji beside it. The big button stays the microphone when the field is empty and Send when there is text.
+          - Key vibration is off unless it is turned on in settings. Existing installs that were still on the previous default are switched off once.
+          - Autocorrect handles short slips such as iw to is, and a space typed in place of a nearby letter such as gobi g to going. A missing space such as isgoing becomes is going. A word that is already correct is left alone, and backspace still restores the previous correction.
+
+          Privacy
+          This build passed the automated privacy gate: no INTERNET permission, backup disabled, only the allowlisted permissions. Voice audio, recognition, and learned words stay on the device.
+
+          License
+          Secure Keyboard is free software under the GNU General Public License v3.0. It is a modified version of HeliBoard (copyright Helium314 and contributors), which is based on OpenBoard and the Android Open Source Keyboard (Apache License 2.0). This is not the official HeliBoard.
+
+          Signing certificate SHA-256
+          33eacd63355ee1b19abca1f997ea25a7946960bbf934411691273dde053c78d4
+
+          Install: download SecureKeyboard-v1.0.1.apk, then enable Secure Keyboard in Settings > System > Keyboard. Check the file against SHA256SUMS.txt before installing.
+          EOF
+          elif [ "$TAG" = "v1.0" ]; then
             cat > release/notes.md <<EOF
           Secure Keyboard v1.0 (commit ${GITHUB_SHA:0:8}). Not yet independently audited.
 
