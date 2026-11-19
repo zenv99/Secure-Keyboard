@@ -106,8 +106,17 @@ jobs:
             export SK_KEYSTORE_FILE="$RUNNER_TEMP/sk.jks"
             export SK_KEYSTORE_PASSWORD="$PW"
             export SK_VERSION_CODE=$((4300 + GITHUB_RUN_NUMBER))
-            export SK_VERSION_NAME="1.0.${GITHUB_RUN_NUMBER}"
+            # v1.0.88 shipped as versionCode 4388. Stay above it so this APK installs as an update.
+            if [ "$SK_VERSION_CODE" -le 4388 ]; then
+              export SK_VERSION_CODE=4389
+            fi
+            if GH_TOKEN="$GITHUB_TOKEN" gh release view v1.0 --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+              export SK_VERSION_NAME="1.0.${GITHUB_RUN_NUMBER}"
+            else
+              export SK_VERSION_NAME="1.0"
+            fi
             echo "SK_SIGNED=1" >> "$GITHUB_ENV"
+            echo "SK_VERSION_NAME=$SK_VERSION_NAME" >> "$GITHUB_ENV"
             echo "Signing with the permanent Secure Keyboard key"
           else
             echo "::warning::Signing secrets missing or wrong (check SK_KEYSTORE_B64 / SK_KEYSTORE_PASSWORD). Building with the temporary debug key; updates will need uninstall."
@@ -137,10 +146,15 @@ jobs:
         run: |
           mkdir -p buildinfo
           echo "${SK_SIGNED:-0}" > buildinfo/signed
+          echo "${SK_VERSION_NAME:-}" > buildinfo/version_name
       - uses: actions/upload-artifact@v4
         with:
           name: secure-keyboard-buildinfo
           path: buildinfo/signed
+      - uses: actions/upload-artifact@v4
+        with:
+          name: secure-keyboard-version
+          path: buildinfo/version_name
 
   emulator-smoke:
     # Runs the real keyboard on an Android emulator against a text field (mic visible, send arrow, hold backspace...).
@@ -211,6 +225,10 @@ jobs:
         with:
           name: secure-keyboard-buildinfo
           path: buildinfo
+      - uses: actions/download-artifact@v4
+        with:
+          name: secure-keyboard-version
+          path: buildinfo
 
       - name: Publish pre-release
         env:
@@ -221,16 +239,45 @@ jobs:
           export GH_REPO="$GITHUB_REPOSITORY"
           cp apk/*.apk release/SecureKeyboard.apk
           (cd release && sha256sum SecureKeyboard.apk > SHA256SUMS.txt)
-          cat > release/notes.md <<EOF
+          VERSION_NAME="$(tr -d '[:space:]' < buildinfo/version_name || true)"
+          if [ "$VERSION_NAME" = "1.0" ]; then
+            TAG="v1.0"
+          else
+            TAG="v1.0.${GITHUB_RUN_NUMBER}"
+          fi
+          if [ "$TAG" = "v1.0" ]; then
+            cat > release/notes.md <<EOF
           Secure Keyboard v1.0 (commit ${GITHUB_SHA:0:8}). Not yet independently audited.
 
-          This build passed the automated privacy gate: no INTERNET permission, backup disabled, only whitelisted permissions.
-          Install: download SecureKeyboard.apk, allow installs from your browser or Files app when asked, then enable Secure Keyboard in Settings > System > Keyboard.
-          Check the file against SHA256SUMS.txt before installing.
+          What changed
+          - Suggestions: emoji for a word such as sun are ranked from Unicode CLDR annotations, with the color emoji near the top.
+          - Dictation stays on the device. Releasing the mic keeps a short tail of audio, and a long hold is transcribed in overlapping pieces so the end of the sentence is not dropped.
+          - Typing: a period is inserted only for a quick double space, within 300 ms, and not in a URL, email, or search field.
+          - The space bar tracks the finger. Small jitter does not move the caret. A slow drag moves about one character per 10 dp, and changing lines takes a larger movement.
+          - The big button is the microphone when the field is empty, and Send once you type or dictate. It performs the field's send action in a multi-line chat, including when the app sets actionNone. It does not insert a newline.
+          - The keyboard and the plus menu follow the light and dark system theme, with the usual chat tools: emoji, clipboard, text replacement, settings, languages, one-handed mode, undo, redo, select all, copy, and paste.
+
+          Privacy
+          This build passed the automated privacy gate: no INTERNET permission, backup disabled, only the allowlisted permissions. Voice audio and recognition stay on the device.
+
+          License
+          Secure Keyboard is free software under the GNU General Public License v3.0. It is a modified version of HeliBoard (copyright Helium314 and contributors), which is based on OpenBoard and the Android Open Source Keyboard (Apache License 2.0). This is not the official HeliBoard.
+
+          Signing certificate SHA-256
+          33eacd63355ee1b19abca1f997ea25a7946960bbf934411691273dde053c78d4
+
+          Install: download SecureKeyboard-v1.0.apk, then enable Secure Keyboard in Settings > System > Keyboard. Check the file against SHA256SUMS.txt before installing.
           EOF
+          else
+            cat > release/notes.md <<EOF
+          Secure Keyboard ${TAG} (commit ${GITHUB_SHA:0:8}). Not yet independently audited.
+
+          This build passed the automated privacy gate: no INTERNET permission, backup disabled, only the allowlisted permissions.
+          Install: download SecureKeyboard-${TAG}.apk, then enable Secure Keyboard in Settings > System > Keyboard. Check the file against SHA256SUMS.txt before installing.
+          EOF
+          fi
           sed -i 's/^          //' release/notes.md
           if [ "$(cat buildinfo/signed)" = "1" ]; then
-            TAG="v1.0.${GITHUB_RUN_NUMBER}"
             cp release/SecureKeyboard.apk "release/SecureKeyboard-${TAG}.apk"
             gh release create "$TAG" "release/SecureKeyboard-${TAG}.apk" release/SHA256SUMS.txt \
               --prerelease --target "$GITHUB_SHA" --title "Secure Keyboard ${TAG}" --notes-file release/notes.md
