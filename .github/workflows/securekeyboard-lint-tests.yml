@@ -14,6 +14,7 @@ on:
       - 'settings.gradle'
       - 'gradle/**'
       - '.github/workflows/securekeyboard-lint-tests.yml'
+      - '.github/workflows/securekeyboard-quality.yml'
 
 permissions:
   contents: read
