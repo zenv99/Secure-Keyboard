@@ -8,9 +8,9 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
     <!-- Color resources for LXX_Light_Border/LXX_Base_Border theme.
          15%:0x26 70%:0xB3 75%:0xC0 80%:0xCC 85%:0xD9 90%:0xE6 -->
-    <color name="keyboard_background_lxx_light_border">#E8EAED</color>
+    <color name="keyboard_background_lxx_light_border">#D1D4DB</color>
     <color name="key_background_normal_lxx_light_border">#FFFFFF</color>
-    <color name="key_background_functional_lxx_light_border">#CCCED5</color>
+    <color name="key_background_functional_lxx_light_border">#ACB3BE</color>
 
     <color name="highlight_color_lxx_dark">#5E97F6</color>
     <color name="gesture_trail_color_lxx_dark">#5E97F6</color>

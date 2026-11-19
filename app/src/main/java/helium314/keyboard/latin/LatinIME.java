@@ -1592,6 +1592,11 @@ public class LatinIME extends InputMethodService implements
     }
 
     public void launchSettings() {
+        launchSettings(null);
+    }
+
+    /** Opens settings. [startDestination] is a [helium314.keyboard.settings.SettingsDestination] route, or null for the main screen. */
+    public void launchSettings(@Nullable String startDestination) {
         mInputLogic.commitTyped(mSettings.getCurrent(), LastComposedWord.NOT_A_SEPARATOR);
         requestHideSelf(0);
         closeMainKeyboard();
@@ -1600,7 +1605,13 @@ public class LatinIME extends InputMethodService implements
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                 | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED
                 | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        if (startDestination != null)
+            intent.putExtra(helium314.keyboard.settings.SettingsDestination.EXTRA_START, startDestination);
         startActivity(intent);
+    }
+
+    public void launchTextReplacements() {
+        launchSettings(helium314.keyboard.settings.SettingsDestination.TextReplacement);
     }
 
     private void closeMainKeyboard() {
