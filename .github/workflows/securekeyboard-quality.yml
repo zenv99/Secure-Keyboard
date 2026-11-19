@@ -110,6 +110,7 @@ jobs:
             if [ "$SK_VERSION_CODE" -le 4402 ]; then
               export SK_VERSION_CODE=4403
             fi
+            # New pre-release. Do not replace v1.0.1.
             export SK_VERSION_NAME="1.0.2"
             echo "SK_SIGNED=1" >> "$GITHUB_ENV"
             echo "SK_VERSION_NAME=$SK_VERSION_NAME" >> "$GITHUB_ENV"
