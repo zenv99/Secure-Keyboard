@@ -91,10 +91,21 @@ class GestureFieldTest {
             ?: throw AssertionError("plus button not shown")
         plus.click()
         for (label in listOf("Photos and Video", "Camera", "Location", "Contact", "Document", "Emoji", "Clipboard", "Text shortcuts", "Settings")) {
-            val node = device.wait(Until.findObject(By.desc(label)), 4000)
-            assertTrue("missing $label", node != null)
+            assertTrue("missing $label", scrollToMenuLabel(label))
         }
         assertFalse(device.hasObject(By.desc("Undo")))
+    }
+
+    /** The plus row scrolls. Later items are in the tree only after the row moves. */
+    private fun scrollToMenuLabel(label: String): Boolean {
+        val width = device.displayWidth
+        val y = (device.displayHeight * 0.72f).toInt()
+        repeat(8) {
+            if (device.hasObject(By.desc(label))) return true
+            device.swipe((width * 0.85f).toInt(), y, (width * 0.15f).toInt(), y, 15)
+            Thread.sleep(250)
+        }
+        return device.hasObject(By.desc(label))
     }
 
     private fun expect(field: String, action: Int, sample: String, dropSelection: Boolean = false) {
