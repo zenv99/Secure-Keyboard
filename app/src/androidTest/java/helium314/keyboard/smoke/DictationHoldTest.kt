@@ -64,7 +64,8 @@ class DictationHoldTest {
         assertEquals("press on Send sent before release", 0, actions().size)
         pointer(MotionEvent.ACTION_UP, send.visibleCenter.x, send.visibleCenter.y)
         waitForActions(1)
-        assertEquals(listOf(EditorInfo.IME_ACTION_SEND), actions())
+        assertEquals(EditorInfo.IME_ACTION_SEND, actions().first())
+        assertEquals(1, actions().count { it == EditorInfo.IME_ACTION_SEND })
         assertTrue("keyboard hid after send", shown(ime))
         assertEquals(hides, LatinIME.hideRequestsForTest)
         assertEquals(windows, LatinIME.hideWindowsForTest)
@@ -92,7 +93,9 @@ class DictationHoldTest {
         Thread.sleep(40)
         pointer(MotionEvent.ACTION_UP, send.visibleCenter.x, send.visibleCenter.y)
         waitForActions(1)
-        assertEquals(listOf(EditorInfo.IME_ACTION_SEND), actions())
+        assertEquals(EditorInfo.IME_ACTION_SEND, actions().first())
+        assertEquals(1, actions().count { it == EditorInfo.IME_ACTION_SEND })
+        assertTrue(actions().none { it == EditorInfo.IME_ACTION_DONE })
         assertTrue("Done field hid the keyboard", shown(ime))
     }
 

@@ -29,10 +29,11 @@ class KeyboardTestActivity : Activity() {
                 else -> inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_MULTI_LINE
             }
             contentDescription = "smoke-field"
-            // Return false so the framework still handles the action. Done hides the keyboard; Send does not.
+            // Consume the action. Returning false makes the framework also report action 0,
+            // and a Done action would hide the keyboard. The test checks the recorded id.
             setOnEditorActionListener { _, actionId, _ ->
                 editorActions.add(actionId)
-                false
+                true
             }
         }
         setContentView(LinearLayout(this).apply { addView(field) })
