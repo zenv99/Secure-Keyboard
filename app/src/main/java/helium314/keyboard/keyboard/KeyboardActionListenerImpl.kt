@@ -339,7 +339,10 @@ class KeyboardActionListenerImpl(private val latinIME: LatinIME, private val inp
         val web = variation == InputType.TYPE_TEXT_VARIATION_WEB_EDIT_TEXT
                 || variation == InputType.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS
         val before = connection.getTextBeforeCursor(TRACKPAD_WINDOW, 0)?.toString()
-        trackpadArrows = web || before == null
+        // X and some React Native fields report selection -1 and a null or stale extract.
+        // Arrow keys still move the caret when setSelection cannot be trusted.
+        val selectionLost = connection.expectedSelectionStart < 0 || connection.expectedSelectionEnd < 0
+        trackpadArrows = web || before == null || selectionLost
         val after = if (trackpadArrows) "" else connection.getTextAfterCursor(TRACKPAD_WINDOW, 0)?.toString() ?: ""
         trackpadDoc = TrackpadDocument(before ?: "", after)
         trackpadWindowStart = if (trackpadArrows) 0

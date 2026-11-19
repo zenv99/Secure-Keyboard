@@ -154,8 +154,17 @@ public final class RichInputConnection implements PrivateCommandPerformer {
                         <= SLOW_INPUTCONNECTION_PERSIST_MS;
     }
 
+    /** True after this session committed text, even if the app then reports an unknown selection. */
+    private boolean mAcceptedText;
+
     public void onStartInput() {
         mLastSlowInputConnectionTime = -SLOW_INPUTCONNECTION_PERSIST_MS;
+        mAcceptedText = false;
+    }
+
+    /** Text we put in the field, or a cursor past the start. Survives a host that drops the selection. */
+    public boolean editorLikelyHasText() {
+        return mAcceptedText || mExpectedSelStart > 0 || mExpectedSelEnd > 0 || mComposingText.length() > 0;
     }
 
     private void checkConsistencyForDebug() {
@@ -368,6 +377,7 @@ public final class RichInputConnection implements PrivateCommandPerformer {
         if (DebugFlags.DEBUG_ENABLED)
             Log.d(TAG, "committing "+text.length()+" characters");
         mCommittedTextBeforeComposingText.append(text);
+        if (text.length() > 0) mAcceptedText = true;
         // TODO: the following is exceedingly error-prone. Right now when the cursor is in the
         //  middle of the composing word mComposingText only holds the part of the composing text
         //  that is before the cursor, so this actually works, but it's terribly confusing. Fix this.
@@ -630,6 +640,8 @@ public final class RichInputConnection implements PrivateCommandPerformer {
             mExpectedSelEnd -= mExpectedSelStart;
             mExpectedSelStart = 0;
         }
+        if (mExpectedSelStart == 0 && mComposingText.length() == 0 && mCommittedTextBeforeComposingText.length() == 0)
+            mAcceptedText = false;
         if (isConnected()) {
             mIC.deleteSurroundingText(beforeLength, 0);
         }
@@ -735,6 +747,7 @@ public final class RichInputConnection implements PrivateCommandPerformer {
         mExpectedSelEnd = mExpectedSelStart;
         mComposingText.setLength(0);
         mComposingText.append(text);
+        if (text.length() > 0) mAcceptedText = true;
         // TODO: support values of newCursorPosition != 1. At this time, this is never called with
         //  newCursorPosition != 1.
         if (isConnected()) {

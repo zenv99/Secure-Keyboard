@@ -36,6 +36,8 @@ class GestureFieldTest {
         expect(KeyboardTestActivity.FIELD_PLAIN, EditorInfo.IME_ACTION_SEND, "hello")
         expect(KeyboardTestActivity.FIELD_EMAIL, EditorInfo.IME_ACTION_NEXT, "a@b.co")
         expect(KeyboardTestActivity.FIELD_WEB, EditorInfo.IME_ACTION_SEND, "hello")
+        expect(KeyboardTestActivity.FIELD_X, EditorInfo.IME_ACTION_SEND, "hello")
+        expect(KeyboardTestActivity.FIELD_X_REPLY, EditorInfo.IME_ACTION_SEND, "hello", dropSelection = true)
         expect(KeyboardTestActivity.FIELD_PASSWORD, EditorInfo.IME_ACTION_GO, "secret")
     }
 
@@ -88,14 +90,14 @@ class GestureFieldTest {
         val plus = device.wait(Until.findObject(By.desc("More keys")), 15000)
             ?: throw AssertionError("plus button not shown")
         plus.click()
-        for (label in listOf("Photos & videos", "Camera", "Location", "Document", "Contact", "Emoji", "Clipboard", "Text shortcuts", "Settings")) {
+        for (label in listOf("Photos and Video", "Camera", "Location", "Contact", "Document", "Emoji", "Clipboard", "Text shortcuts", "Settings")) {
             val node = device.wait(Until.findObject(By.desc(label)), 4000)
             assertTrue("missing $label", node != null)
         }
         assertFalse(device.hasObject(By.desc("Undo")))
     }
 
-    private fun expect(field: String, action: Int, sample: String) {
+    private fun expect(field: String, action: Int, sample: String, dropSelection: Boolean = false) {
         open(field)
         val ime = LatinIME.instanceForTest ?: throw AssertionError("$field: keyboard service was not created")
         instrumentation.runOnMainSync {
@@ -103,6 +105,11 @@ class GestureFieldTest {
             KeyboardTestActivity.instance!!.field.setSelection(sample.length, sample.length)
         }
         Thread.sleep(300)
+        if (dropSelection) {
+            instrumentation.runOnMainSync {
+                ime.onUpdateSelection(sample.length, sample.length, -1, -1, -1, -1)
+            }
+        }
         instrumentation.runOnMainSync { ime.onSendKey() }
         Thread.sleep(200)
         val actions = KeyboardTestActivity.instance!!.editorActions.toList()

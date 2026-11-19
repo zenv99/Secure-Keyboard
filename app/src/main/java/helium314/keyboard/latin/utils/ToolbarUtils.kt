@@ -140,7 +140,7 @@ val toolbarKeyStrings = entries.associateWithTo(EnumMap(ToolbarKey::class.java))
 
 /** What the (+) button opens. Short, and in the order used on an iOS keyboard. */
 val standardPlusMenu = listOf(
-    PHOTO, CAMERA, LOCATION, DOCUMENT, CONTACT, EMOJI, CLIPBOARD, TEXT_REPLACEMENT, SETTINGS,
+    PHOTO, CAMERA, LOCATION, CONTACT, DOCUMENT, EMOJI, CLIPBOARD, TEXT_REPLACEMENT, SETTINGS,
 )
 
 /** The old (+) row: cursor arrows and select-word, which is not the iOS set. */

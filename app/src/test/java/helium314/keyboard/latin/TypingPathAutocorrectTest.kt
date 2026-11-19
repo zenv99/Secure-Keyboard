@@ -190,6 +190,131 @@ class TypingPathAutocorrectTest {
         assertTrue(algoMs < 5.0, "corrector slower than 5 ms/word ($algoMs)")
     }
 
+    @Test fun categoryCorpusThroughTheIme() {
+        val fingers = adjacentSubstitutions(120)
+        val transposed = transpositions(80)
+        val missing = missingLetters(80)
+        val doubled = doubledLetters(80)
+        val runOns = runOnCases(100)
+        val contractions = contractionCases()
+        val guard = guardWords()
+        val started = System.nanoTime()
+        val finger = score("FAT", fingers)
+        val trans = score("TRANSPOSE", transposed)
+        val miss = score("MISSING", missing)
+        val doub = score("DOUBLE", doubled)
+        val run = score("RUNON", runOns)
+        val cont = score("CONTRACTION", contractions)
+        var guardChanged = 0
+        for (word in guard) {
+            if (!sameWords(typeFresh("$word "), word)) guardChanged++
+        }
+        val total = fingers.size + transposed.size + missing.size + doubled.size + runOns.size + contractions.size + guard.size
+        val elapsed = (System.nanoTime() - started) / 1_000_000.0
+        val algo = algorithmMillisPerWord(fingers + transposed + missing + doubled, runOns)
+        println(
+            "IME_CORPUS fat=${finger.fixed}/${finger.total} transpose=${trans.fixed}/${trans.total} " +
+                "missing=${miss.fixed}/${miss.total} double=${doub.fixed}/${doub.total} " +
+                "runon=${run.fixed}/${run.total} contraction=${cont.fixed}/${cont.total} " +
+                "guardChanged=$guardChanged algoMs=$algo imeMsPerWord=${"%.2f".format(elapsed / total)}"
+        )
+        assertTrue(finger.total >= 100 && finger.rate >= 0.90, "fat ${finger.fixed}/${finger.total}")
+        assertTrue(trans.total >= 30 && trans.rate >= 0.90, "transpose ${trans.fixed}/${trans.total}")
+        assertTrue(miss.total >= 60 && miss.rate >= 0.80, "missing ${miss.fixed}/${miss.total}")
+        assertTrue(doub.total >= 60 && doub.rate >= 0.80, "double ${doub.fixed}/${doub.total}")
+        assertTrue(run.rate >= 0.90, "run-on ${run.fixed}/${run.total}")
+        assertTrue(cont.rate >= 0.90, "contraction ${cont.fixed}/${cont.total}")
+        assertEquals(0, guardChanged)
+        assertTrue(algo < 5.0, "algo $algo ms")
+    }
+
+    private data class Score(val fixed: Int, val total: Int) {
+        val rate: Double get() = if (total == 0) 0.0 else fixed.toDouble() / total
+    }
+
+    private fun score(label: String, cases: List<Pair<String, String>>): Score {
+        var fixed = 0
+        val misses = ArrayList<String>()
+        for ((typed, expected) in cases) {
+            val got = typeFresh("$typed ")
+            if (sameWords(got, expected)) fixed++ else if (misses.size < 8) misses.add("$typed→${got.trim()} wanted $expected")
+        }
+        if (misses.isNotEmpty()) println("${label}_MISSES $misses")
+        return Score(fixed, cases.size)
+    }
+
+    private fun mutate(word: String, at: Int, replacement: Char): String? {
+        if (at !in word.indices) return null
+        val chars = word.toCharArray()
+        chars[at] = replacement
+        val typo = String(chars)
+        return if (typo != word && typo !in corpusWords()) typo else null
+    }
+
+    private fun adjacentSubstitutions(count: Int): List<Pair<String, String>> {
+        val out = ArrayList<Pair<String, String>>()
+        for (word in fatFingerTargets()) {
+            if (out.size >= count) break
+            for (i in word.indices) {
+                val neighbor = adjacentKey(word[i]) ?: continue
+                val typo = mutate(word, i, neighbor) ?: continue
+                if (out.none { it.first == typo }) out.add(typo to word)
+                if (out.size >= count) break
+            }
+        }
+        return out
+    }
+
+    private fun transpositions(count: Int): List<Pair<String, String>> {
+        val out = ArrayList<Pair<String, String>>()
+        for (word in fatFingerTargets()) {
+            if (word.length < 4 || out.size >= count) continue
+            for (i in 0 until word.length - 1) {
+                if (adjacentKey(word[i]) != word[i + 1] && helium314.keyboard.latin.autocorrect.KeyGeometry.qwertyDistance(word[i], word[i + 1]) > 1.2f) continue
+                val chars = word.toCharArray()
+                val tmp = chars[i]
+                chars[i] = chars[i + 1]
+                chars[i + 1] = tmp
+                val typo = String(chars)
+                if (typo != word && typo !in corpusWords() && out.none { it.first == typo }) out.add(typo to word)
+                if (out.size >= count) break
+            }
+        }
+        return out
+    }
+
+    private fun missingLetters(count: Int): List<Pair<String, String>> {
+        val out = ArrayList<Pair<String, String>>()
+        for (word in fatFingerTargets()) {
+            if (word.length < 5 || out.size >= count) continue
+            for (i in 1 until word.length - 1) {
+                val typo = word.removeRange(i, i + 1)
+                if (typo.length >= 4 && typo !in corpusWords() && out.none { it.first == typo }) out.add(typo to word)
+                if (out.size >= count) break
+            }
+        }
+        return out
+    }
+
+    private fun doubledLetters(count: Int): List<Pair<String, String>> {
+        val out = ArrayList<Pair<String, String>>()
+        for (word in fatFingerTargets()) {
+            if (word.length < 4 || out.size >= count) continue
+            for (i in 1 until word.length - 1) {
+                val typo = word.substring(0, i) + word[i] + word.substring(i)
+                if (typo !in corpusWords() && out.none { it.first == typo }) out.add(typo to word)
+                if (out.size >= count) break
+            }
+        }
+        return out
+    }
+
+    private fun contractionCases() = listOf(
+        "dont" to "don't", "cant" to "can't", "wont" to "won't", "isnt" to "isn't",
+        "arent" to "aren't", "didnt" to "didn't", "doesnt" to "doesn't", "im" to "I'm",
+        "youre" to "you're", "theyre" to "they're", "ive" to "I've", "youve" to "you've",
+    )
+
     private fun typeFresh(text: String): String {
         ShadowInputMethodService.reset()
         val inputType = InputType.TYPE_CLASS_TEXT or

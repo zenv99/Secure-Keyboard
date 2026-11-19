@@ -108,6 +108,17 @@ class DictationSendPolicyTest {
         }
     }
 
+    @Test fun reactNativeComposeWithNoClassStillSendsThenEnter() {
+        val plan = DictationSendPolicy.sendPlan(
+            EditorInfo.IME_ACTION_NONE or EditorInfo.IME_FLAG_NO_ENTER_ACTION or EditorInfo.IME_FLAG_NO_EXTRACT_UI,
+            0,
+            0,
+            false,
+        )
+        assertEquals(EditorInfo.IME_ACTION_SEND, plan[0].actionId)
+        assertTrue(plan.last().isEnter)
+    }
+
     @Test fun urlAndSearchKeepTheirOwnAction() {
         val url = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_URI
         val go = DictationSendPolicy.sendPlan(EditorInfo.IME_ACTION_GO, url, 0, false)

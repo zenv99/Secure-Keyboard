@@ -1340,6 +1340,7 @@ public class LatinIME extends InputMethodService implements
 
     private boolean fieldHasText() {
         if (mInputLogic.getComposingLength() > 0) return true;
+        if (mInputLogic.mConnection.editorLikelyHasText()) return true;
         final int start = mInputLogic.mConnection.getExpectedSelectionStart();
         final int end = mInputLogic.mConnection.getExpectedSelectionEnd();
         if (start > 0 || end > 0) return true;

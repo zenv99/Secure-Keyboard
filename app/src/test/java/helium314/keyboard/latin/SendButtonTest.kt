@@ -16,6 +16,7 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 /**
  * After typing, the big button sends. Dictation's send uses the same action.
@@ -75,6 +76,30 @@ class SendButtonTest {
         latinIME.onSendKey()
         assertEquals(EditorInfo.IME_ACTION_SEARCH, ShadowInputMethodService.lastEditorAction)
         assertEquals(0, ShadowInputMethodService.enterPresses)
+        assertStillShown()
+    }
+
+    @Test fun unknownSelectionDoesNotDropTheWordBeingTyped() {
+        val x = EditorInfo.IME_ACTION_NONE or EditorInfo.IME_FLAG_NO_ENTER_ACTION or EditorInfo.IME_FLAG_NO_EXTRACT_UI
+        startField(x, InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_MULTI_LINE)
+        type("teh")
+        latinIME.onUpdateSelection(3, 3, -1, -1, -1, -1)
+        ShadowLooper.idleMainLooper()
+        latinIME.onEvent(helium314.keyboard.event.Event.createEventForCodePointFromUnknownSource(' '.code))
+        ShadowLooper.idleMainLooper()
+        val text = ShadowInputMethodService.text.lowercase()
+        assertTrue(text.contains("teh") || text.contains("the"), text)
+    }
+
+    @Test fun lostSelectionStillSendsAndDoesNotHide() {
+        val x = EditorInfo.IME_ACTION_NONE or EditorInfo.IME_FLAG_NO_ENTER_ACTION or EditorInfo.IME_FLAG_NO_EXTRACT_UI
+        startField(x, InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_MULTI_LINE or InputType.TYPE_TEXT_FLAG_CAP_SENTENCES)
+        type("hello")
+        latinIME.onUpdateSelection(5, 5, -1, -1, -1, -1)
+        ShadowLooper.idleMainLooper()
+        latinIME.onSendKey()
+        assertEquals(EditorInfo.IME_ACTION_SEND, ShadowInputMethodService.lastEditorAction)
+        assertEquals(1, ShadowInputMethodService.editorActionCount)
         assertStillShown()
     }
 

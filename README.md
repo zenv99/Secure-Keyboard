@@ -2,7 +2,7 @@
 
 A private Android keyboard. It works like the iOS keyboard, and nothing you type or say ever leaves your phone.
 
-By Zen V. Based on [HeliBoard](https://github.com/HeliBorg/HeliBoard). Free software, GPL-3.0.
+By Zen V. Based on [HeliBoard](https://github.com/HeliBorg/HeliBoard) (GPL-3.0), which is based on OpenBoard and AOSP LatinIME (Apache-2.0). Free software, GPL-3.0. See [NOTICE](NOTICE) for the other keyboards whose behavior this app follows.
 
 ## What it does
 

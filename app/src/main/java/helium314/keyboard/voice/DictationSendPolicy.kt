@@ -37,32 +37,39 @@ object DictationSendPolicy {
     }
 
     /**
-     * What a short tap tries, in order. A URL bar gets Go, a search field gets Search.
-     * A chat field, including one that declares nothing and sets [EditorInfo.IME_FLAG_NO_ENTER_ACTION],
-     * tries Send. If the app ignores that, the next step is the enter key, which is how WhatsApp
-     * sends when "Enter is send" is on. Enter is not used for a URL, search, email, or password field.
+     * What a short tap tries, in order.
+     * HeliBoard issue 1989: apps set [EditorInfo.IME_FLAG_NO_ENTER_ACTION] and still expect the
+     * declared action (Send, Go, Search). The flag is ignored for that action.
+     * When the field declares nothing (WhatsApp and X compose often do), try Send and, if the
+     * connection returns false, the enter key. That is the fallback other IMEs use, not a newline.
+     * A URL bar stays Go and search stays Search. Enter is not used for those, or for email or password.
      */
     fun sendPlan(imeOptions: Int, inputType: Int, editorActionId: Int, hasActionLabel: Boolean): List<SendStep> {
         val declared = imeOptions and EditorInfo.IME_MASK_ACTION
         val variation = inputType and InputType.TYPE_MASK_VARIATION
+        val clazz = inputType and InputType.TYPE_MASK_CLASS
         if (InputTypeUtils.isAnyPasswordInputType(inputType)) {
             if (declared == EditorInfo.IME_ACTION_NONE || declared == EditorInfo.IME_ACTION_UNSPECIFIED)
                 return emptyList()
             return listOf(SendStep.action(declared))
         }
         if (hasActionLabel && editorActionId != 0) return listOf(SendStep.action(editorActionId))
-        if (variation == InputType.TYPE_TEXT_VARIATION_URI || declared == EditorInfo.IME_ACTION_GO) {
-            val action = if (declared == EditorInfo.IME_ACTION_SEARCH) EditorInfo.IME_ACTION_SEARCH
-            else EditorInfo.IME_ACTION_GO
-            return listOf(SendStep.action(action))
-        }
-        if (declared == EditorInfo.IME_ACTION_SEARCH) return listOf(SendStep.action(EditorInfo.IME_ACTION_SEARCH))
-        if (variation == InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS
-            || variation == InputType.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS
-        ) {
-            val action = if (declared == EditorInfo.IME_ACTION_NONE || declared == EditorInfo.IME_ACTION_UNSPECIFIED)
-                EditorInfo.IME_ACTION_NEXT else declared
-            return listOf(SendStep.action(if (action == EditorInfo.IME_ACTION_DONE) EditorInfo.IME_ACTION_NEXT else action))
+        // A class of 0 is what some React Native fields (X compose and reply) report.
+        // They are chat fields, not URL bars, even when the variation bits look unset.
+        if (clazz == InputType.TYPE_CLASS_TEXT) {
+            if (variation == InputType.TYPE_TEXT_VARIATION_URI || declared == EditorInfo.IME_ACTION_GO) {
+                val action = if (declared == EditorInfo.IME_ACTION_SEARCH) EditorInfo.IME_ACTION_SEARCH
+                else EditorInfo.IME_ACTION_GO
+                return listOf(SendStep.action(action))
+            }
+            if (declared == EditorInfo.IME_ACTION_SEARCH) return listOf(SendStep.action(EditorInfo.IME_ACTION_SEARCH))
+            if (variation == InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS
+                || variation == InputType.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS
+            ) {
+                val action = if (declared == EditorInfo.IME_ACTION_NONE || declared == EditorInfo.IME_ACTION_UNSPECIFIED)
+                    EditorInfo.IME_ACTION_NEXT else declared
+                return listOf(SendStep.action(if (action == EditorInfo.IME_ACTION_DONE) EditorInfo.IME_ACTION_NEXT else action))
+            }
         }
         val steps = ArrayList<SendStep>(2)
         steps.add(SendStep.action(EditorInfo.IME_ACTION_SEND))

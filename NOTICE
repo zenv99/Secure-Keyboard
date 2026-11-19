@@ -1,0 +1,45 @@
+Secure Keyboard includes and adapts work from these projects. Their licenses are GPL-compatible. No code was taken from projects whose licenses are not.
+
+HeliBoard
+  Copyright Helium314 and contributors
+  https://github.com/HeliBorg/HeliBoard
+  GNU General Public License v3.0
+  This keyboard is a modified HeliBoard. The big button performs the field's declared
+  editor action even when the field sets IME_FLAG_NO_ENTER_ACTION, which is the approach
+  discussed in HeliBoard issue 1989 (Pixel launcher and browser search fields).
+
+OpenBoard and the Android Open Source LatinIME
+  Copyright The Android Open Source Project
+  Apache License 2.0
+  Cursor movement uses InputConnection.setSelection, and an unknown selection (-1) is
+  not a cursor position (Constants.NOT_A_CURSOR_POSITION). When setSelection fails, the
+  caret is moved with DPAD key events, the same fallback AOSP uses when the editor
+  connection cannot be read.
+
+FlorisBoard
+  Copyright Patrick Goldinger and contributors
+  https://github.com/florisboard/florisboard
+  Apache License 2.0
+  FlorisBoard pull request 1822 keeps a local editor cache when a selection callback is
+  not a real move, instead of re-reading the field. Space-bar cursor swipes there send
+  DPAD key events (see the FlorisBoard touch-gesture docs). Both are used here when a
+  WebView, browser, or React Native field (including X compose and reply) drops or
+  ignores the selection. No FlorisBoard source file was copied.
+
+AnySoftKeyboard
+  Copyright Menny Even-Dan and contributors
+  https://github.com/AnySoftKeyboard/AnySoftKeyboard
+  Apache License 2.0
+  Reviewed for on-device correction ideas. Its binary dictionary and correction engine
+  were not copied. Corrections in this app stay in the HeliBoard and AOSP suggestion path.
+
+FUTO Keyboard
+  https://github.com/futo-org/android-keyboard
+  FUTO Source First License 1.1
+  That license is not GPL-compatible (non-commercial modification and distribution limits,
+  no sublicensing). No FUTO source was copied or adapted.
+
+whisper.cpp
+  Copyright Georgi Gerganov and contributors
+  MIT License
+  On-device speech recognition. See third_party/whisper.cpp.

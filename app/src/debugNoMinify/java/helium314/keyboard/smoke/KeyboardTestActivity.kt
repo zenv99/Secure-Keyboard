@@ -46,6 +46,11 @@ class KeyboardTestActivity : Activity() {
                     inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS
                     imeOptions = EditorInfo.IME_ACTION_NEXT
                 }
+                FIELD_X, FIELD_X_REPLY -> {
+                    // X compose and reply are React Native text fields. Reply also drops the selection.
+                    inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_CAP_SENTENCES or InputType.TYPE_TEXT_FLAG_MULTI_LINE
+                    imeOptions = EditorInfo.IME_ACTION_NONE or EditorInfo.IME_FLAG_NO_ENTER_ACTION or EditorInfo.IME_FLAG_NO_EXTRACT_UI
+                }
                 FIELD_WEB -> {
                     inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_WEB_EDIT_TEXT or InputType.TYPE_TEXT_FLAG_MULTI_LINE
                     imeOptions = EditorInfo.IME_ACTION_NONE or EditorInfo.IME_FLAG_NO_ENTER_ACTION
@@ -87,6 +92,8 @@ class KeyboardTestActivity : Activity() {
         const val FIELD_PASSWORD = "password"
         const val FIELD_EMAIL = "email"
         const val FIELD_WEB = "web"
+        const val FIELD_X = "x"
+        const val FIELD_X_REPLY = "x-reply"
         @Volatile var instance: KeyboardTestActivity? = null
     }
 }
