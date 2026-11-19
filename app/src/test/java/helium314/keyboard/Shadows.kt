@@ -135,6 +135,9 @@ class ShadowInputMethodService {
         var currentInputType = InputType.TYPE_CLASS_TEXT
         var currentImeOptions = 0
         var lastEditorAction: Int? = null
+        var editorActionCount = 0
+        var editorActionHandled = true
+        var enterPresses = 0
 
         // convenience for access
         val textBeforeCursor get() = text.substring(0, selectionStart)
@@ -156,6 +159,9 @@ class ShadowInputMethodService {
             currentInputType = InputType.TYPE_CLASS_TEXT
             currentImeOptions = 0
             lastEditorAction = null
+            editorActionCount = 0
+            editorActionHandled = true
+            enterPresses = 0
         }
     }
 
@@ -280,6 +286,7 @@ class ShadowInputMethodService {
             return true
         }
         override fun sendKeyEvent(p0: KeyEvent): Boolean {
+            if (p0.keyCode == KeyEvent.KEYCODE_ENTER && p0.action == KeyEvent.ACTION_DOWN) enterPresses++
             if (p0.action != KeyEvent.ACTION_DOWN) return true // only change the text on key down, like RichInputConnection does
             if (p0.keyCode == KeyEvent.KEYCODE_DEL) {
                 if (selectionEnd == 0) return true // nothing to delete
@@ -323,7 +330,8 @@ class ShadowInputMethodService {
         override fun commitCompletion(p0: CompletionInfo?): Boolean = TODO("Not yet implemented")
         override fun performEditorAction(p0: Int): Boolean {
             lastEditorAction = p0
-            return true
+            editorActionCount++
+            return editorActionHandled
         }
         override fun performContextMenuAction(p0: Int): Boolean = TODO("Not yet implemented")
         override fun clearMetaKeyStates(p0: Int): Boolean = TODO("Not yet implemented")

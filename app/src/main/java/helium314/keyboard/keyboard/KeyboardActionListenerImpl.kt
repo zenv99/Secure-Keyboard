@@ -324,6 +324,8 @@ class KeyboardActionListenerImpl(private val latinIME: LatinIME, private val inp
     private var trackpadDoc: TrackpadDocument? = null
     private var trackpadWindowStart = 0
     private var trackpadFramePosted = false
+    /** WebView and some browsers ignore setSelection. Arrow keys still move the caret there. */
+    private var trackpadArrows = false
     private val trackpadFrame = Choreographer.FrameCallback {
         trackpadFramePosted = false
         val steps = trackpadMotion.consume(System.nanoTime())
@@ -333,17 +335,25 @@ class KeyboardActionListenerImpl(private val latinIME: LatinIME, private val inp
     private fun beginTrackpad() {
         // Leave any half-typed word as the user typed it, then take a snapshot to move inside.
         inputLogic.finishInput()
-        val before = connection.getTextBeforeCursor(TRACKPAD_WINDOW, 0)?.toString() ?: ""
-        val after = connection.getTextAfterCursor(TRACKPAD_WINDOW, 0)?.toString() ?: ""
-        trackpadDoc = TrackpadDocument(before, after)
-        trackpadWindowStart = connection.expectedSelectionStart - before.length
+        val variation = settings.current.mInputAttributes.mInputType and InputType.TYPE_MASK_VARIATION
+        val web = variation == InputType.TYPE_TEXT_VARIATION_WEB_EDIT_TEXT
+                || variation == InputType.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS
+        val before = connection.getTextBeforeCursor(TRACKPAD_WINDOW, 0)?.toString()
+        // X and some React Native fields report selection -1 and a null or stale extract.
+        // Arrow keys still move the caret when setSelection cannot be trusted.
+        val selectionLost = connection.expectedSelectionStart < 0 || connection.expectedSelectionEnd < 0
+        trackpadArrows = web || before == null || selectionLost
+        val after = if (trackpadArrows) "" else connection.getTextAfterCursor(TRACKPAD_WINDOW, 0)?.toString() ?: ""
+        trackpadDoc = TrackpadDocument(before ?: "", after)
+        trackpadWindowStart = if (trackpadArrows) 0
+            else connection.expectedSelectionStart - (before?.length ?: 0)
         trackpadMotion.reset()
         trackpadMotion.configure(
             Resources.getSystem().displayMetrics.density,
             settings.current.mTouchpadSensitivity
         )
-        keyboardSwitcher.mainKeyboardView?.alpha = 0.22f
-        performHapticFeedback(HapticEvent.KEY_LONG_PRESS)
+        // Labels fade. The keys stay put, and this gesture does not buzz.
+        keyboardSwitcher.mainKeyboardView?.setTrackpadLabelAlpha(0.2f)
     }
 
     private fun endTrackpad() {
@@ -353,7 +363,8 @@ class KeyboardActionListenerImpl(private val latinIME: LatinIME, private val inp
             applyTrackpadSteps(trackpadMotion.consume(System.nanoTime()))
         }
         trackpadDoc = null
-        keyboardSwitcher.mainKeyboardView?.alpha = 1f
+        trackpadArrows = false
+        keyboardSwitcher.mainKeyboardView?.setTrackpadLabelAlpha(1f)
         val end = connection.expectedSelectionStart
         if (end >= 0) connection.setSelection(end, end) // refresh the text cache once, not every frame
         inputLogic.restartSuggestionsOnWordTouchedByCursor(settings.current)
@@ -369,15 +380,33 @@ class KeyboardActionListenerImpl(private val latinIME: LatinIME, private val inp
     }
 
     private fun applyTrackpadSteps(steps: TrackpadSteps) {
-        val doc = trackpadDoc ?: return
         if (steps.graphemes == 0 && steps.lines == 0) return
+        if (trackpadArrows) {
+            nudgeCaretWithArrows(steps.graphemes, steps.lines)
+            return
+        }
+        val doc = trackpadDoc ?: return
         val crossed = doc.move(steps.graphemes, steps.lines)
         if (crossed == 0) return
         val target = (trackpadWindowStart + doc.charOffset()).coerceAtLeast(0)
-        connection.moveCursorTo(target)
-        // One light tick per character the caret actually moved. The motion model already
-        // caps a frame, so a flick cannot buzz for the whole line.
-        repeat(crossed.coerceAtMost(3)) { performHapticFeedback(HapticEvent.GESTURE_MOVE) }
+        if (!connection.moveCursorTo(target)) {
+            // The editor ignored setSelection (common in a browser). Use arrows for the rest of the drag.
+            trackpadArrows = true
+            nudgeCaretWithArrows(steps.graphemes, steps.lines)
+        }
+    }
+
+    private fun nudgeCaretWithArrows(graphemes: Int, lines: Int) {
+        val horizontal = if (graphemes < 0) KeyEvent.KEYCODE_DPAD_LEFT else KeyEvent.KEYCODE_DPAD_RIGHT
+        val vertical = if (lines < 0) KeyEvent.KEYCODE_DPAD_UP else KeyEvent.KEYCODE_DPAD_DOWN
+        repeat(abs(graphemes)) { tapKey(horizontal) }
+        repeat(abs(lines)) { tapKey(vertical) }
+    }
+
+    private fun tapKey(keyCode: Int) {
+        val now = android.os.SystemClock.uptimeMillis()
+        connection.sendKeyEvent(KeyEvent(now, now, KeyEvent.ACTION_DOWN, keyCode, 0))
+        connection.sendKeyEvent(KeyEvent(now, now, KeyEvent.ACTION_UP, keyCode, 0))
     }
 
     override fun onTouchpadMove(stepsX: Int, stepsY: Int): Boolean {

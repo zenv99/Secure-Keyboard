@@ -485,8 +485,10 @@ public class LatinIME extends InputMethodService implements
             onDictatedText(text);
             return kotlin.Unit.INSTANCE;
         }, produced -> {
-            if (produced) autoSendAfterDictation();
-            updateVoiceKeyMode();
+            // Transcription finished. Leave the text in the field. Do not send and do not hide.
+            // The old auto-send called performEditorAction here. WhatsApp treats that as sending
+            // the message and closes the keyboard, which is what a press of this button was doing.
+            onDictationSessionFinished(produced);
             return kotlin.Unit.INSTANCE;
         });
         mIsHardwareAcceleratedDrawingEnabled = this.enableHardwareAcceleration();
@@ -504,6 +506,7 @@ public class LatinIME extends InputMethodService implements
         mStatsUtilsManager.onCreate(this, mDictionaryFacilitator);
         mDisplayContext = KtxKt.getDisplayContext(this);
         KeyboardSwitcher.init(this);
+        instanceForTest = this;
         super.onCreate();
 
         loadSettings();
@@ -624,6 +627,7 @@ public class LatinIME extends InputMethodService implements
 
     @Override
     public void onDestroy() {
+        if (instanceForTest == this) instanceForTest = null;
         if (mPushToTalk != null) mPushToTalk.release();
         mClipboardHistoryManager.onDestroy();
         mDictionaryFacilitator.closeDictionaries();
@@ -1040,8 +1044,29 @@ public class LatinIME extends InputMethodService implements
         super.onExtractedCursorMovement(dx, dy);
     }
 
+    /** Counts hideWindow so tests can assert dictation and send never dismiss the keyboard. */
+    public static int hideWindowsForTest;
+
+    /** The running service, so an instrumented chat field can see the real keyboard. */
+    public static LatinIME instanceForTest;
+
+    /** Reloads the (+) row from preferences. The emulator test uses this after an old menu is upgraded. */
+    public void reloadToolbarForTest() {
+        if (mSuggestionStripView != null) mSuggestionStripView.rebuildToolbarKeys();
+    }
+
+    public java.util.List<String> toolbarLabelsForTest() {
+        if (mSuggestionStripView == null) return java.util.Collections.emptyList();
+        return mSuggestionStripView.toolbarLabels();
+    }
+
+    public void scrollToolbarForTest(int x) {
+        if (mSuggestionStripView != null) mSuggestionStripView.scrollToolbarTo(x);
+    }
+
     @Override
     public void hideWindow() {
+        hideWindowsForTest++;
         Log.i(TAG, "hideWindow");
         if (hasSuggestionStripView() && mSettings.getCurrent().mToolbarMode == ToolbarMode.EXPANDABLE)
             mSuggestionStripView.setToolbarVisibility(false);
@@ -1284,29 +1309,40 @@ public class LatinIME extends InputMethodService implements
 
     @Override
     public void onSendKey() {
+        // A short tap, and only a short tap, on the send face. A press or a hold never gets here.
         if (!fieldHasText()) return;
-        performBigButtonAction();
+        performShortTapSend();
     }
 
     /**
-     * After a non-empty dictation, perform Send (or Search). Never hides the keyboard,
-     * never inserts a newline, and never sends a raw enter key.
+     * Dictation ended. The text is already in the field. This does not perform an editor action
+     * and does not call requestHideSelf or hideWindow, so WhatsApp keeps the keyboard up.
      */
-    private void autoSendAfterDictation() {
-        performBigButtonAction();
+    public static boolean lastDictationProducedForTest;
+
+    public void onDictationSessionFinished(boolean produced) {
+        lastDictationProducedForTest = produced;
+        updateVoiceKeyMode();
     }
 
-    /** Shared by a tap on Send and by dictation finishing. Does not call requestHideSelf. */
-    private void performBigButtonAction() {
+    /** A short tap on Send. Does not call requestHideSelf or hideWindow. */
+    private void performShortTapSend() {
         final android.view.inputmethod.EditorInfo ei = getCurrentInputEditorInfo();
         final android.view.inputmethod.InputConnection ic = getCurrentInputConnection();
         if (ei == null || ic == null) return;
-        if (!helium314.keyboard.voice.DictationSendPolicy.INSTANCE.shouldPerformAction(ei.inputType, ei.imeOptions)) {
-            return;
+        final java.util.List<helium314.keyboard.voice.DictationSendPolicy.SendStep> plan =
+                helium314.keyboard.voice.DictationSendPolicy.INSTANCE.sendPlan(
+                        ei.imeOptions, ei.inputType, ei.actionId, ei.actionLabel != null);
+        for (int i = 0; i < plan.size(); i++) {
+            final helium314.keyboard.voice.DictationSendPolicy.SendStep step = plan.get(i);
+            if (step.isEnter()) {
+                final long now = android.os.SystemClock.uptimeMillis();
+                ic.sendKeyEvent(new android.view.KeyEvent(now, now, android.view.KeyEvent.ACTION_DOWN, android.view.KeyEvent.KEYCODE_ENTER, 0));
+                ic.sendKeyEvent(new android.view.KeyEvent(now, now, android.view.KeyEvent.ACTION_UP, android.view.KeyEvent.KEYCODE_ENTER, 0));
+                break;
+            }
+            if (ic.performEditorAction(step.getActionId())) break;
         }
-        final int actionId = helium314.keyboard.voice.DictationSendPolicy.INSTANCE.actionId(
-                ei.imeOptions, ei.actionId, ei.actionLabel != null);
-        ic.performEditorAction(actionId);
         updateVoiceKeyMode();
     }
 
@@ -1318,6 +1354,7 @@ public class LatinIME extends InputMethodService implements
 
     private boolean fieldHasText() {
         if (mInputLogic.getComposingLength() > 0) return true;
+        if (mInputLogic.mConnection.editorLikelyHasText()) return true;
         final int start = mInputLogic.mConnection.getExpectedSelectionStart();
         final int end = mInputLogic.mConnection.getExpectedSelectionEnd();
         if (start > 0 || end > 0) return true;
@@ -1355,6 +1392,9 @@ public class LatinIME extends InputMethodService implements
                 toInsert = " " + toInsert;
         }
         onTextInput(toInsert);
+        // The button has to be Send before the finger comes back down. Waiting for a
+        // selection update left it as the mic, so the next tap dictated again.
+        updateVoiceKeyMode();
     }
 
     public void onTextInput(@Nullable String rawText) {

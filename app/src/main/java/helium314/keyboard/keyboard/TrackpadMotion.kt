@@ -110,7 +110,7 @@ class TrackpadMotion {
         /** Exponential smoothing of each touch delta. Lower keeps more of the previous sample. */
         const val SMOOTH_ALPHA = 0.62f
         /** Finger travel ignored at the start of a drag, so settling on the space bar does not jump. */
-        const val DEAD_ZONE_DP = 4f
+        const val DEAD_ZONE_DP = 1.5f
         /** About one character per 10 dp at a slow speed (the 8–12 dp iOS range). */
         const val CHAR_DP = 10f
         /** Lines need a clearly larger movement than characters. */
@@ -120,7 +120,7 @@ class TrackpadMotion {
         const val ACCEL_RANGE_DP_PER_S = 260f
         const val ACCEL_CAP = 2.6f
         /** A single frame never throws the caret across the field. */
-        const val STEP_CAP = 3
+        const val STEP_CAP = 8
     }
 }
 

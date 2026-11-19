@@ -394,6 +394,13 @@ public final class InputLogic {
      */
     public boolean onUpdateSelection(int oldSelStart, int oldSelEnd, int newSelStart,
              int newSelEnd, int composingSpanStart, int composingSpanEnd, SettingsValues settingsValues) {
+        // X, some WebViews, and other React Native fields report -1 when they do not
+        // know the selection. AOSP treats that as "not a cursor position". FlorisBoard
+        // (PR 1822) keeps the local editor cache instead of resetting on a callback that
+        // is not a real move. Resetting here dropped the word being typed.
+        if (newSelStart == Constants.NOT_A_CURSOR_POSITION || newSelEnd == Constants.NOT_A_CURSOR_POSITION) {
+            return false;
+        }
         boolean expectCursorMove = mightBeExpectedCursorMove(); // reset the timer
         if (mConnection.isBelatedExpectedUpdate(oldSelStart, newSelStart, oldSelEnd, newSelEnd, composingSpanStart, composingSpanEnd)) {
             // return whether we expect a user-initiated explicit cursor move (i.e. not as result of other input, but e.g. space swipe)

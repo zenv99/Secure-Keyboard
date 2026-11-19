@@ -140,7 +140,7 @@ val toolbarKeyStrings = entries.associateWithTo(EnumMap(ToolbarKey::class.java))
 
 /** What the (+) button opens. Short, and in the order used on an iOS keyboard. */
 val standardPlusMenu = listOf(
-    PHOTO, CAMERA, LOCATION, DOCUMENT, CONTACT, EMOJI, CLIPBOARD, TEXT_REPLACEMENT, SETTINGS,
+    PHOTO, CAMERA, LOCATION, CONTACT, DOCUMENT, EMOJI, CLIPBOARD, TEXT_REPLACEMENT, SETTINGS,
 )
 
 /** The old (+) row: cursor arrows and select-word, which is not the iOS set. */
@@ -189,8 +189,10 @@ fun plusMenuBeforeLocation() = listOf(
 )
 
 fun upgradeToolbarPrefs(prefs: SharedPreferences) {
-    val enabled = if (prefs.contains(Settings.PREF_TOOLBAR_KEYS)) getEnabledToolbarKeys(prefs) else emptyList()
-    if (isLegacyPlusMenu(enabled) || enabled == previousPlusMenu() || enabled == plusMenuBeforeLocation())
+    // Any saved menu that is not the current set is replaced. Adding the new keys as
+    // disabled left upgraders on the old arrows-and-undo row, which is what v1.0.3 showed.
+    val enabled = if (prefs.contains(Settings.PREF_TOOLBAR_KEYS)) getEnabledToolbarKeys(prefs) else standardPlusMenu
+    if (enabled != standardPlusMenu)
         prefs.edit { putString(Settings.PREF_TOOLBAR_KEYS, defaultToolbarPref) }
     upgradeToolbarPref(prefs, Settings.PREF_TOOLBAR_KEYS, defaultToolbarPref)
     upgradeToolbarPref(prefs, Settings.PREF_PINNED_TOOLBAR_KEYS, defaultPinnedToolbarPref)

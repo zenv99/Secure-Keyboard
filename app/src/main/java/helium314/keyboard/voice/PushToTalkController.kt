@@ -12,9 +12,7 @@ import android.os.IBinder
 import android.os.Looper
 import android.os.Message
 import android.os.Messenger
-import android.widget.Toast
 import app.securekeyboard.asr.AsrService
-import helium314.keyboard.latin.R
 
 /**
  * Hold-to-talk dictation. Press starts recording in the isolated ASR process, release transcribes
@@ -62,22 +60,14 @@ class PushToTalkController @JvmOverloads constructor(
                     onText(text)
                 }
                 if (isLast) {
-                    val produced = committedAny
-                    if (produced) {
-                        Toast.makeText(context, R.string.voice_dictation_done, Toast.LENGTH_SHORT).show()
-                    }
-                    onFinished(produced)
+                    // No toast here. A toast takes a window and Android hides the keyboard.
+                    onFinished(committedAny)
                 }
                 true
             }
             AsrService.MSG_STARTED -> {
                 DictationLog.add(context, "mic live after " + (System.currentTimeMillis() - pressedAt) + " ms, held=" + held)
                 if (held) bump() // the microphone is live now: this buzz is the signal to start speaking
-                if (held) Toast.makeText(
-                    context,
-                    context.getString(R.string.voice_listening) + " (build " + (helium314.keyboard.latin.BuildConfig.VERSION_CODE - 4300) + ")",
-                    Toast.LENGTH_SHORT
-                ).show()
                 true
             }
             AsrService.MSG_ERROR -> {
@@ -126,9 +116,8 @@ class PushToTalkController @JvmOverloads constructor(
         pressesForTest++
         pressedAt = System.currentTimeMillis()
         DictationLog.add(context, "press, service ready=" + (service != null))
+        // Binding is not a failure, and a toast here is what closed the keyboard on press.
         if (service != null) startSession() else bind()
-        // "Listening…" is shown when the recorder has really started (MSG_STARTED), so nobody speaks too early.
-        if (!bound && service == null) Toast.makeText(context, R.string.voice_error_generic, Toast.LENGTH_SHORT).show()
         return true
     }
 
@@ -137,12 +126,7 @@ class PushToTalkController @JvmOverloads constructor(
         if (held) DictationLog.add(context, "release after " + (System.currentTimeMillis() - pressedAt) + " ms, session=" + sessionStarted)
         if (held) bump() // small click when the finger lifts, like the one on press
         held = false
-        if (sessionStarted) {
-            send(AsrService.MSG_STOP)
-            // shows how long the key was actually held, so a hold cut short by the system is easy to spot
-            val heldSeconds = (System.currentTimeMillis() - pressedAt) / 1000
-            Toast.makeText(context, context.getString(R.string.voice_transcribing) + " (" + heldSeconds + " s)", Toast.LENGTH_SHORT).show()
-        }
+        if (sessionStarted) send(AsrService.MSG_STOP)
         sessionStarted = false
     }
 
@@ -208,17 +192,7 @@ class PushToTalkController @JvmOverloads constructor(
         when (code) {
             AsrService.ERR_NO_PERMISSION ->
                 context.startActivity(Intent(context, MicPermissionActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
-            else -> {
-                val message = when (code) {
-                    AsrService.ERR_NO_MODEL -> R.string.voice_error_no_model
-                    AsrService.ERR_MODEL_INTEGRITY -> R.string.voice_error_model_integrity
-                    AsrService.ERR_NATIVE -> R.string.voice_error_unsupported
-                    AsrService.ERR_SILENT -> R.string.voice_error_silent
-                    AsrService.ERR_NO_SPEECH -> R.string.voice_error_no_speech
-                    else -> R.string.voice_error_generic
-                }
-                Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
-            }
+            else -> DictationLog.add(context, "dictation error " + code)
         }
     }
 }

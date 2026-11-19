@@ -352,6 +352,30 @@ class ProximityAutocorrectTest {
         val falseRate: Double get() = if (keep == 0) 0.0 else falseCount.toDouble() / keep
     }
 
+    @Test fun widerTyposOnRealWordsStayAccurate() {
+        val words = VOCAB.map { it.word }.filter { it.length in 5..8 && it.all { ch -> ch.isLowerCase() } }.distinct()
+        var tried = 0
+        var fixed = 0
+        var falseFix = 0
+        for (word in words) {
+            if (correct(word) != null) falseFix++
+            val chars = word.toCharArray()
+            val i = word.length / 2
+            val tmp = chars[i]
+            chars[i] = chars[i - 1]
+            chars[i - 1] = tmp
+            val typo = String(chars)
+            if (typo == word) continue
+            tried++
+            if (correct(typo) == word) fixed++
+        }
+        val rate = if (tried == 0) 0f else fixed.toFloat() / tried
+        println("WIDER_TYPOS words=${words.size} tried=$tried fixed=$fixed rate=$rate false=$falseFix")
+        assertEquals(0, falseFix)
+        assertTrue(tried >= 40, "corpus $tried")
+        assertTrue(rate >= 0.55f, "rate $rate ($fixed/$tried)")
+    }
+
     companion object {
         private val VOCAB = listOf(
             w("correct", 210), w("direct", 180), w("ordered", 90), w("cored", 45),

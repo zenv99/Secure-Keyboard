@@ -16,6 +16,7 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 /**
  * After typing, the big button sends. Dictation's send uses the same action.
@@ -34,6 +35,7 @@ class SendButtonTest {
 
     @BeforeTest fun reset() {
         LatinIME.hideRequestsForTest = 0
+        LatinIME.hideWindowsForTest = 0
         ShadowInputMethodService.reset()
     }
 
@@ -46,11 +48,108 @@ class SendButtonTest {
         assertEquals(hides, LatinIME.hideRequestsForTest)
     }
 
+    @Test fun ignoredSendFallsBackToEnterOnAWhatsAppField() {
+        for (action in listOf(EditorInfo.IME_ACTION_NONE, EditorInfo.IME_ACTION_UNSPECIFIED, EditorInfo.IME_ACTION_SEND)) {
+            ShadowInputMethodService.reset()
+            LatinIME.hideRequestsForTest = 0
+            ShadowInputMethodService.editorActionHandled = false
+            startField(action or EditorInfo.IME_FLAG_NO_ENTER_ACTION or EditorInfo.IME_FLAG_NO_EXTRACT_UI, chatInput())
+            type("hello")
+            latinIME.onSendKey()
+            assertEquals(EditorInfo.IME_ACTION_SEND, ShadowInputMethodService.lastEditorAction)
+            assertEquals(1, ShadowInputMethodService.enterPresses)
+            assertStillShown()
+        }
+    }
+
+    @Test fun urlBarGoesAndSearchSearches() {
+        startField(EditorInfo.IME_ACTION_GO, InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_URI)
+        type("example.com")
+        latinIME.onSendKey()
+        assertEquals(EditorInfo.IME_ACTION_GO, ShadowInputMethodService.lastEditorAction)
+        assertEquals(0, ShadowInputMethodService.enterPresses)
+        assertStillShown()
+        ShadowInputMethodService.reset()
+        LatinIME.hideRequestsForTest = 0
+        startField(EditorInfo.IME_ACTION_SEARCH, InputType.TYPE_CLASS_TEXT)
+        type("kittens")
+        latinIME.onSendKey()
+        assertEquals(EditorInfo.IME_ACTION_SEARCH, ShadowInputMethodService.lastEditorAction)
+        assertEquals(0, ShadowInputMethodService.enterPresses)
+        assertStillShown()
+    }
+
+    @Test fun unknownSelectionDoesNotDropTheWordBeingTyped() {
+        val x = EditorInfo.IME_ACTION_NONE or EditorInfo.IME_FLAG_NO_ENTER_ACTION or EditorInfo.IME_FLAG_NO_EXTRACT_UI
+        startField(x, InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_MULTI_LINE)
+        type("teh")
+        latinIME.onUpdateSelection(3, 3, -1, -1, -1, -1)
+        ShadowLooper.idleMainLooper()
+        latinIME.onEvent(helium314.keyboard.event.Event.createEventForCodePointFromUnknownSource(' '.code))
+        ShadowLooper.idleMainLooper()
+        val text = ShadowInputMethodService.text.lowercase()
+        assertTrue(text.contains("teh") || text.contains("the"), text)
+    }
+
+    @Test fun lostSelectionStillSendsAndDoesNotHide() {
+        val x = EditorInfo.IME_ACTION_NONE or EditorInfo.IME_FLAG_NO_ENTER_ACTION or EditorInfo.IME_FLAG_NO_EXTRACT_UI
+        startField(x, InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_MULTI_LINE or InputType.TYPE_TEXT_FLAG_CAP_SENTENCES)
+        type("hello")
+        latinIME.onUpdateSelection(5, 5, -1, -1, -1, -1)
+        ShadowLooper.idleMainLooper()
+        latinIME.onSendKey()
+        assertEquals(EditorInfo.IME_ACTION_SEND, ShadowInputMethodService.lastEditorAction)
+        assertEquals(1, ShadowInputMethodService.editorActionCount)
+        assertStillShown()
+    }
+
     @Test fun emptyFieldDoesNotSend() {
         startField(whatsAppOptions(), chatInput())
         latinIME.onSendKey()
         assertNull(ShadowInputMethodService.lastEditorAction)
         assertEquals(0, LatinIME.hideRequestsForTest)
+    }
+
+    @Test fun dictationInsertsTextAndDoesNotSendOrHide() {
+        startField(whatsAppOptions(), chatInput())
+        latinIME.onDictatedText("on my way")
+        latinIME.onDictationSessionFinished(true)
+        assertEquals("on my way", ShadowInputMethodService.text.trim())
+        assertEquals(0, ShadowInputMethodService.editorActionCount)
+        assertNull(ShadowInputMethodService.lastEditorAction)
+        assertStillShown()
+    }
+
+    @Test fun aSecondHoldAppendsAndStillDoesNotSend() {
+        startField(whatsAppOptions(), chatInput())
+        latinIME.onDictatedText("on my way")
+        latinIME.onDictationSessionFinished(true)
+        latinIME.onDictatedText("thanks")
+        latinIME.onDictationSessionFinished(true)
+        assertEquals("on my way thanks", ShadowInputMethodService.text.trim())
+        assertEquals(0, ShadowInputMethodService.editorActionCount)
+        assertStillShown()
+    }
+
+    @Test fun oneShortTapAfterDictationSendsExactlyOnce() {
+        startField(whatsAppOptions(), chatInput())
+        latinIME.onDictatedText("hello")
+        latinIME.onDictationSessionFinished(true)
+        latinIME.onSendKey()
+        assertEquals(1, ShadowInputMethodService.editorActionCount)
+        assertEquals(EditorInfo.IME_ACTION_SEND, ShadowInputMethodService.lastEditorAction)
+        assertStillShown()
+    }
+
+    @Test fun doneFieldDictationDoesNotSendDone() {
+        startField(EditorInfo.IME_ACTION_DONE or EditorInfo.IME_FLAG_NO_ENTER_ACTION, chatInput())
+        latinIME.onDictatedText("hello")
+        latinIME.onDictationSessionFinished(true)
+        assertEquals(0, ShadowInputMethodService.editorActionCount)
+        latinIME.onSendKey()
+        assertEquals(EditorInfo.IME_ACTION_SEND, ShadowInputMethodService.lastEditorAction)
+        assertEquals(1, ShadowInputMethodService.editorActionCount)
+        assertStillShown()
     }
 
     @Test fun doneFieldStillSendsSoDictationDoesNotCloseTheKeyboard() {
@@ -78,6 +177,12 @@ class SendButtonTest {
             latinIME.onEvent(Event.createEventForCodePointFromUnknownSource(ch.code))
             ShadowLooper.idleMainLooper()
         }
+    }
+
+    private fun assertStillShown() {
+        assertEquals(0, LatinIME.hideRequestsForTest)
+        assertEquals(0, LatinIME.hideWindowsForTest)
+        assertEquals(true, latinIME.isInputViewShown)
     }
 
     private fun whatsAppOptions() =
