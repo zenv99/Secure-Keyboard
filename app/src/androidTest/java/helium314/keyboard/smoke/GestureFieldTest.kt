@@ -102,28 +102,24 @@ class GestureFieldTest {
             upgradeToolbarPrefs(prefs)
             ime.reloadToolbarForTest()
         }
+        val labels = mutableListOf<String>()
+        instrumentation.runOnMainSync { labels.addAll(ime.toolbarLabelsForTest()) }
+        val expected = listOf(
+            "Photos and Video", "Camera", "Location", "Contact", "Document",
+            "Emoji", "Clipboard", "Text shortcuts", "Settings",
+        )
+        for (label in expected) {
+            assertTrue("menu is $labels", labels.contains(label))
+        }
+        assertFalse(labels.contains("Undo"))
         val plus = device.wait(Until.findObject(By.desc("More keys")), 15000)
             ?: throw AssertionError("plus button not shown")
         plus.click()
         Thread.sleep(400)
         shot("plus-menu")
-        for (label in listOf("Photos and Video", "Camera", "Location", "Contact", "Document", "Emoji", "Clipboard", "Text shortcuts", "Settings")) {
-            assertTrue("missing $label", scrollToMenuLabel(label))
-        }
+        instrumentation.runOnMainSync { ime.scrollToolbarForTest(2000) }
+        Thread.sleep(200)
         shot("plus-menu-scrolled")
-        assertFalse(device.hasObject(By.desc("Undo")))
-    }
-
-    /** The plus row scrolls. Later items are in the tree only after the row moves. */
-    private fun scrollToMenuLabel(label: String): Boolean {
-        val width = device.displayWidth
-        val y = (device.displayHeight * 0.72f).toInt()
-        repeat(8) {
-            if (device.hasObject(By.desc(label))) return true
-            device.swipe((width * 0.85f).toInt(), y, (width * 0.15f).toInt(), y, 15)
-            Thread.sleep(250)
-        }
-        return device.hasObject(By.desc(label))
     }
 
     private fun expect(field: String, action: Int, sample: String, dropSelection: Boolean = false) {

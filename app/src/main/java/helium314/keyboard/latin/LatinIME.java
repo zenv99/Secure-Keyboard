@@ -1055,6 +1055,15 @@ public class LatinIME extends InputMethodService implements
         if (mSuggestionStripView != null) mSuggestionStripView.rebuildToolbarKeys();
     }
 
+    public java.util.List<String> toolbarLabelsForTest() {
+        if (mSuggestionStripView == null) return java.util.Collections.emptyList();
+        return mSuggestionStripView.toolbarLabels();
+    }
+
+    public void scrollToolbarForTest(int x) {
+        if (mSuggestionStripView != null) mSuggestionStripView.scrollToolbarTo(x);
+    }
+
     @Override
     public void hideWindow() {
         hideWindowsForTest++;

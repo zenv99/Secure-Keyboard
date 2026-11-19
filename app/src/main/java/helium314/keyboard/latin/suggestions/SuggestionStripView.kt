@@ -554,6 +554,13 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
         addToolbarKeys(Settings.getValues().mColors)
     }
 
+    fun toolbarLabels(): List<String> =
+        (0 until toolbar.childCount).map { toolbar.getChildAt(it).contentDescription?.toString().orEmpty() }
+
+    fun scrollToolbarTo(x: Int) {
+        toolbarContainer.scrollTo(x, 0)
+    }
+
     private fun addToolbarKeys(colors: helium314.keyboard.latin.common.Colors) {
         for (key in getEnabledToolbarKeys(context.prefs())) {
             if (key == ToolbarKey.VOICE) continue
