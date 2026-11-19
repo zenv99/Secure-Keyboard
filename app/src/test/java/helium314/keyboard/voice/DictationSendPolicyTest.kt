@@ -92,12 +92,29 @@ class DictationSendPolicyTest {
         assertEquals(EditorInfo.IME_ACTION_SEARCH, DictationSendPolicy.actionId(options, 0, false))
     }
 
-    @Test fun doneAndGoBecomeSendSoTheKeyboardStaysUp() {
-        // Android's text field hides the IME on Done. Go and Next move focus. The big button uses Send.
+    @Test fun doneBecomesSendAndGoStaysGo() {
+        // Android's text field hides the IME on Done. A URL bar keeps Go. Search stays search.
         assertEquals(EditorInfo.IME_ACTION_SEND, DictationSendPolicy.actionId(EditorInfo.IME_ACTION_DONE, 0, false))
-        assertEquals(EditorInfo.IME_ACTION_SEND, DictationSendPolicy.actionId(EditorInfo.IME_ACTION_GO, 0, false))
-        assertEquals(EditorInfo.IME_ACTION_SEND, DictationSendPolicy.actionId(EditorInfo.IME_ACTION_NEXT, 0, false))
+        assertEquals(EditorInfo.IME_ACTION_GO, DictationSendPolicy.actionId(EditorInfo.IME_ACTION_GO, 0, false))
         assertEquals(EditorInfo.IME_ACTION_SEARCH, DictationSendPolicy.actionId(EditorInfo.IME_ACTION_SEARCH, 0, true))
+    }
+
+    @Test fun chatFieldsWithNoEnterFlagPlanSendThenEnter() {
+        for (action in listOf(EditorInfo.IME_ACTION_NONE, EditorInfo.IME_ACTION_UNSPECIFIED, EditorInfo.IME_ACTION_SEND)) {
+            val options = action or EditorInfo.IME_FLAG_NO_ENTER_ACTION
+            val plan = DictationSendPolicy.sendPlan(options, InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_MULTI_LINE, 0, false)
+            assertEquals(EditorInfo.IME_ACTION_SEND, plan[0].actionId, "action $action")
+            assertTrue(plan.last().isEnter, "action $action")
+        }
+    }
+
+    @Test fun urlAndSearchKeepTheirOwnAction() {
+        val url = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_URI
+        val go = DictationSendPolicy.sendPlan(EditorInfo.IME_ACTION_GO, url, 0, false)
+        assertEquals(EditorInfo.IME_ACTION_GO, go.single().actionId)
+        assertEquals(false, go.single().isEnter)
+        val search = DictationSendPolicy.sendPlan(EditorInfo.IME_ACTION_SEARCH, InputType.TYPE_CLASS_TEXT, 0, false)
+        assertEquals(EditorInfo.IME_ACTION_SEARCH, search.single().actionId)
     }
 
     @Test fun whatsAppStyleFieldSendsAndDoesNotReturnEnter() {

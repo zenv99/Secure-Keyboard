@@ -391,8 +391,8 @@
     <string name="redo" tools:keep="@string/redo">Redo</string>
     <string name="close_history" tools:keep="@string/close_history">Close clipboard history</string>
     <string name="emoji" tools:keep="@string/emoji">Emoji</string>
-    <string name="text_replacement" translatable="false">Text replacement</string>
-    <string name="photo" translatable="false">Photos</string>
+    <string name="text_replacement" translatable="false">Text shortcuts</string>
+    <string name="photo" translatable="false">Photos &amp; videos</string>
     <string name="camera" translatable="false">Camera</string>
     <string name="document" translatable="false">Document</string>
     <string name="contact" translatable="false">Contact</string>

@@ -1204,7 +1204,7 @@ public final class PointerTracker implements PointerTrackerQueue.Element,
         }
         final int code = key.getCode();
         // Hold the space bar (without the language-switch hold) and the keyboard becomes a trackpad.
-        if (code == Constants.CODE_SPACE && !Settings.getValues().mSpaceForLangChange) {
+        if (code == Constants.CODE_SPACE) {
             enterTrackpad(mLastX, mLastY);
             return;
         }
@@ -1340,8 +1340,9 @@ public final class PointerTracker implements PointerTrackerQueue.Element,
     private int getLongPressTimeout(int code) {
         int longpressTimeout = Settings.getValues().mKeyLongpressTimeout;
         return switch (code) {
-            case Constants.CODE_SPACE, KeyCode.SHIFT, KeyCode.SYMBOL_ALPHA
-                // We use slightly longer timeout for space, shift-lock, and the numpad long-press.
+            case Constants.CODE_SPACE -> 300; // iOS turns the keyboard into a trackpad after about 300 ms
+            case KeyCode.SHIFT, KeyCode.SYMBOL_ALPHA
+                // We use slightly longer timeout for shift-lock and the numpad long-press.
                 -> longpressTimeout * 3 / 2
             ;
             default -> mIsInSlidingKeyInput

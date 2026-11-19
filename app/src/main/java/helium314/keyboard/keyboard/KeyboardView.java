@@ -90,6 +90,8 @@ public class KeyboardView extends View {
     private Bitmap mOffscreenBuffer;
     /** Flag for whether the key hints should be displayed */
     private boolean mShowsHints;
+    /** 255 shows labels. A space-bar trackpad fades them without hiding the keys. */
+    private int mTrackpadLabelAlpha = Constants.Color.ALPHA_OPAQUE;
     /** Scale for downscaling icons and fixed size backgrounds if keyboard height is set below 80% */
     private float mIconScaleFactor;
     /** The canvas for the above mutable keyboard bitmap */
@@ -153,6 +155,13 @@ public class KeyboardView extends View {
     @Nullable
     public KeyVisualAttributes getKeyVisualAttribute() {
         return mKeyVisualAttributes;
+    }
+
+    public void setTrackpadLabelAlpha(final float fraction) {
+        final int alpha = Math.max(0, Math.min(Constants.Color.ALPHA_OPAQUE, Math.round(fraction * Constants.Color.ALPHA_OPAQUE)));
+        if (alpha == mTrackpadLabelAlpha) return;
+        mTrackpadLabelAlpha = alpha;
+        invalidateAllKeys();
     }
 
     private static void blendAlpha(@NonNull final Paint paint, final int alpha) {
@@ -447,7 +456,7 @@ public class KeyboardView extends View {
                 paint.setColor(Color.TRANSPARENT);
                 paint.clearShadowLayer();
             }
-            blendAlpha(paint, params.mAnimAlpha);
+            blendAlpha(paint, params.mAnimAlpha * mTrackpadLabelAlpha / Constants.Color.ALPHA_OPAQUE);
             canvas.drawText(label, 0, label.length(), labelX, labelBaseline, paint);
             // Turn off drop shadow and reset x-scale.
             paint.clearShadowLayer();

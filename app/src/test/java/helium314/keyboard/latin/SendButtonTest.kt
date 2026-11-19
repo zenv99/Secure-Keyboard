@@ -47,6 +47,37 @@ class SendButtonTest {
         assertEquals(hides, LatinIME.hideRequestsForTest)
     }
 
+    @Test fun ignoredSendFallsBackToEnterOnAWhatsAppField() {
+        for (action in listOf(EditorInfo.IME_ACTION_NONE, EditorInfo.IME_ACTION_UNSPECIFIED, EditorInfo.IME_ACTION_SEND)) {
+            ShadowInputMethodService.reset()
+            LatinIME.hideRequestsForTest = 0
+            ShadowInputMethodService.editorActionHandled = false
+            startField(action or EditorInfo.IME_FLAG_NO_ENTER_ACTION or EditorInfo.IME_FLAG_NO_EXTRACT_UI, chatInput())
+            type("hello")
+            latinIME.onSendKey()
+            assertEquals(EditorInfo.IME_ACTION_SEND, ShadowInputMethodService.lastEditorAction)
+            assertEquals(1, ShadowInputMethodService.enterPresses)
+            assertStillShown()
+        }
+    }
+
+    @Test fun urlBarGoesAndSearchSearches() {
+        startField(EditorInfo.IME_ACTION_GO, InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_URI)
+        type("example.com")
+        latinIME.onSendKey()
+        assertEquals(EditorInfo.IME_ACTION_GO, ShadowInputMethodService.lastEditorAction)
+        assertEquals(0, ShadowInputMethodService.enterPresses)
+        assertStillShown()
+        ShadowInputMethodService.reset()
+        LatinIME.hideRequestsForTest = 0
+        startField(EditorInfo.IME_ACTION_SEARCH, InputType.TYPE_CLASS_TEXT)
+        type("kittens")
+        latinIME.onSendKey()
+        assertEquals(EditorInfo.IME_ACTION_SEARCH, ShadowInputMethodService.lastEditorAction)
+        assertEquals(0, ShadowInputMethodService.enterPresses)
+        assertStillShown()
+    }
+
     @Test fun emptyFieldDoesNotSend() {
         startField(whatsAppOptions(), chatInput())
         latinIME.onSendKey()

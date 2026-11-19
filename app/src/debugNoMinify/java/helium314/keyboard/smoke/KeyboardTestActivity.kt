@@ -26,6 +26,30 @@ class KeyboardTestActivity : Activity() {
                     inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_CAP_SENTENCES or InputType.TYPE_TEXT_FLAG_MULTI_LINE
                     imeOptions = EditorInfo.IME_ACTION_DONE or EditorInfo.IME_FLAG_NO_ENTER_ACTION
                 }
+                FIELD_URL -> {
+                    inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_URI
+                    imeOptions = EditorInfo.IME_ACTION_GO
+                }
+                FIELD_SEARCH -> {
+                    inputType = InputType.TYPE_CLASS_TEXT
+                    imeOptions = EditorInfo.IME_ACTION_SEARCH
+                }
+                FIELD_PLAIN -> {
+                    inputType = InputType.TYPE_CLASS_TEXT
+                    imeOptions = EditorInfo.IME_ACTION_NONE
+                }
+                FIELD_PASSWORD -> {
+                    inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
+                    imeOptions = EditorInfo.IME_ACTION_GO
+                }
+                FIELD_EMAIL -> {
+                    inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS
+                    imeOptions = EditorInfo.IME_ACTION_NEXT
+                }
+                FIELD_WEB -> {
+                    inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_WEB_EDIT_TEXT or InputType.TYPE_TEXT_FLAG_MULTI_LINE
+                    imeOptions = EditorInfo.IME_ACTION_NONE or EditorInfo.IME_FLAG_NO_ENTER_ACTION
+                }
                 else -> inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_MULTI_LINE
             }
             contentDescription = "smoke-field"
@@ -57,6 +81,12 @@ class KeyboardTestActivity : Activity() {
         const val EXTRA_FIELD = "field"
         const val FIELD_WHATSAPP = "whatsapp"
         const val FIELD_DONE = "done"
+        const val FIELD_URL = "url"
+        const val FIELD_SEARCH = "search"
+        const val FIELD_PLAIN = "plain"
+        const val FIELD_PASSWORD = "password"
+        const val FIELD_EMAIL = "email"
+        const val FIELD_WEB = "web"
         @Volatile var instance: KeyboardTestActivity? = null
     }
 }

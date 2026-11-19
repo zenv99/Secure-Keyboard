@@ -189,8 +189,10 @@ fun plusMenuBeforeLocation() = listOf(
 )
 
 fun upgradeToolbarPrefs(prefs: SharedPreferences) {
-    val enabled = if (prefs.contains(Settings.PREF_TOOLBAR_KEYS)) getEnabledToolbarKeys(prefs) else emptyList()
-    if (isLegacyPlusMenu(enabled) || enabled == previousPlusMenu() || enabled == plusMenuBeforeLocation())
+    // Any saved menu that is not the current set is replaced. Adding the new keys as
+    // disabled left upgraders on the old arrows-and-undo row, which is what v1.0.3 showed.
+    val enabled = if (prefs.contains(Settings.PREF_TOOLBAR_KEYS)) getEnabledToolbarKeys(prefs) else standardPlusMenu
+    if (enabled != standardPlusMenu)
         prefs.edit { putString(Settings.PREF_TOOLBAR_KEYS, defaultToolbarPref) }
     upgradeToolbarPref(prefs, Settings.PREF_TOOLBAR_KEYS, defaultToolbarPref)
     upgradeToolbarPref(prefs, Settings.PREF_PINNED_TOOLBAR_KEYS, defaultPinnedToolbarPref)

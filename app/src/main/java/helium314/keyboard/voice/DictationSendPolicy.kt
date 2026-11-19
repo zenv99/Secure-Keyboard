@@ -2,6 +2,7 @@
 package helium314.keyboard.voice
 
 import android.text.InputType
+import android.view.KeyEvent
 import android.view.inputmethod.EditorInfo
 import helium314.keyboard.latin.utils.InputTypeUtils
 
@@ -31,10 +32,54 @@ object DictationSendPolicy {
      * keyboard stays up. Search stays search. The result is never a newline.
      */
     fun actionId(imeOptions: Int, editorActionId: Int, hasActionLabel: Boolean): Int {
-        if (hasActionLabel && editorActionId == EditorInfo.IME_ACTION_SEARCH) return editorActionId
+        val plan = sendPlan(imeOptions, InputType.TYPE_CLASS_TEXT, editorActionId, hasActionLabel)
+        return plan.firstOrNull { it.actionId >= 0 }?.actionId ?: EditorInfo.IME_ACTION_SEND
+    }
+
+    /**
+     * What a short tap tries, in order. A URL bar gets Go, a search field gets Search.
+     * A chat field, including one that declares nothing and sets [EditorInfo.IME_FLAG_NO_ENTER_ACTION],
+     * tries Send. If the app ignores that, the next step is the enter key, which is how WhatsApp
+     * sends when "Enter is send" is on. Enter is not used for a URL, search, email, or password field.
+     */
+    fun sendPlan(imeOptions: Int, inputType: Int, editorActionId: Int, hasActionLabel: Boolean): List<SendStep> {
         val declared = imeOptions and EditorInfo.IME_MASK_ACTION
-        return if (declared == EditorInfo.IME_ACTION_SEARCH) EditorInfo.IME_ACTION_SEARCH
-        else EditorInfo.IME_ACTION_SEND
+        val variation = inputType and InputType.TYPE_MASK_VARIATION
+        if (InputTypeUtils.isAnyPasswordInputType(inputType)) {
+            if (declared == EditorInfo.IME_ACTION_NONE || declared == EditorInfo.IME_ACTION_UNSPECIFIED)
+                return emptyList()
+            return listOf(SendStep.action(declared))
+        }
+        if (hasActionLabel && editorActionId != 0) return listOf(SendStep.action(editorActionId))
+        if (variation == InputType.TYPE_TEXT_VARIATION_URI || declared == EditorInfo.IME_ACTION_GO) {
+            val action = if (declared == EditorInfo.IME_ACTION_SEARCH) EditorInfo.IME_ACTION_SEARCH
+            else EditorInfo.IME_ACTION_GO
+            return listOf(SendStep.action(action))
+        }
+        if (declared == EditorInfo.IME_ACTION_SEARCH) return listOf(SendStep.action(EditorInfo.IME_ACTION_SEARCH))
+        if (variation == InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS
+            || variation == InputType.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS
+        ) {
+            val action = if (declared == EditorInfo.IME_ACTION_NONE || declared == EditorInfo.IME_ACTION_UNSPECIFIED)
+                EditorInfo.IME_ACTION_NEXT else declared
+            return listOf(SendStep.action(if (action == EditorInfo.IME_ACTION_DONE) EditorInfo.IME_ACTION_NEXT else action))
+        }
+        val steps = ArrayList<SendStep>(2)
+        steps.add(SendStep.action(EditorInfo.IME_ACTION_SEND))
+        // Enter is the fallback only for a chat field. A URL or search field stopped above.
+        val noEnter = imeOptions and EditorInfo.IME_FLAG_NO_ENTER_ACTION != 0
+        val enterIsSend = !noEnter || declared == EditorInfo.IME_ACTION_SEND
+                || declared == EditorInfo.IME_ACTION_NONE || declared == EditorInfo.IME_ACTION_UNSPECIFIED
+        if (enterIsSend) steps.add(SendStep.enter())
+        return steps
+    }
+
+    class SendStep private constructor(val actionId: Int) {
+        val isEnter: Boolean get() = actionId < 0
+        companion object {
+            fun action(id: Int) = SendStep(id)
+            fun enter() = SendStep(-KeyEvent.KEYCODE_ENTER)
+        }
     }
 
     /**

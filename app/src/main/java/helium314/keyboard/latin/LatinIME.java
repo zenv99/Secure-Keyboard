@@ -1316,12 +1316,19 @@ public class LatinIME extends InputMethodService implements
         final android.view.inputmethod.EditorInfo ei = getCurrentInputEditorInfo();
         final android.view.inputmethod.InputConnection ic = getCurrentInputConnection();
         if (ei == null || ic == null) return;
-        if (!helium314.keyboard.voice.DictationSendPolicy.INSTANCE.shouldPerformAction(ei.inputType, ei.imeOptions)) {
-            return;
+        final java.util.List<helium314.keyboard.voice.DictationSendPolicy.SendStep> plan =
+                helium314.keyboard.voice.DictationSendPolicy.INSTANCE.sendPlan(
+                        ei.imeOptions, ei.inputType, ei.actionId, ei.actionLabel != null);
+        for (int i = 0; i < plan.size(); i++) {
+            final helium314.keyboard.voice.DictationSendPolicy.SendStep step = plan.get(i);
+            if (step.isEnter()) {
+                final long now = android.os.SystemClock.uptimeMillis();
+                ic.sendKeyEvent(new android.view.KeyEvent(now, now, android.view.KeyEvent.ACTION_DOWN, android.view.KeyEvent.KEYCODE_ENTER, 0));
+                ic.sendKeyEvent(new android.view.KeyEvent(now, now, android.view.KeyEvent.ACTION_UP, android.view.KeyEvent.KEYCODE_ENTER, 0));
+                break;
+            }
+            if (ic.performEditorAction(step.getActionId())) break;
         }
-        final int actionId = helium314.keyboard.voice.DictationSendPolicy.INSTANCE.actionId(
-                ei.imeOptions, ei.actionId, ei.actionLabel != null);
-        ic.performEditorAction(actionId);
         updateVoiceKeyMode();
     }
 
@@ -1370,6 +1377,9 @@ public class LatinIME extends InputMethodService implements
                 toInsert = " " + toInsert;
         }
         onTextInput(toInsert);
+        // The button has to be Send before the finger comes back down. Waiting for a
+        // selection update left it as the mic, so the next tap dictated again.
+        updateVoiceKeyMode();
     }
 
     public void onTextInput(@Nullable String rawText) {

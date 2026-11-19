@@ -649,7 +649,9 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
             listener.onPushToTalkPress()
         }
         view.setOnTouchListener { v, event ->
-            val onKey = event.x >= 0 && event.x <= v.width && event.y >= 0 && event.y <= v.height
+            // A finger that drifts a little past the key is still this button. A strict edge was swallowing taps.
+            val slop = 48f * density
+            val onKey = event.x >= -slop && event.x <= v.width + slop && event.y >= -slop && event.y <= v.height + slop
             when (event.actionMasked) {
                 MotionEvent.ACTION_DOWN -> {
                     v.isPressed = true
