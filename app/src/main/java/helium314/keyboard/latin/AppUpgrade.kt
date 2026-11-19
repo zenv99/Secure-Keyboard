@@ -707,16 +707,29 @@ private object AppUpgrade {
                 prefs.edit { remove("emoji_recent_keys")  }
             }
         }
-        if (oldVersion in 1..4394) {
-            // v1.0 shipped vibration on, a 12 ms key tick, key hints, and a dpad key.
-            // Those were defaults, not a choice. Turn them off once. A custom duration is kept.
+        if (oldVersion in 1..4396) {
+            // v1.0 turned vibration on at 12 ms and switched the theme. Those were defaults.
+            // Turn vibration off once, drop key hints, and restore the v1.0.88 theme
+            // when the saved values are still that default.
             val duration = if (prefs.contains(Settings.PREF_VIBRATION_DURATION_SETTINGS))
                 prefs.getInt(Settings.PREF_VIBRATION_DURATION_SETTINGS, 12) else 12
             val vibrate = prefs.getBoolean(Settings.PREF_VIBRATE_ON, true)
+            val stillV1Theme = prefs.getString(Settings.PREF_THEME_STYLE, KeyboardTheme.STYLE_ROUNDED) == KeyboardTheme.STYLE_ROUNDED
+                    && prefs.getBoolean(Settings.PREF_THEME_KEY_BORDERS, true)
+                    && prefs.getBoolean(Settings.PREF_THEME_DAY_NIGHT, true)
             prefs.edit {
-                if (vibrate && duration == 12) putBoolean(Settings.PREF_VIBRATE_ON, false)
+                if (vibrate && (duration == 12 || duration == -1)) {
+                    putBoolean(Settings.PREF_VIBRATE_ON, false)
+                    if (duration == 12) putInt(Settings.PREF_VIBRATION_DURATION_SETTINGS, -1)
+                }
                 putBoolean(Settings.PREF_SHOW_HINTS, false)
-                putBoolean(Settings.PREF_SHOW_DPAD_KEY, false)
+                if (stillV1Theme) {
+                    putString(Settings.PREF_THEME_STYLE, KeyboardTheme.STYLE_MATERIAL)
+                    putString(Settings.PREF_THEME_COLORS, KeyboardTheme.THEME_DARK)
+                    putString(Settings.PREF_THEME_COLORS_NIGHT, KeyboardTheme.THEME_DARK)
+                    putBoolean(Settings.PREF_THEME_KEY_BORDERS, false)
+                    putBoolean(Settings.PREF_THEME_DAY_NIGHT, false)
+                }
             }
         }
         if (oldVersion <= 4201) {

@@ -44,14 +44,14 @@ object Defaults {
     }
 
     private const val DEFAULT_SIZE_SCALE = 1.0f // 100%
-    const val PREF_THEME_STYLE = KeyboardTheme.STYLE_ROUNDED
+    const val PREF_THEME_STYLE = KeyboardTheme.STYLE_MATERIAL
     fun PREF_ICON_STYLE(prefs: SharedPreferences) = prefs.getString(Settings.PREF_THEME_STYLE, PREF_THEME_STYLE)!!
     const val PREF_ACCENT_SHIFTED_ICON = false
-    const val PREF_THEME_COLORS = KeyboardTheme.THEME_LIGHT
+    const val PREF_THEME_COLORS = KeyboardTheme.THEME_DARK
     const val PREF_THEME_COLORS_NIGHT = KeyboardTheme.THEME_DARK
-    const val PREF_THEME_KEY_BORDERS = true
+    const val PREF_THEME_KEY_BORDERS = false
     @JvmField
-    val PREF_THEME_DAY_NIGHT = true
+    val PREF_THEME_DAY_NIGHT = false
     const val PREF_CUSTOM_ICON_NAMES = ""
     const val PREF_TOOLBAR_CUSTOM_KEY_CODES = ""
     const val PREF_AUTO_CAP = true
@@ -80,7 +80,7 @@ object Defaults {
     const val PREF_SHOW_LANGUAGE_SWITCH_KEY = false
     const val PREF_LANGUAGE_SWITCH_KEY = "internal"
     const val PREF_SHOW_EMOJI_KEY = true
-    const val PREF_SHOW_DPAD_KEY = false
+    const val PREF_SHOW_DPAD_KEY = true
     const val PREF_VARIABLE_TOOLBAR_DIRECTION = true
     const val PREF_ADDITIONAL_SUBTYPES = "de${Separators.SET}${ExtraValue.KEYBOARD_LAYOUT_SET}=MAIN:qwerty${Separators.SETS}" +
             "fr${Separators.SET}${ExtraValue.KEYBOARD_LAYOUT_SET}=MAIN:qwertz${Separators.SETS}" +
@@ -92,7 +92,7 @@ object Defaults {
     val PREF_KEYBOARD_HEIGHT_SCALE = Array(4) { DEFAULT_SIZE_SCALE }
     @JvmField
     // taller bottom row (space bar) in portrait, normal in landscape; index order matches PREF_BOTTOM_PADDING_SCALE
-    val PREF_BOTTOM_ROW_SCALE = arrayOf(DEFAULT_SIZE_SCALE, DEFAULT_SIZE_SCALE, DEFAULT_SIZE_SCALE, DEFAULT_SIZE_SCALE)
+    val PREF_BOTTOM_ROW_SCALE = arrayOf(1.35f, DEFAULT_SIZE_SCALE, 1.35f, DEFAULT_SIZE_SCALE)
     @JvmField
     // DEFAULT_SIZE_SCALE for portrait, 0 for landscape (normal and folded)
     val PREF_BOTTOM_PADDING_SCALE = arrayOf(DEFAULT_SIZE_SCALE, 0f, DEFAULT_SIZE_SCALE, 0f)
@@ -122,7 +122,7 @@ object Defaults {
     const val PREF_SUGGEST_PUNCTUATION = false
     const val PREF_SUGGEST_CLIPBOARD_CONTENT = true
     const val PREF_GESTURE_INPUT = true
-    const val PREF_VIBRATION_DURATION_SETTINGS = 12
+    const val PREF_VIBRATION_DURATION_SETTINGS = -1
     const val PREF_KEYPRESS_SOUND_VOLUME = -0.01f
     const val PREF_KEY_LONGPRESS_TIMEOUT = 300
     const val PREF_ENABLE_EMOJI_ALT_PHYSICAL_KEY = true
