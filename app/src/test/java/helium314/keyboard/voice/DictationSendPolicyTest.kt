@@ -10,6 +10,39 @@ import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 
 class DictationSendPolicyTest {
+    @Test fun pressNeverSendsAndOnlyAnEmptyFieldStartsTheMic() {
+        assertEquals(false, DictationSendPolicy.pressSends())
+        assertEquals(true, DictationSendPolicy.startsMicOnPress(sendFace = false))
+        assertEquals(false, DictationSendPolicy.startsMicOnPress(sendFace = true))
+    }
+
+    @Test fun releaseOnAnEmptyFieldTranscribesAndDoesNotSend() {
+        assertEquals(DictationSendPolicy.Release.TRANSCRIBE, DictationSendPolicy.onRelease(false, 30, true, true))
+        assertEquals(DictationSendPolicy.Release.TRANSCRIBE, DictationSendPolicy.onRelease(false, 900, true, true))
+    }
+
+    @Test fun shortTapOnTheSendFaceSendsOnce() {
+        assertEquals(
+            DictationSendPolicy.Release.SEND,
+            DictationSendPolicy.onRelease(true, DictationSendPolicy.HOLD_TO_DICTATE_MS - 1, true, false),
+        )
+    }
+
+    @Test fun aHoldOnTheSendFaceDictatesAndNeverSends() {
+        assertEquals(
+            DictationSendPolicy.Release.TRANSCRIBE,
+            DictationSendPolicy.onRelease(true, DictationSendPolicy.HOLD_TO_DICTATE_MS, true, true),
+        )
+        assertEquals(
+            DictationSendPolicy.Release.TRANSCRIBE,
+            DictationSendPolicy.onRelease(true, DictationSendPolicy.HOLD_TO_DICTATE_MS, false, false),
+        )
+    }
+
+    @Test fun aTapThatSlidesOffTheSendFaceDoesNothing() {
+        assertEquals(DictationSendPolicy.Release.NONE, DictationSendPolicy.onRelease(true, 80, false, false))
+    }
+
     @Test fun emptyFieldIsTheMic() {
         assertEquals(DictationSendPolicy.FACE_MIC, DictationSendPolicy.face(hasText = false))
         assertEquals("sym_keyboard_voice", DictationSendPolicy.drawableName(hasText = false))

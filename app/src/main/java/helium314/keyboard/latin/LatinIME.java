@@ -485,8 +485,10 @@ public class LatinIME extends InputMethodService implements
             onDictatedText(text);
             return kotlin.Unit.INSTANCE;
         }, produced -> {
-            if (produced) autoSendAfterDictation();
-            updateVoiceKeyMode();
+            // Transcription finished. Leave the text in the field. Do not send and do not hide.
+            // The old auto-send called performEditorAction here. WhatsApp treats that as sending
+            // the message and closes the keyboard, which is what a press of this button was doing.
+            onDictationSessionFinished(produced);
             return kotlin.Unit.INSTANCE;
         });
         mIsHardwareAcceleratedDrawingEnabled = this.enableHardwareAcceleration();
@@ -504,6 +506,7 @@ public class LatinIME extends InputMethodService implements
         mStatsUtilsManager.onCreate(this, mDictionaryFacilitator);
         mDisplayContext = KtxKt.getDisplayContext(this);
         KeyboardSwitcher.init(this);
+        instanceForTest = this;
         super.onCreate();
 
         loadSettings();
@@ -624,6 +627,7 @@ public class LatinIME extends InputMethodService implements
 
     @Override
     public void onDestroy() {
+        if (instanceForTest == this) instanceForTest = null;
         if (mPushToTalk != null) mPushToTalk.release();
         mClipboardHistoryManager.onDestroy();
         mDictionaryFacilitator.closeDictionaries();
@@ -1040,8 +1044,15 @@ public class LatinIME extends InputMethodService implements
         super.onExtractedCursorMovement(dx, dy);
     }
 
+    /** Counts hideWindow so tests can assert dictation and send never dismiss the keyboard. */
+    public static int hideWindowsForTest;
+
+    /** The running service, so an instrumented chat field can see the real keyboard. */
+    public static LatinIME instanceForTest;
+
     @Override
     public void hideWindow() {
+        hideWindowsForTest++;
         Log.i(TAG, "hideWindow");
         if (hasSuggestionStripView() && mSettings.getCurrent().mToolbarMode == ToolbarMode.EXPANDABLE)
             mSuggestionStripView.setToolbarVisibility(false);
@@ -1284,20 +1295,24 @@ public class LatinIME extends InputMethodService implements
 
     @Override
     public void onSendKey() {
+        // A short tap, and only a short tap, on the send face. A press or a hold never gets here.
         if (!fieldHasText()) return;
-        performBigButtonAction();
+        performShortTapSend();
     }
 
     /**
-     * After a non-empty dictation, perform Send (or Search). Never hides the keyboard,
-     * never inserts a newline, and never sends a raw enter key.
+     * Dictation ended. The text is already in the field. This does not perform an editor action
+     * and does not call requestHideSelf or hideWindow, so WhatsApp keeps the keyboard up.
      */
-    private void autoSendAfterDictation() {
-        performBigButtonAction();
+    public static boolean lastDictationProducedForTest;
+
+    public void onDictationSessionFinished(boolean produced) {
+        lastDictationProducedForTest = produced;
+        updateVoiceKeyMode();
     }
 
-    /** Shared by a tap on Send and by dictation finishing. Does not call requestHideSelf. */
-    private void performBigButtonAction() {
+    /** A short tap on Send. Does not call requestHideSelf or hideWindow. */
+    private void performShortTapSend() {
         final android.view.inputmethod.EditorInfo ei = getCurrentInputEditorInfo();
         final android.view.inputmethod.InputConnection ic = getCurrentInputConnection();
         if (ei == null || ic == null) return;

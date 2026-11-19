@@ -36,6 +36,7 @@ import helium314.keyboard.keyboard.internal.KeyboardIconsSet
 import helium314.keyboard.keyboard.internal.keyboard_parser.floris.KeyCode
 import helium314.keyboard.latin.AudioAndHapticFeedbackManager
 import helium314.keyboard.voice.DictationKeySpec
+import helium314.keyboard.voice.DictationSendPolicy
 import helium314.keyboard.latin.dictionary.Dictionary
 import helium314.keyboard.latin.R
 import helium314.keyboard.latin.common.ColorType
@@ -639,32 +640,44 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
         voiceKeyView = view
         micIcon = view.drawable
         if (sendMode) { sendMode = false; setVoiceKeySendMode(true) }
+        var downAt = 0L
+        var micLive = false
+        val holdToDictate = Runnable {
+            if (!sendMode || micLive) return@Runnable
+            micLive = true
+            micBackground.setColor(recordingRed)
+            listener.onPushToTalkPress()
+        }
         view.setOnTouchListener { v, event ->
-            if (sendMode) {
-                when (event.actionMasked) {
-                    MotionEvent.ACTION_DOWN -> {
-                        v.isPressed = true
-                        AudioAndHapticFeedbackManager.getInstance().performHapticFeedback(v, HapticEvent.KEY_PRESS)
-                    }
-                    MotionEvent.ACTION_UP -> {
-                        v.isPressed = false
-                        if (event.x >= 0 && event.x <= v.width && event.y >= 0 && event.y <= v.height) listener.onSendKey()
-                    }
-                    MotionEvent.ACTION_CANCEL -> v.isPressed = false
-                }
-                return@setOnTouchListener true
-            }
+            val onKey = event.x >= 0 && event.x <= v.width && event.y >= 0 && event.y <= v.height
             when (event.actionMasked) {
                 MotionEvent.ACTION_DOWN -> {
                     v.isPressed = true
                     v.parent?.requestDisallowInterceptTouchEvent(true)
-                    micBackground.setColor(recordingRed)
-                    listener.onPushToTalkPress()
+                    downAt = event.eventTime
+                    v.removeCallbacks(holdToDictate)
+                    // Empty field: the mic is live only while the finger is down.
+                    // Send face: a short tap sends on the way up. A hold starts dictation and appends.
+                    micLive = DictationSendPolicy.startsMicOnPress(sendMode)
+                    if (micLive) {
+                        micBackground.setColor(recordingRed)
+                        listener.onPushToTalkPress()
+                    } else {
+                        AudioAndHapticFeedbackManager.getInstance().performHapticFeedback(v, HapticEvent.KEY_PRESS)
+                        v.postDelayed(holdToDictate, DictationSendPolicy.HOLD_TO_DICTATE_MS)
+                    }
                 }
                 MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
                     v.isPressed = false
+                    v.removeCallbacks(holdToDictate)
+                    val held = event.eventTime - downAt
+                    when (DictationSendPolicy.onRelease(sendMode, held, onKey, micLive)) {
+                        DictationSendPolicy.Release.SEND -> listener.onSendKey()
+                        DictationSendPolicy.Release.TRANSCRIBE -> if (micLive) listener.onPushToTalkRelease()
+                        DictationSendPolicy.Release.NONE -> {}
+                    }
+                    micLive = false
                     micBackground.setColor(idleRed)
-                    listener.onPushToTalkRelease()
                 }
             }
             true

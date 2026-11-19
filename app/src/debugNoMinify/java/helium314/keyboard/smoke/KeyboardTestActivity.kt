@@ -4,19 +4,36 @@ package helium314.keyboard.smoke
 import android.app.Activity
 import android.os.Bundle
 import android.text.InputType
+import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.LinearLayout
 
-/** A plain text field that hosts the real keyboard for the on-emulator smoke tests. */
+/** A text field that hosts the real keyboard. The default field is unchanged for the older smoke tests. */
 class KeyboardTestActivity : Activity() {
     lateinit var field: EditText
+    val editorActions = java.util.Collections.synchronizedList(mutableListOf<Int>())
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         field = EditText(this).apply {
-            inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_MULTI_LINE
+            when (intent.getStringExtra(EXTRA_FIELD)) {
+                FIELD_WHATSAPP -> {
+                    inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_CAP_SENTENCES or InputType.TYPE_TEXT_FLAG_MULTI_LINE
+                    imeOptions = EditorInfo.IME_ACTION_SEND or EditorInfo.IME_FLAG_NO_ENTER_ACTION or EditorInfo.IME_FLAG_NO_EXTRACT_UI
+                }
+                FIELD_DONE -> {
+                    inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_CAP_SENTENCES or InputType.TYPE_TEXT_FLAG_MULTI_LINE
+                    imeOptions = EditorInfo.IME_ACTION_DONE or EditorInfo.IME_FLAG_NO_ENTER_ACTION
+                }
+                else -> inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_MULTI_LINE
+            }
             contentDescription = "smoke-field"
+            // Return false so the framework still handles the action. Done hides the keyboard; Send does not.
+            setOnEditorActionListener { _, actionId, _ ->
+                editorActions.add(actionId)
+                false
+            }
         }
         setContentView(LinearLayout(this).apply { addView(field) })
         instance = this
@@ -35,5 +52,10 @@ class KeyboardTestActivity : Activity() {
         field.postDelayed({ showKeyboard(triesLeft - 1) }, 250)
     }
 
-    companion object { @Volatile var instance: KeyboardTestActivity? = null }
+    companion object {
+        const val EXTRA_FIELD = "field"
+        const val FIELD_WHATSAPP = "whatsapp"
+        const val FIELD_DONE = "done"
+        @Volatile var instance: KeyboardTestActivity? = null
+    }
 }

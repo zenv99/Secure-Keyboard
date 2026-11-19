@@ -38,9 +38,33 @@ object DictationSendPolicy {
     }
 
     /**
-     * After dictation inserts text, perform the field's editor action.
-     * Password fields and a bare URL field do not. A search field performs search.
-     * The action is never a newline.
+     * A short tap on the send face performs this action. A hold never does: the finger
+     * has to come up inside this window, without the mic having started.
+     * Dictation itself does not perform an action. That is what was sending the WhatsApp
+     * message and closing the keyboard the moment the button was used.
+     */
+    const val HOLD_TO_DICTATE_MS = 400L
+
+    enum class Release { TRANSCRIBE, SEND, NONE }
+
+    /** Press-down never sends. An empty field starts the mic immediately. A send face waits. */
+    fun pressSends(): Boolean = false
+
+    fun startsMicOnPress(sendFace: Boolean): Boolean = !sendFace
+
+    /**
+     * What a finger-up means. A hold, or a mic that is already live, transcribes and does not send.
+     * Only a short tap on the send face, still on the key, sends.
+     */
+    fun onRelease(sendFace: Boolean, heldMs: Long, fingerOnKey: Boolean, micLive: Boolean): Release {
+        if (micLive || !sendFace || heldMs >= HOLD_TO_DICTATE_MS) return Release.TRANSCRIBE
+        if (fingerOnKey) return Release.SEND
+        return Release.NONE
+    }
+
+    /**
+     * A short tap may perform the editor action. Password fields and a bare URL field do not.
+     * A search field performs search. The action is never a newline, and dictation never calls this.
      */
     fun shouldPerformAction(inputType: Int, imeOptions: Int): Boolean {
         if (InputTypeUtils.isAnyPasswordInputType(inputType)) return false

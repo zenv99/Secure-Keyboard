@@ -34,6 +34,7 @@ class SendButtonTest {
 
     @BeforeTest fun reset() {
         LatinIME.hideRequestsForTest = 0
+        LatinIME.hideWindowsForTest = 0
         ShadowInputMethodService.reset()
     }
 
@@ -51,6 +52,48 @@ class SendButtonTest {
         latinIME.onSendKey()
         assertNull(ShadowInputMethodService.lastEditorAction)
         assertEquals(0, LatinIME.hideRequestsForTest)
+    }
+
+    @Test fun dictationInsertsTextAndDoesNotSendOrHide() {
+        startField(whatsAppOptions(), chatInput())
+        latinIME.onDictatedText("on my way")
+        latinIME.onDictationSessionFinished(true)
+        assertEquals("on my way", ShadowInputMethodService.text.trim())
+        assertEquals(0, ShadowInputMethodService.editorActionCount)
+        assertNull(ShadowInputMethodService.lastEditorAction)
+        assertStillShown()
+    }
+
+    @Test fun aSecondHoldAppendsAndStillDoesNotSend() {
+        startField(whatsAppOptions(), chatInput())
+        latinIME.onDictatedText("on my way")
+        latinIME.onDictationSessionFinished(true)
+        latinIME.onDictatedText("thanks")
+        latinIME.onDictationSessionFinished(true)
+        assertEquals("on my way thanks", ShadowInputMethodService.text.trim())
+        assertEquals(0, ShadowInputMethodService.editorActionCount)
+        assertStillShown()
+    }
+
+    @Test fun oneShortTapAfterDictationSendsExactlyOnce() {
+        startField(whatsAppOptions(), chatInput())
+        latinIME.onDictatedText("hello")
+        latinIME.onDictationSessionFinished(true)
+        latinIME.onSendKey()
+        assertEquals(1, ShadowInputMethodService.editorActionCount)
+        assertEquals(EditorInfo.IME_ACTION_SEND, ShadowInputMethodService.lastEditorAction)
+        assertStillShown()
+    }
+
+    @Test fun doneFieldDictationDoesNotSendDone() {
+        startField(EditorInfo.IME_ACTION_DONE or EditorInfo.IME_FLAG_NO_ENTER_ACTION, chatInput())
+        latinIME.onDictatedText("hello")
+        latinIME.onDictationSessionFinished(true)
+        assertEquals(0, ShadowInputMethodService.editorActionCount)
+        latinIME.onSendKey()
+        assertEquals(EditorInfo.IME_ACTION_SEND, ShadowInputMethodService.lastEditorAction)
+        assertEquals(1, ShadowInputMethodService.editorActionCount)
+        assertStillShown()
     }
 
     @Test fun doneFieldStillSendsSoDictationDoesNotCloseTheKeyboard() {
@@ -78,6 +121,12 @@ class SendButtonTest {
             latinIME.onEvent(Event.createEventForCodePointFromUnknownSource(ch.code))
             ShadowLooper.idleMainLooper()
         }
+    }
+
+    private fun assertStillShown() {
+        assertEquals(0, LatinIME.hideRequestsForTest)
+        assertEquals(0, LatinIME.hideWindowsForTest)
+        assertEquals(true, latinIME.isInputViewShown)
     }
 
     private fun whatsAppOptions() =

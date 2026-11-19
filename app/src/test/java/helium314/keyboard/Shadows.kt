@@ -135,6 +135,7 @@ class ShadowInputMethodService {
         var currentInputType = InputType.TYPE_CLASS_TEXT
         var currentImeOptions = 0
         var lastEditorAction: Int? = null
+        var editorActionCount = 0
 
         // convenience for access
         val textBeforeCursor get() = text.substring(0, selectionStart)
@@ -156,6 +157,7 @@ class ShadowInputMethodService {
             currentInputType = InputType.TYPE_CLASS_TEXT
             currentImeOptions = 0
             lastEditorAction = null
+            editorActionCount = 0
         }
     }
 
@@ -323,6 +325,7 @@ class ShadowInputMethodService {
         override fun commitCompletion(p0: CompletionInfo?): Boolean = TODO("Not yet implemented")
         override fun performEditorAction(p0: Int): Boolean {
             lastEditorAction = p0
+            editorActionCount++
             return true
         }
         override fun performContextMenuAction(p0: Int): Boolean = TODO("Not yet implemented")
