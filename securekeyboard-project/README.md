@@ -26,9 +26,7 @@ These are observations from the fork's current Gradle and manifest files, not a 
 
 ## Current implementation status
 
-The development branch now disables Android app backup and device-to-device data extraction, and CI checks those source declarations plus the built APK's merged manifest. The app still needs a successful CI build and device verification.
-
-This folder is an engineering plan and integration scaffold. It is not yet a completed feature implementation or APK. The ASR service sample is deliberately isolated until the exact Android service lifecycle, manifest, native toolchain, model licensing, and device performance have been validated.
+CI on `main` builds a release APK, checks the privacy allowlists, and runs an emulator smoke test. Signed main-branch builds are published as GitHub pre-releases. This folder is the engineering notes for that work. Some earlier notes in `docs/` describe plans that have since landed; [SECURITY.md](../SECURITY.md) and the repository README are the current description of what the build does.
 
 ## Work order
 

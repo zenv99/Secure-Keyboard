@@ -1,1 +1,1 @@
-Private keyboard with swipe typing, autocorrect and on-device voice. No data leaves your phone.
+Offline Android keyboard. No network permission. Fork of HeliBoard.

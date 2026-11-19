@@ -64,13 +64,13 @@ A search of `HeliBorg/HeliBoard` commits for security, vulnerability, permission
 
 ### Releases and Obtainium
 
-GitHub Actions writes `SHA256SUMS.txt` next to the APK on a signed main-branch release. The signing key is not in this repository, so this review cannot print the release certificate fingerprint. After a signed build, or locally with the keystore:
+GitHub Actions writes `SHA256SUMS.txt` next to the APK on a signed main-branch release. The signing key is not in this repository. The certificate SHA-256 below was read from a signed release APK with `apksigner verify --print-certs` (subject `CN=Secure Keyboard, O=zenv99`):
 
 ```
-keytool -list -v -keystore securekeyboard.jks -alias securekeyboard
+33eacd63355ee1b19abca1f997ea25a7946960bbf934411691273dde053c78d4
 ```
 
-Compare the SHA-256 fingerprint with what Obtainium / AppVerifier shows before trusting an update. APKs are not bit-identical across machines: Android Gradle Plugin still stamps build times. Native libraries pass `-Wl,--build-id=none` to avoid one source of difference.
+Compare that value with what Obtainium or AppVerifier shows before trusting an update. APKs are not bit-identical across machines: Android Gradle Plugin still stamps build times. Native libraries pass `-Wl,--build-id=none` to avoid one source of difference.
 
 ### GrapheneOS
 
@@ -82,7 +82,7 @@ Native code uses the system allocator (C++ `new` / libc malloc via the NDK). The
 
 - No independent audit by someone outside this repository.
 - libFuzzer and ASan were not run on whisper.cpp or the dictionary JNI.
-- Release certificate fingerprint is not published here, because the signing key is only in GitHub secrets.
+- The signing key remains only in GitHub secrets. The certificate SHA-256 from a signed release APK is in the section above and in the README.
 - Bit-identical reproducible APKs are not claimed.
 - GrapheneOS hardened_malloc and the network toggle were not confirmed on a phone.
 - Clipboard rows saved by older builds, when history was on by default, stay on disk until the user turns the setting off (that clears unpinned clips) or clears app storage. New installs do not record clips unless the setting is turned on.
