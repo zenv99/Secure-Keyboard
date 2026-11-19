@@ -550,8 +550,10 @@ class DictionaryFacilitatorImpl : DictionaryFacilitator {
         // Fat-finger and contraction corrections (xoredrt → correct, dont → don't).
         // Same-length neighbour matching remains as a fallback for words the edit model skips.
         val typedForFuzzy = composedData.mTypedWord
-        if (!composedData.mIsBatchMode && typedForFuzzy.length >= 2 && !isValidSpellingWord(typedForFuzzy)
-            && !isValidSpellingWord(typedForFuzzy.lowercase())
+        val previousWord = if (ngramContext.prevWordCount > 0) ngramContext.getNthPrevWord(1)?.toString() else null
+        val illContraction = typedForFuzzy.equals("ill", ignoreCase = true)
+        if (!composedData.mIsBatchMode && typedForFuzzy.length >= 2
+            && (illContraction || (!isValidSpellingWord(typedForFuzzy) && !isValidSpellingWord(typedForFuzzy.lowercase())))
             && !mustKeepTypedWord(typedForFuzzy)
             && !AutocorrectPolicy.isLiteralToken(typedForFuzzy)) {
             val main = dictionaryGroups[0].getDict(Dictionary.TYPE_MAIN)
@@ -560,7 +562,7 @@ class DictionaryFacilitatorImpl : DictionaryFacilitator {
                 // capitalizing corrections in the middle of a line.
                 val sentenceStart = typedForFuzzy.firstOrNull()?.isUpperCase() == true
                 val corrected = helium314.keyboard.latin.glide.GlideTyping.proximityCorrection(
-                    main, typedForFuzzy, keyboard, sentenceStart, composedData.mInputPointers
+                    main, typedForFuzzy, keyboard, sentenceStart, composedData.mInputPointers, previousWord
                 )
                 val merged = corrected
                     ?: helium314.keyboard.latin.glide.GlideTyping.missingSpace(main, typedForFuzzy, keyboard)
@@ -639,7 +641,8 @@ class DictionaryFacilitatorImpl : DictionaryFacilitator {
     // meaning that it always has default mConfidence. So we cannot choose to only check preferred
     // locale, and instead simply return true if word is in any of the available dictionaries
     override fun autocorrectTypedWord(typed: String): String? {
-        if (typed.length < 2 || isValidSpellingWord(typed) || isValidSpellingWord(typed.lowercase())
+        val illContraction = typed.equals("ill", ignoreCase = true)
+        if (typed.length < 2 || (!illContraction && (isValidSpellingWord(typed) || isValidSpellingWord(typed.lowercase())))
             || mustKeepTypedWord(typed) || AutocorrectPolicy.isLiteralToken(typed)) return null
         val main = dictionaryGroups.getOrNull(0)?.getDict(Dictionary.TYPE_MAIN) ?: return null
         val keyboard = try {

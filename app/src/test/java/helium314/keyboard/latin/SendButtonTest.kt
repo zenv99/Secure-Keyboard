@@ -1,0 +1,88 @@
+// SPDX-License-Identifier: GPL-3.0-only
+package helium314.keyboard.latin
+
+import android.text.InputType
+import android.view.inputmethod.EditorInfo
+import helium314.keyboard.ShadowInputMethodManager2
+import helium314.keyboard.ShadowInputMethodService
+import helium314.keyboard.ShadowLocaleManagerCompat
+import helium314.keyboard.event.Event
+import org.junit.runner.RunWith
+import org.robolectric.Robolectric
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
+import org.robolectric.shadows.ShadowLooper
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertNull
+
+/**
+ * After typing, the big button sends. Dictation's send uses the same action.
+ * Neither path asks the keyboard to hide.
+ */
+@RunWith(RobolectricTestRunner::class)
+@Config(shadows = [
+    ShadowLocaleManagerCompat::class,
+    ShadowInputMethodManager2::class,
+    ShadowInputMethodService::class,
+    ShadowKeyboardSwitcher::class,
+    ShadowFacilitator2::class,
+])
+class SendButtonTest {
+    private val latinIME = Robolectric.setupService(LatinIME::class.java)
+
+    @BeforeTest fun reset() {
+        LatinIME.hideRequestsForTest = 0
+        ShadowInputMethodService.reset()
+    }
+
+    @Test fun typedChatTextSendsAndDoesNotHide() {
+        startField(whatsAppOptions(), chatInput())
+        type("hello")
+        val hides = LatinIME.hideRequestsForTest
+        latinIME.onSendKey()
+        assertEquals(EditorInfo.IME_ACTION_SEND, ShadowInputMethodService.lastEditorAction)
+        assertEquals(hides, LatinIME.hideRequestsForTest)
+    }
+
+    @Test fun emptyFieldDoesNotSend() {
+        startField(whatsAppOptions(), chatInput())
+        latinIME.onSendKey()
+        assertNull(ShadowInputMethodService.lastEditorAction)
+        assertEquals(0, LatinIME.hideRequestsForTest)
+    }
+
+    @Test fun doneFieldStillSendsSoDictationDoesNotCloseTheKeyboard() {
+        startField(EditorInfo.IME_ACTION_DONE, chatInput())
+        type("hello")
+        val hides = LatinIME.hideRequestsForTest
+        latinIME.onSendKey()
+        assertEquals(EditorInfo.IME_ACTION_SEND, ShadowInputMethodService.lastEditorAction)
+        assertEquals(hides, LatinIME.hideRequestsForTest)
+    }
+
+    private fun startField(imeOptions: Int, inputType: Int) {
+        ShadowInputMethodService.currentInputType = inputType
+        ShadowInputMethodService.currentImeOptions = imeOptions
+        val info = EditorInfo()
+        info.inputType = inputType
+        info.imeOptions = imeOptions
+        latinIME.mHandler.onStartInput(info, false)
+        latinIME.mHandler.onStartInputView(info, true)
+        ShadowLooper.idleMainLooper()
+    }
+
+    private fun type(word: String) {
+        for (ch in word) {
+            latinIME.onEvent(Event.createEventForCodePointFromUnknownSource(ch.code))
+            ShadowLooper.idleMainLooper()
+        }
+    }
+
+    private fun whatsAppOptions() =
+        EditorInfo.IME_ACTION_SEND or EditorInfo.IME_FLAG_NO_ENTER_ACTION or EditorInfo.IME_FLAG_NO_EXTRACT_UI
+
+    private fun chatInput() =
+        InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_CAP_SENTENCES or InputType.TYPE_TEXT_FLAG_MULTI_LINE
+}

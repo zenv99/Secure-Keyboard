@@ -312,6 +312,7 @@ object GlideTyping {
         keyboard: Keyboard,
         sentenceStart: Boolean,
         pointers: helium314.keyboard.latin.common.InputPointers? = null,
+        previous: String? = null,
     ): String? {
         val opened = openSource(dict, keyboard) ?: return null
         val keyW = max(1f, keyboard.mMostCommonKeyWidth.toFloat())
@@ -320,6 +321,7 @@ object GlideTyping {
             typed, opened.first, opened.second,
             kept = false, sentenceStart = sentenceStart,
             touches = touches, centreOf = { ch -> centreInKeyWidths(keyboard, ch, keyW) },
+            previous = previous,
         )
     }
 

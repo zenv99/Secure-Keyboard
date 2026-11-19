@@ -38,6 +38,8 @@ class ProximityAutocorrectTest {
         assertEquals("don't", correct("dont"))
         assertEquals("I'm", correct("im"))
         assertEquals("can't", correct("cant"))
+        assertEquals("I'll", ProximityAutocorrect.correct("ill", vocab))
+        assertNull(ProximityAutocorrect.correct("ill", vocab, previous = "feel"))
         assertEquals("I've", correct("ive"))
         assertEquals("Don't", correct("Dont"))
         assertEquals("DON'T", correct("DONT"))
@@ -49,7 +51,7 @@ class ProximityAutocorrectTest {
 
     @Test fun validWordsNamesSlangAndLiteralsStay() {
         for (word in listOf(
-            "cat", "ok", "lol", "the", "auto", "correct", "because", "zen", "yeet", "ill", "its", "to", "on", "in",
+            "cat", "ok", "lol", "the", "auto", "correct", "because", "zen", "yeet", "its", "to", "on", "in",
         )) {
             assertNull(correct(word), word)
         }
@@ -437,7 +439,7 @@ class ProximityAutocorrectTest {
         )
 
         private val KEEP = listOf(
-            "cat", "ok", "lol", "the", "auto", "correct", "because", "zen", "yeet", "ill", "its",
+            "cat", "ok", "lol", "the", "auto", "correct", "because", "zen", "yeet", "its",
             "to", "on", "in", "of", "it", "me", "brb", "omw", "https://example.com", "a@b.co", "42",
             "hello", "people", "testing",
         )

@@ -96,6 +96,7 @@ object ProximityAutocorrect {
         distance: (Char, Char) -> Float = KeyGeometry::qwertyDistance,
         kept: Boolean = false,
         sentenceStart: Boolean = false,
+        previous: String? = null,
         /** One touch point per typed letter, in the same units as [centreOf]. Null when the press position is unknown. */
         touches: Array<FloatArray?>? = null,
         centreOf: ((Char) -> FloatArray?)? = null,
@@ -104,6 +105,9 @@ object ProximityAutocorrect {
         if (kept || AutocorrectPolicy.isLiteralToken(typed)) return null
         val typedLetters = AutocorrectPolicy.lettersOf(typed)
         if (typedLetters.length !in 2..MAX_LENGTH) return null
+        if (typedLetters == "ill" && !adjectiveBeforeIll(previous)) {
+            return applyCase(typed, "I'll", sentenceStart)
+        }
         if (isExactVocabularyWord(typed, words, distance)) return null
 
         contractions[typedLetters]?.let { form ->
@@ -137,7 +141,8 @@ object ProximityAutocorrect {
             val raw = alignmentCost(typedLetters, candidateLetters, distance, limit, touches, centreOf)
             if (raw > limit) continue
             if (raw > HEAVY_RAW && probability < HEAVY_MIN_PROBABILITY) continue
-            val score = rank(raw, probability, overlap(typedLetters, candidateLetters), lenDiff)
+            var score = rank(raw, probability, overlap(typedLetters, candidateLetters), lenDiff)
+            if (previous != null && bigram(previous, candidate) > 12) score -= 0.25f
             val sameAsBest = bestWord != null && AutocorrectPolicy.lettersOf(bestWord!!) == candidateLetters
             if (score < bestScore) {
                 if (!sameAsBest) secondScore = bestScore
@@ -306,6 +311,14 @@ object ProximityAutocorrect {
         }
         parts.reverse()
         return parts.joinToString(" ") to score[n]
+    }
+
+    private fun adjectiveBeforeIll(previous: String?): Boolean {
+        val word = previous?.lowercase(Locale.ROOT)?.trim().orEmpty()
+        return word in setOf(
+            "feel", "feeling", "felt", "very", "so", "an", "the", "got", "get", "am", "is", "was",
+            "looks", "looking", "being", "still", "too", "really", "chronically", "mentally", "seriously",
+        )
     }
 
     private fun bigram(left: String, right: String): Int {
