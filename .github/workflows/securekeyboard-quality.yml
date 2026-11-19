@@ -106,18 +106,18 @@ jobs:
             export SK_KEYSTORE_FILE="$RUNNER_TEMP/sk.jks"
             export SK_KEYSTORE_PASSWORD="$PW"
             export SK_VERSION_CODE=$((4300 + GITHUB_RUN_NUMBER))
-            # v1.0 shipped as versionCode 4394. Stay above it so this APK installs as an update.
-            # Stay above the already published v1.0.1 (versionCode 4396).
-            if [ "$SK_VERSION_CODE" -le 4396 ]; then
-              export SK_VERSION_CODE=4397
+            # Published v1.0.1 is versionCode 4402. Stay above it so Obtainium and Android see an update.
+            if [ "$SK_VERSION_CODE" -le 4402 ]; then
+              export SK_VERSION_CODE=4403
             fi
-            # This release is v1.0.1. If that pre-release already exists, the publish job replaces its files.
-            export SK_VERSION_NAME="1.0.1"
+            export SK_VERSION_NAME="1.0.2"
             echo "SK_SIGNED=1" >> "$GITHUB_ENV"
             echo "SK_VERSION_NAME=$SK_VERSION_NAME" >> "$GITHUB_ENV"
+            echo "SK_VERSION_CODE=$SK_VERSION_CODE" >> "$GITHUB_ENV"
             echo "Signing with the permanent Secure Keyboard key"
           else
-            echo "::warning::Signing secrets missing or wrong (check SK_KEYSTORE_B64 / SK_KEYSTORE_PASSWORD). Building with the temporary debug key; updates will need uninstall."
+            echo "Release signing key is missing or wrong. Refusing to build a debug-signed release." >&2
+            exit 1
           fi
           ./gradlew --no-daemon :app:assembleRelease :app:bundleRelease
       - name: Enforce no-INTERNET permission in produced APK
@@ -237,14 +237,35 @@ jobs:
           export GH_REPO="$GITHUB_REPOSITORY"
           cp apk/*.apk release/SecureKeyboard.apk
           VERSION_NAME="$(tr -d '[:space:]' < buildinfo/version_name || true)"
-          if [ "$VERSION_NAME" = "1.0" ] || [ "$VERSION_NAME" = "1.0.1" ]; then
+          if [ "$VERSION_NAME" = "1.0" ] || [ "$VERSION_NAME" = "1.0.1" ] || [ "$VERSION_NAME" = "1.0.2" ]; then
             TAG="v${VERSION_NAME}"
           else
             TAG="v1.0.${GITHUB_RUN_NUMBER}"
           fi
           cp release/SecureKeyboard.apk "release/SecureKeyboard-${TAG}.apk"
           (cd release && sha256sum "SecureKeyboard-${TAG}.apk" > SHA256SUMS.txt)
-          if [ "$TAG" = "v1.0.1" ]; then
+          if [ "$TAG" = "v1.0.2" ]; then
+            cat > release/notes.md <<EOF
+          Secure Keyboard v1.0.2 (commit ${GITHUB_SHA:0:8}). Not yet independently audited.
+
+          What changed
+          - Autocorrect fixes neighboring-key slips and run-on words on space (hwllo to hello, iamgoing to I am going, whatbtime to what time). A real word or name is left alone.
+          - Dictation can be used again after it finishes, and then performs the field's send action. It does not insert a newline.
+          - The plus menu is Photos, Camera, Location, Document, Contact, Emoji, Clipboard, Text shortcuts, and Settings. Location is requested only when tapped, takes one fix, and inserts a maps link as text. It is not stored.
+          - Version bump to 1.0.2 so updaters detect it.
+
+          Privacy
+          No INTERNET permission. No background location. Backup is off. Voice, the location fix, and learned words stay on the device.
+
+          License
+          Secure Keyboard is free software under the GNU General Public License v3.0. It is a modified version of HeliBoard (copyright Helium314 and contributors), which is based on OpenBoard and the Android Open Source Keyboard (Apache License 2.0). This is not the official HeliBoard.
+
+          Signing certificate SHA-256
+          33eacd63355ee1b19abca1f997ea25a7946960bbf934411691273dde053c78d4
+
+          Install: download SecureKeyboard-v1.0.2.apk, then enable Secure Keyboard in Settings > System > Keyboard. Check the file against SHA256SUMS.txt before installing.
+          EOF
+          elif [ "$TAG" = "v1.0.1" ]; then
             cat > release/notes.md <<EOF
           Secure Keyboard v1.0.1 (commit ${GITHUB_SHA:0:8}). Not yet independently audited.
 
@@ -296,15 +317,14 @@ jobs:
           EOF
           fi
           sed -i 's/^          //' release/notes.md
-          if [ "$(cat buildinfo/signed)" = "1" ]; then
-            cp release/SecureKeyboard.apk "release/SecureKeyboard-${TAG}.apk"
-            if [ "$TAG" = "v1.0.1" ] && gh release view "$TAG" >/dev/null 2>&1; then
-              gh release upload "$TAG" "release/SecureKeyboard-${TAG}.apk" release/SHA256SUMS.txt --clobber
-              gh release edit "$TAG" --prerelease --target "$GITHUB_SHA" --title "Secure Keyboard v1.0.1" --notes-file release/notes.md
-            else
-              gh release create "$TAG" "release/SecureKeyboard-${TAG}.apk" release/SHA256SUMS.txt \
-                --prerelease --target "$GITHUB_SHA" --title "Secure Keyboard ${TAG}" --notes-file release/notes.md
-            fi
+          if [ "$(cat buildinfo/signed)" != "1" ]; then
+            echo "Refusing to publish: the APK was not signed with the release key." >&2
+            exit 1
           fi
-          # The old rolling 'test-build' release is gone: its non-version tag confused Obtainium's update check.
-          gh release delete test-build --cleanup-tag --yes || true
+          cp release/SecureKeyboard.apk "release/SecureKeyboard-${TAG}.apk"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "Refusing to replace existing release $TAG." >&2
+            exit 1
+          fi
+          gh release create "$TAG" "release/SecureKeyboard-${TAG}.apk" release/SHA256SUMS.txt \
+            --prerelease --target "$GITHUB_SHA" --title "Secure Keyboard ${TAG}" --notes-file release/notes.md
