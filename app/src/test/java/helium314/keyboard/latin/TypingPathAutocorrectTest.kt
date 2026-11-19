@@ -3,6 +3,7 @@ package helium314.keyboard.latin
 
 import android.text.InputType
 import android.view.inputmethod.EditorInfo
+import androidx.core.content.edit
 import helium314.keyboard.ShadowInputMethodManager2
 import helium314.keyboard.ShadowInputMethodService
 import helium314.keyboard.ShadowLocaleManagerCompat
@@ -18,6 +19,7 @@ import helium314.keyboard.latin.common.ComposedData
 import helium314.keyboard.latin.dictionary.Dictionary
 import helium314.keyboard.latin.settings.Settings
 import helium314.keyboard.latin.settings.SettingsValuesForSuggestion
+import helium314.keyboard.latin.utils.prefs
 import helium314.keyboard.latin.suggestions.SuggestedWordInfo
 import helium314.keyboard.latin.suggestions.SuggestedWords
 import org.junit.runner.RunWith
@@ -57,6 +59,9 @@ class TypingPathAutocorrectTest {
 
     @BeforeTest fun loadEnglishMainDictionary() {
         ShadowLog.stream = System.out
+        // Other tests in this process can turn revert-on-backspace off. This class needs it on.
+        latinIME.prefs().edit { putBoolean(Settings.PREF_BACKSPACE_REVERTS_AUTOCORRECT, true) }
+        Settings.getInstance().loadSettings(latinIME)
         dictionary.resetDictionaries(
             latinIME, Locale.US, false, false, false, true, "", latinIME,
         )

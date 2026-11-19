@@ -754,6 +754,7 @@ class InputLogicTest {
         getAutocorrectedWithSpaceAfter("hello", "hullo")
         functionalKeyPress(KeyCode.DELETE)
         assertEquals("hello", text)
+        latinIME.prefs().edit { putBoolean(Settings.PREF_BACKSPACE_REVERTS_AUTOCORRECT, true) }
     }
 
     @Test fun `remove glide typing word on delete`() {
