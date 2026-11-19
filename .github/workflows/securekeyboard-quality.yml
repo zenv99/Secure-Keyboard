@@ -83,10 +83,12 @@ jobs:
           ALLOW_UNPINNED: '0' # the pin in securekeyboard-project/asr/MODEL_SHA256 is enforced
         run: bash securekeyboard-project/ci/fetch_model.sh
       - name: Unit tests (gate - release is not built or published if these fail)
-        timeout-minutes: 20
+        timeout-minutes: 35
         run: |
           chmod +x ./gradlew
-          ./gradlew --no-daemon :app:testDebugUnitTest
+          # Robolectric fetches its android-all jar at test start and sometimes gets a 404.
+          # A real assertion failure fails again. A missed download usually succeeds on the retry.
+          ./gradlew --no-daemon :app:testDebugUnitTest || ./gradlew --no-daemon :app:testDebugUnitTest
       - name: Upload test report
         if: always()
         uses: actions/upload-artifact@v4
@@ -106,12 +108,12 @@ jobs:
             export SK_KEYSTORE_FILE="$RUNNER_TEMP/sk.jks"
             export SK_KEYSTORE_PASSWORD="$PW"
             export SK_VERSION_CODE=$((4300 + GITHUB_RUN_NUMBER))
-            # Published v1.0.1 is versionCode 4402. Stay above it so Obtainium and Android see an update.
-            if [ "$SK_VERSION_CODE" -le 4402 ]; then
-              export SK_VERSION_CODE=4403
+            # Published v1.0.2 is versionCode 4404. Stay above it so Obtainium and Android see an update.
+            if [ "$SK_VERSION_CODE" -le 4404 ]; then
+              export SK_VERSION_CODE=4405
             fi
-            # New pre-release. Do not replace v1.0.1.
-            export SK_VERSION_NAME="1.0.2"
+            # New pre-release. Do not replace v1.0, v1.0.1, or v1.0.2.
+            export SK_VERSION_NAME="1.0.3"
             echo "SK_SIGNED=1" >> "$GITHUB_ENV"
             echo "SK_VERSION_NAME=$SK_VERSION_NAME" >> "$GITHUB_ENV"
             echo "SK_VERSION_CODE=$SK_VERSION_CODE" >> "$GITHUB_ENV"
@@ -238,14 +240,33 @@ jobs:
           export GH_REPO="$GITHUB_REPOSITORY"
           cp apk/*.apk release/SecureKeyboard.apk
           VERSION_NAME="$(tr -d '[:space:]' < buildinfo/version_name || true)"
-          if [ "$VERSION_NAME" = "1.0" ] || [ "$VERSION_NAME" = "1.0.1" ] || [ "$VERSION_NAME" = "1.0.2" ]; then
+          if [ "$VERSION_NAME" = "1.0" ] || [ "$VERSION_NAME" = "1.0.1" ] || [ "$VERSION_NAME" = "1.0.2" ] || [ "$VERSION_NAME" = "1.0.3" ]; then
             TAG="v${VERSION_NAME}"
           else
             TAG="v1.0.${GITHUB_RUN_NUMBER}"
           fi
           cp release/SecureKeyboard.apk "release/SecureKeyboard-${TAG}.apk"
           (cd release && sha256sum "SecureKeyboard-${TAG}.apk" > SHA256SUMS.txt)
-          if [ "$TAG" = "v1.0.2" ]; then
+          if [ "$TAG" = "v1.0.3" ]; then
+            cat > release/notes.md <<EOF
+          Secure Keyboard v1.0.3 (commit ${GITHUB_SHA:0:8}). Not yet independently audited.
+
+          What changed
+          - After you type, the big button sends. After dictation finishes and sends, the keyboard stays open.
+          - ill becomes I'll unless the previous word is calling someone sick. Learning stays on the device.
+
+          Privacy
+          No INTERNET permission. No background location. Backup is off. Voice and learned words stay on the device.
+
+          License
+          Secure Keyboard is free software under the GNU General Public License v3.0. It is a modified version of HeliBoard (copyright Helium314 and contributors), which is based on OpenBoard and the Android Open Source Keyboard (Apache License 2.0). This is not the official HeliBoard.
+
+          Signing certificate SHA-256
+          33eacd63355ee1b19abca1f997ea25a7946960bbf934411691273dde053c78d4
+
+          Install: download SecureKeyboard-v1.0.3.apk, then enable Secure Keyboard in Settings > System > Keyboard. Check the file against SHA256SUMS.txt before installing.
+          EOF
+          elif [ "$TAG" = "v1.0.2" ]; then
             cat > release/notes.md <<EOF
           Secure Keyboard v1.0.2 (commit ${GITHUB_SHA:0:8}). Not yet independently audited.
 

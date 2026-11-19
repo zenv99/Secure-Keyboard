@@ -59,8 +59,12 @@ class DictationSendPolicyTest {
         assertEquals(EditorInfo.IME_ACTION_SEARCH, DictationSendPolicy.actionId(options, 0, false))
     }
 
-    @Test fun customActionLabelIsPassedThrough() {
-        assertEquals(42, DictationSendPolicy.actionId(EditorInfo.IME_ACTION_NONE, 42, true))
+    @Test fun doneAndGoBecomeSendSoTheKeyboardStaysUp() {
+        // Android's text field hides the IME on Done. Go and Next move focus. The big button uses Send.
+        assertEquals(EditorInfo.IME_ACTION_SEND, DictationSendPolicy.actionId(EditorInfo.IME_ACTION_DONE, 0, false))
+        assertEquals(EditorInfo.IME_ACTION_SEND, DictationSendPolicy.actionId(EditorInfo.IME_ACTION_GO, 0, false))
+        assertEquals(EditorInfo.IME_ACTION_SEND, DictationSendPolicy.actionId(EditorInfo.IME_ACTION_NEXT, 0, false))
+        assertEquals(EditorInfo.IME_ACTION_SEARCH, DictationSendPolicy.actionId(EditorInfo.IME_ACTION_SEARCH, 0, true))
     }
 
     @Test fun whatsAppStyleFieldSendsAndDoesNotReturnEnter() {

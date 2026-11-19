@@ -1055,8 +1055,12 @@ public class LatinIME extends InputMethodService implements
         super.hideWindow();
     }
 
+    /** Counts hide requests so tests can assert dictation and send never dismiss the keyboard. */
+    public static int hideRequestsForTest;
+
     @Override
     public void requestHideSelf(int flags) {
+        hideRequestsForTest++;
         super.requestHideSelf(flags);
         Log.i(TAG, "requestHideSelf: " + flags);
     }
@@ -1280,21 +1284,20 @@ public class LatinIME extends InputMethodService implements
 
     @Override
     public void onSendKey() {
-        // The big button sends. It does not insert a newline, including when the field is
-        // multi-line or reports actionNone because of IME_FLAG_NO_ENTER_ACTION.
-        final android.view.inputmethod.EditorInfo ei = getCurrentInputEditorInfo();
-        final android.view.inputmethod.InputConnection ic = getCurrentInputConnection();
-        if (ei == null || ic == null) return;
-        final int actionId = helium314.keyboard.voice.DictationSendPolicy.INSTANCE.actionId(
-                ei.imeOptions, ei.actionId, ei.actionLabel != null);
-        ic.performEditorAction(actionId);
+        if (!fieldHasText()) return;
+        performBigButtonAction();
     }
 
     /**
-     * After a non-empty dictation, perform the field's editor action.
-     * This never inserts a newline and never sends a raw enter key.
+     * After a non-empty dictation, perform Send (or Search). Never hides the keyboard,
+     * never inserts a newline, and never sends a raw enter key.
      */
     private void autoSendAfterDictation() {
+        performBigButtonAction();
+    }
+
+    /** Shared by a tap on Send and by dictation finishing. Does not call requestHideSelf. */
+    private void performBigButtonAction() {
         final android.view.inputmethod.EditorInfo ei = getCurrentInputEditorInfo();
         final android.view.inputmethod.InputConnection ic = getCurrentInputConnection();
         if (ei == null || ic == null) return;
@@ -1304,6 +1307,7 @@ public class LatinIME extends InputMethodService implements
         final int actionId = helium314.keyboard.voice.DictationSendPolicy.INSTANCE.actionId(
                 ei.imeOptions, ei.actionId, ei.actionLabel != null);
         ic.performEditorAction(actionId);
+        updateVoiceKeyMode();
     }
 
     /** The big mic key becomes the send key while the field contains text, including text just dictated. */
@@ -1313,11 +1317,18 @@ public class LatinIME extends InputMethodService implements
     }
 
     private boolean fieldHasText() {
+        if (mInputLogic.getComposingLength() > 0) return true;
         final int start = mInputLogic.mConnection.getExpectedSelectionStart();
         final int end = mInputLogic.mConnection.getExpectedSelectionEnd();
         if (start > 0 || end > 0) return true;
         // Cursor parked at the start of a field that already has text.
         if (start == 0 && end == 0) return mInputLogic.mConnection.hasTextAfterCursor();
+        if (start < 0 || end < 0) {
+            final CharSequence before = mInputLogic.mConnection.getTextBeforeCursor(1, 0);
+            if (before != null && before.length() > 0) return true;
+            final CharSequence after = mInputLogic.mConnection.getTextAfterCursor(1, 0);
+            return after != null && after.length() > 0;
+        }
         return false;
     }
 

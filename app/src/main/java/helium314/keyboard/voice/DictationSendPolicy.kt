@@ -25,16 +25,16 @@ object DictationSendPolicy {
     fun drawableName(hasText: Boolean): String = if (hasText) SEND_DRAWABLE else "sym_keyboard_voice"
 
     /**
-     * Editor action the big button performs. A field with no declared action still sends.
-     * The result is never "insert a newline".
+     * Editor action the big button and dictation perform.
+     * Android's text field hides the keyboard on [EditorInfo.IME_ACTION_DONE], and moves focus
+     * on next/previous. Chat fields, including ones that declare Done or Go, get Send so the
+     * keyboard stays up. Search stays search. The result is never a newline.
      */
     fun actionId(imeOptions: Int, editorActionId: Int, hasActionLabel: Boolean): Int {
-        if (hasActionLabel) return editorActionId
+        if (hasActionLabel && editorActionId == EditorInfo.IME_ACTION_SEARCH) return editorActionId
         val declared = imeOptions and EditorInfo.IME_MASK_ACTION
-        return if (declared == EditorInfo.IME_ACTION_NONE || declared == EditorInfo.IME_ACTION_UNSPECIFIED)
-            EditorInfo.IME_ACTION_SEND
-        else
-            declared
+        return if (declared == EditorInfo.IME_ACTION_SEARCH) EditorInfo.IME_ACTION_SEARCH
+        else EditorInfo.IME_ACTION_SEND
     }
 
     /**
