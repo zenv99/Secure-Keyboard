@@ -1276,27 +1276,29 @@ public class LatinIME extends InputMethodService implements
 
     @Override
     public void onSendKey() {
-        // Always an editor action (send / go / search ...), never a line break.
+        // The big button sends. It does not insert a newline, including when the field is
+        // multi-line or reports actionNone because of IME_FLAG_NO_ENTER_ACTION.
         final android.view.inputmethod.EditorInfo ei = getCurrentInputEditorInfo();
         final android.view.inputmethod.InputConnection ic = getCurrentInputConnection();
         if (ei == null || ic == null) return;
-        final int actionId = helium314.keyboard.latin.utils.InputTypeUtils.getImeOptionsActionIdFromEditorInfo(ei);
-        if (actionId == helium314.keyboard.latin.utils.InputTypeUtils.IME_ACTION_CUSTOM_LABEL) {
-            ic.performEditorAction(ei.actionId);
-        } else if (actionId != android.view.inputmethod.EditorInfo.IME_ACTION_NONE) {
-            ic.performEditorAction(actionId);
-        } else {
-            // the app uses Enter for new lines: still ask it to send
-            ic.performEditorAction(android.view.inputmethod.EditorInfo.IME_ACTION_SEND);
-        }
+        final int actionId = helium314.keyboard.voice.DictationSendPolicy.INSTANCE.actionId(
+                ei.imeOptions, ei.actionId, ei.actionLabel != null);
+        ic.performEditorAction(actionId);
     }
 
-    /** The big mic key becomes a send key while the text field contains text. */
+    /** The big mic key becomes the send key while the field contains text, including text just dictated. */
     private void updateVoiceKeyMode() {
         if (!hasSuggestionStripView()) return;
-        final boolean hasText = mInputLogic.mConnection.getExpectedSelectionStart() > 0
-                || mInputLogic.mConnection.getExpectedSelectionEnd() > 0;
-        mSuggestionStripView.setVoiceKeySendMode(hasText);
+        mSuggestionStripView.setVoiceKeySendMode(fieldHasText());
+    }
+
+    private boolean fieldHasText() {
+        final int start = mInputLogic.mConnection.getExpectedSelectionStart();
+        final int end = mInputLogic.mConnection.getExpectedSelectionEnd();
+        if (start > 0 || end > 0) return true;
+        // Cursor parked at the start of a field that already has text.
+        if (start == 0 && end == 0) return mInputLogic.mConnection.hasTextAfterCursor();
+        return false;
     }
 
     public void onPushToTalkRelease() {

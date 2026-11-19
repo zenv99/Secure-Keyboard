@@ -7,18 +7,23 @@ import kotlin.math.hypot
 import kotlin.math.roundToLong
 
 /**
- * Turns finger travel into fractional character and line steps.
+ * Turns finger travel into fractional character and line steps, the way the iOS space bar does.
  *
- * Slow movement is about one grapheme per 5.5 dp and one line per 13 dp (sensitivity 50),
- * so the caret can move by less than a key. Faster movement accelerates, up to 3.2x.
- * Samples offered before the next frame are summed, so a 60 Hz or 120 Hz stream emits
- * at most one cursor update per frame and never dumps a whole key's worth of characters at once.
+ * Touch deltas go through an exponential low-pass, so finger jitter cancels instead of stepping
+ * the caret. The first few dp are a dead zone. After that, slow movement needs about 10 dp per
+ * character and a clearly larger distance per line. Acceleration starts only once the finger is
+ * actually moving quickly, and it is capped, as is the number of characters emitted in one frame.
  */
 class TrackpadMotion {
     private var density = 1f
     private var sensitivity = 50
-    private var fracX = 0f
-    private var fracY = 0f
+    private var smoothX = 0f
+    private var smoothY = 0f
+    private var accX = 0f
+    private var accY = 0f
+    private var deadX = 0f
+    private var deadY = 0f
+    private var deadArmed = true
     private var lastEventNs = 0L
     private var pending = false
     private var firstEventNs = 0L
@@ -30,8 +35,13 @@ class TrackpadMotion {
     }
 
     fun reset() {
-        fracX = 0f
-        fracY = 0f
+        smoothX = 0f
+        smoothY = 0f
+        accX = 0f
+        accY = 0f
+        deadX = 0f
+        deadY = 0f
+        deadArmed = true
         lastEventNs = 0L
         pending = false
         firstEventNs = 0L
@@ -44,11 +54,33 @@ class TrackpadMotion {
         lastEventNs = eventNs
         val dxDp = dxPx / density
         val dyDp = dyPx / density
-        val speed = hypot(dxDp, dyDp) / (dtNs / 1_000_000_000f)
-        val accel = (1f + (speed - 60f).coerceAtLeast(0f) / 500f).coerceIn(1f, 3.2f)
+        // Low-pass. A jittery sample is mostly the previous direction, so it cannot walk the caret.
+        smoothX = SMOOTH_ALPHA * dxDp + (1f - SMOOTH_ALPHA) * smoothX
+        smoothY = SMOOTH_ALPHA * dyDp + (1f - SMOOTH_ALPHA) * smoothY
+        var ux = smoothX
+        var uy = smoothY
+        if (deadArmed) {
+            deadX += ux
+            deadY += uy
+            if (hypot(deadX, deadY) < DEAD_ZONE_DP) {
+                if (!pending) firstEventNs = eventNs
+                pending = true
+                return
+            }
+            deadArmed = false
+            val travelled = hypot(deadX, deadY).coerceAtLeast(0.001f)
+            val overflow = travelled - DEAD_ZONE_DP
+            ux = deadX / travelled * overflow
+            uy = deadY / travelled * overflow
+            smoothX = 0f
+            smoothY = 0f
+        }
+        val speed = hypot(ux, uy) / (dtNs / 1_000_000_000f)
+        val accel = (1f + (speed - ACCEL_START_DP_PER_S).coerceAtLeast(0f) / ACCEL_RANGE_DP_PER_S)
+            .coerceIn(1f, ACCEL_CAP)
         val scale = 1.45f - sensitivity * 0.009f
-        fracX += dxDp / (5.5f * scale) * accel
-        fracY += dyDp / (13f * scale) * accel
+        accX += ux / (CHAR_DP * scale) * accel
+        accY += uy / (LINE_DP * scale) * accel
         if (!pending) firstEventNs = eventNs
         pending = true
     }
@@ -59,10 +91,10 @@ class TrackpadMotion {
         val latency = (applyNs - firstEventNs) / 1_000_000f
         if (latenciesMs.size == 64) latenciesMs.removeAt(0)
         latenciesMs.add(latency)
-        val sx = truncTowardZero(fracX)
-        val sy = truncTowardZero(fracY)
-        fracX -= sx
-        fracY -= sy
+        val sx = truncTowardZero(accX).coerceIn(-STEP_CAP, STEP_CAP)
+        val sy = truncTowardZero(accY).coerceIn(-STEP_CAP, STEP_CAP)
+        accX -= sx
+        accY -= sy
         pending = false
         return TrackpadSteps(sx, sy, latency)
     }
@@ -72,6 +104,23 @@ class TrackpadMotion {
     private fun truncTowardZero(value: Float): Int {
         val whole = value.toInt()
         return if (value < 0f && whole.toFloat() != value && abs(value) < 1f) 0 else whole
+    }
+
+    private companion object {
+        /** Exponential smoothing of each touch delta. Lower keeps more of the previous sample. */
+        const val SMOOTH_ALPHA = 0.62f
+        /** Finger travel ignored at the start of a drag, so settling on the space bar does not jump. */
+        const val DEAD_ZONE_DP = 4f
+        /** About one character per 10 dp at a slow speed (the 8–12 dp iOS range). */
+        const val CHAR_DP = 10f
+        /** Lines need a clearly larger movement than characters. */
+        const val LINE_DP = 28f
+        /** Acceleration stays at 1x until the finger is moving briskly, then rises gently. */
+        const val ACCEL_START_DP_PER_S = 180f
+        const val ACCEL_RANGE_DP_PER_S = 260f
+        const val ACCEL_CAP = 2.6f
+        /** A single frame never throws the caret across the field. */
+        const val STEP_CAP = 3
     }
 }
 

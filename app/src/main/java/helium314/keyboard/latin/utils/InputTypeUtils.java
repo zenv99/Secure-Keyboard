@@ -71,13 +71,13 @@ public final class InputTypeUtils implements InputType {
 
     public static int getImeOptionsActionIdFromEditorInfo(final EditorInfo editorInfo) {
         final int imeOptions = AppWorkarounds.INSTANCE.adjustImeOptions(editorInfo.imeOptions, editorInfo.packageName);
-        if ((imeOptions & EditorInfo.IME_FLAG_NO_ENTER_ACTION) != 0) {
-            return EditorInfo.IME_ACTION_NONE;
-        } else if (editorInfo.actionLabel != null) {
+        if (editorInfo.actionLabel != null) {
             return IME_ACTION_CUSTOM_LABEL;
-        } else {
-            // Note: this is different from editorInfo.actionId, hence "ImeOptionsActionId"
-            return imeOptions & EditorInfo.IME_MASK_ACTION;
         }
+        // Chat fields set IME_ACTION_SEND together with IME_FLAG_NO_ENTER_ACTION and a multi-line
+        // input type. Treating the flag as "no action" drew a return arrow and inserted a newline.
+        // The action the app declared is the one the enter key shows and performs. A field that
+        // declared nothing (NONE) still inserts a newline.
+        return imeOptions & EditorInfo.IME_MASK_ACTION;
     }
 }

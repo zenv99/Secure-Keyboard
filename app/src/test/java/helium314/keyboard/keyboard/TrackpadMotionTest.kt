@@ -2,6 +2,7 @@
 package helium314.keyboard.keyboard
 
 import kotlin.math.abs
+import kotlin.math.hypot
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -9,6 +10,7 @@ import kotlin.test.assertTrue
 /**
  * Motion numbers below are measured by running this test, not guessed.
  * Density 2.75 is a 440 dpi phone. Sensitivity 50 is the default (1x scale).
+ * Slow movement is about one character per 10 dp, after a short dead zone.
  */
 class TrackpadMotionTest {
     @Test fun slowDragNeverJumpsMoreThanOneCharacterPerFrame() {
@@ -110,6 +112,52 @@ class TrackpadMotionTest {
         assertTrue(p95us < 200.0, "compute p95 ${p95us}us")
     }
 
+    @Test fun jitterDoesNotMoveTheCaret() {
+        val jitter = jitterStream(frames = 400, amplitudePx = 3f)
+        val moved = play(motion(), jitter)
+        assertEquals(0, moved.graphemes, "horizontal jitter walked ${moved.graphemes}")
+        assertEquals(0, moved.lines, "vertical jitter walked ${moved.lines}")
+    }
+
+    @Test fun shakyDragDoesNotAddMovesBeyondTheNetTravel() {
+        // +3 px, -1 px, repeating. Net travel is +1 px per sample. The old 5.5 dp model
+        // turned the extra back-and-forth into additional characters.
+        val shaky = ArrayList<Sample>()
+        var t = 0L
+        val frame = 8_333_333L
+        repeat(160) { i ->
+            val dx = if (i % 2 == 0) 3f else -1f
+            val dy = if (i % 2 == 0) 0.8f else -0.8f
+            shaky.add(Sample(dx, dy, t))
+            t += frame
+        }
+        val before = legacyMoves(shaky)
+        val after = play(motion(), shaky)
+        println("TRACKPAD_MOVES shaky_before_graphemes=${before.graphemes} shaky_after_graphemes=${after.graphemes} " +
+            "shaky_before_lines=${before.lines} shaky_after_lines=${after.lines}")
+        assertTrue(after.graphemes < before.graphemes,
+            "shaky drag after ${after.graphemes} should be under the old ${before.graphemes}")
+        assertTrue(after.lines <= before.lines)
+        assertEquals(0, after.lines)
+    }
+
+    @Test fun sameSlowDragMovesFewerCharactersThanTheOldSensitiveModel() {
+        val drag = streamSamples(dxPxPerFrame = 2f, frames = 120, frameNs = 16_666_667L)
+        val before = legacyMoves(drag)
+        val after = play(motion(), drag)
+        println("TRACKPAD_MOVES slow_before_graphemes=${before.graphemes} slow_after_graphemes=${after.graphemes}")
+        assertTrue(before.graphemes > after.graphemes)
+        assertTrue(after.graphemes > 0)
+        assertTrue(after.maxGraphemes <= 1)
+    }
+
+    @Test fun verticalNeedsMoreTravelThanHorizontal() {
+        val horizontal = play(motion(), streamSamples(dxPxPerFrame = 8f, dyPxPerFrame = 0f, frames = 40, frameNs = 8_333_333L))
+        val vertical = play(motion(), streamSamples(dxPxPerFrame = 0f, dyPxPerFrame = 8f, frames = 40, frameNs = 8_333_333L))
+        assertTrue(horizontal.graphemes > vertical.lines,
+            "same 8 px stream moved ${horizontal.graphemes} characters but ${vertical.lines} lines")
+    }
+
     @Test fun cursorCrossesLinesAndKeepsItsColumn() {
         val doc = TrackpadDocument("hello", "\nworld\n!")
         assertEquals(5, doc.charOffset()) // after "hello", before the newline
@@ -130,18 +178,86 @@ class TrackpadMotionTest {
 
     private data class StreamResult(val totalGraphemes: Int, val maxGraphemes: Int, val frames: Int)
 
+    private data class Sample(val dx: Float, val dy: Float, val timeNs: Long)
+
+    private data class MoveCount(val graphemes: Int, val lines: Int, val maxGraphemes: Int)
+
     private fun stream(dxPxPerFrame: Float, frames: Int, frameNs: Long): StreamResult {
-        val motion = motion()
-        var total = 0
-        var maxStep = 0
+        val played = play(motion(), streamSamples(dxPxPerFrame, 0f, frames, frameNs))
+        return StreamResult(played.graphemes, played.maxGraphemes, frames)
+    }
+
+    private fun streamSamples(dxPxPerFrame: Float, dyPxPerFrame: Float = 0f, frames: Int, frameNs: Long): List<Sample> {
+        val out = ArrayList<Sample>(frames)
         var t = 0L
         repeat(frames) {
-            motion.offer(dxPxPerFrame, 0f, t)
-            val steps = motion.consume(t + frameNs)
-            total += steps.graphemes
-            if (abs(steps.graphemes) > maxStep) maxStep = abs(steps.graphemes)
+            out.add(Sample(dxPxPerFrame, dyPxPerFrame, t))
             t += frameNs
         }
-        return StreamResult(total, maxStep, frames)
+        return out
+    }
+
+    private fun jitterStream(frames: Int, amplitudePx: Float): List<Sample> {
+        val out = ArrayList<Sample>(frames)
+        var t = 0L
+        val frame = 8_333_333L
+        repeat(frames) { i ->
+            val sign = if (i % 2 == 0) 1f else -1f
+            out.add(Sample(sign * amplitudePx, sign * amplitudePx * 0.5f, t))
+            t += frame
+        }
+        return out
+    }
+
+    private fun play(motion: TrackpadMotion, samples: List<Sample>): MoveCount {
+        var gx = 0
+        var gy = 0
+        var maxStep = 0
+        for (i in samples.indices) {
+            val sample = samples[i]
+            val applyAt = if (i + 1 < samples.size) samples[i + 1].timeNs else sample.timeNs + 8_333_333L
+            motion.offer(sample.dx, sample.dy, sample.timeNs)
+            val steps = motion.consume(applyAt)
+            gx += steps.graphemes
+            gy += steps.lines
+            if (abs(steps.graphemes) > maxStep) maxStep = abs(steps.graphemes)
+        }
+        return MoveCount(gx, gy, maxStep)
+    }
+
+    /**
+     * The previous model: one character per 5.5 dp, acceleration from 60 dp/s, no dead zone
+     * and no smoothing. Kept so a shaky stream can be compared with the numbers it used to emit.
+     */
+    private fun legacyMoves(samples: List<Sample>): MoveCount {
+        var fracX = 0f
+        var fracY = 0f
+        var last = 0L
+        var gx = 0
+        var gy = 0
+        val density = 2.75f
+        val scale = 1f
+        for (sample in samples) {
+            val dt = if (last == 0L) 8_000_000L else (sample.timeNs - last).coerceIn(1_000_000L, 50_000_000L)
+            last = sample.timeNs
+            val dxDp = sample.dx / density
+            val dyDp = sample.dy / density
+            val speed = hypot(dxDp, dyDp) / (dt / 1_000_000_000f)
+            val accel = (1f + (speed - 60f).coerceAtLeast(0f) / 500f).coerceIn(1f, 3.2f)
+            fracX += dxDp / (5.5f * scale) * accel
+            fracY += dyDp / (13f * scale) * accel
+            val sx = truncLegacy(fracX)
+            val sy = truncLegacy(fracY)
+            fracX -= sx
+            fracY -= sy
+            gx += sx
+            gy += sy
+        }
+        return MoveCount(gx, gy, 0)
+    }
+
+    private fun truncLegacy(value: Float): Int {
+        val whole = value.toInt()
+        return if (value < 0f && whole.toFloat() != value && abs(value) < 1f) 0 else whole
     }
 }
