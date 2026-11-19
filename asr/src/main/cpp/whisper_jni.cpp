@@ -23,7 +23,7 @@ Java_app_securekeyboard_asr_WhisperBridge_nativeInit(JNIEnv *env, jobject, jstri
 JNIEXPORT jstring JNICALL
 Java_app_securekeyboard_asr_WhisperBridge_nativeTranscribe(JNIEnv *env, jobject, jlong handle,
                                                            jfloatArray pcm, jstring lang,
-                                                           jint threads) {
+                                                           jint threads, jstring prompt) {
     auto *ctx = reinterpret_cast<whisper_context *>(handle);
     if (ctx == nullptr) return env->NewStringUTF("");
 
@@ -34,25 +34,38 @@ Java_app_securekeyboard_asr_WhisperBridge_nativeTranscribe(JNIEnv *env, jobject,
     jfloat *samples = env->GetFloatArrayElements(pcm, nullptr);
     if (samples == nullptr) return env->NewStringUTF("");
     const char *language = env->GetStringUTFChars(lang, nullptr);
+    const char *promptChars = prompt != nullptr ? env->GetStringUTFChars(prompt, nullptr) : nullptr;
 
+    // Greedy, one candidate. Beam search costs a lot more battery for a short dictation.
+    // Temperature still falls back when the decode looks degenerate (stream example default).
     whisper_full_params params = whisper_full_default_params(WHISPER_SAMPLING_GREEDY);
     params.n_threads = std::max(1, (int) threads);
     params.language = language;
     params.translate = false;
+    // The context object is reused across holds. Do not feed it the previous hold's tokens.
+    // A short initial_prompt carries the previous window of THIS hold only.
     params.no_context = true;
+    params.initial_prompt = (promptChars != nullptr && promptChars[0] != '\0') ? promptChars : nullptr;
+    params.carry_initial_prompt = false;
     params.single_segment = false;
-    // Same decoding setup as the first version that worked (timestamps off: turning them on duplicated text).
+    // Timestamps off: turning them on duplicated text. Every segment is still concatenated below.
     params.no_timestamps = true;
     const double seconds = (double) n / 16000.0;
-    // Size the audio window to the clip instead of always encoding 30 s: much faster for short dictation.
-    // Generous margin (4 s) and a floor of 12.8 s: tighter windows caused repeated-word loops before.
-    if (seconds <= 20.0) {
-        const int ctx = (int) (std::ceil((seconds + 4.0) * 50.0 / 64.0) * 64.0);
-        params.audio_ctx = std::min(1500, std::max(640, ctx));
+    // Cover the whole clip. A shorter audio_ctx drops the end of the audio.
+    // 50 encoder frames per second, plus 1 s, rounded up, and never under 12.8 s
+    // (tighter windows previously caused repeated-word loops). 0 means the full 30 s window.
+    // Keep this in sync with DictationPipeline.audioContextFrames.
+    {
+        const int frames = (int) std::ceil(seconds * 50.0) + 50;
+        const int ctx = ((frames + 63) / 64) * 64;
+        const int covered = std::max(640, ctx);
+        params.audio_ctx = covered >= 1500 ? 0 : covered;
     }
-    // Hard limit on output: about 6 tokens per second of speech at most.
-    params.max_tokens = std::min(220, std::max(16, (int) (seconds * 6.0) + 8));
-    params.temperature_inc = 0.2f;      // standard fallback when output looks degenerate
+    // 0 = no per-segment cap. With no_timestamps, a positive cap ends the segment and
+    // whisper.cpp then skips the rest of the window, which cut off the rest of the sentence.
+    params.max_tokens = 0;
+    params.temperature = 0.0f;
+    params.temperature_inc = 0.2f;
     params.entropy_thold = 2.4f;
     params.logprob_thold = -1.0f;
     params.no_speech_thold = 0.6f;
@@ -73,6 +86,7 @@ Java_app_securekeyboard_asr_WhisperBridge_nativeTranscribe(JNIEnv *env, jobject,
         }
     }
 
+    if (promptChars != nullptr) env->ReleaseStringUTFChars(prompt, promptChars);
     env->ReleaseStringUTFChars(lang, language);
     env->ReleaseFloatArrayElements(pcm, samples, JNI_ABORT);
     return env->NewStringUTF(out.c_str());

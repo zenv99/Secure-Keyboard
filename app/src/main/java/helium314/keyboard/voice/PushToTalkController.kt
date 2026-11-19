@@ -37,6 +37,7 @@ class PushToTalkController(
     private var lastTextSession = -1
     private var pressedAt = 0L
     private var awaiting = false // a dictation session is open: only then is incoming text accepted
+    private var committedAny = false // this hold already inserted text; the Done state is shown once, at the end
 
     private val replyTo = Messenger(Handler(Looper.getMainLooper()) { message ->
         when (message.what) {
@@ -53,7 +54,11 @@ class PushToTalkController(
                     lastText = text
                     lastTextTime = now
                     lastTextSession = sessionId
+                    committedAny = true
                     onText(text)
+                }
+                if (isLast && committedAny) {
+                    Toast.makeText(context, R.string.voice_dictation_done, Toast.LENGTH_SHORT).show()
                 }
                 true
             }
@@ -167,6 +172,7 @@ class PushToTalkController(
 
     private fun startSession() {
         sessionId++
+        committedAny = false
         sessionStarted = send(AsrService.MSG_START)
         awaiting = sessionStarted
     }

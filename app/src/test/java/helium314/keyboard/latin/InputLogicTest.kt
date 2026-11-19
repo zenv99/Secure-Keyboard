@@ -47,6 +47,7 @@ import kotlin.streams.asSequence
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 @RunWith(RobolectricTestRunner::class)
 @Config(shadows = [
@@ -808,6 +809,15 @@ class InputLogicTest {
         assertEquals(5, cursor)
         latinIME.mKeyboardActionListener.onHorizontalSpaceSwipe(1)
         assertEquals(5, cursor)
+    }
+
+    @Test fun dictationInsertsTheFullSentenceAfterAComposingWord() {
+        chainInput("hello")
+        val sentence = "please remember every word of this long spoken sentence including the final clause about the garden gate"
+        latinIME.onDictatedText(sentence)
+        handleMessages()
+        assertEquals("hello $sentence", text)
+        assertTrue(text.endsWith("garden gate"))
     }
 
     // ------- helper functions ---------
