@@ -148,6 +148,11 @@ public interface DictionaryFacilitator {
         return null;
     }
 
+    /** Fat-finger or run-on fix for [typed], or null when the word should be left as typed. */
+    default String autocorrectTypedWord(String typed) {
+        return null;
+    }
+
     boolean isValidSpellingWord(final String word);
 
     boolean isValidSuggestionWord(final String word);

@@ -158,6 +158,10 @@ class KeyboardIconsSet private constructor() {
                     ToolbarKey.SPLIT -> R.drawable.ic_ime_switcher
                     ToolbarKey.BACKGROUND_GATHERING -> R.drawable.ic_settings_gesture
                     ToolbarKey.TEXT_REPLACEMENT -> R.drawable.ic_text_replacement
+                    ToolbarKey.PHOTO -> R.drawable.ic_attach_photo
+                    ToolbarKey.CAMERA -> R.drawable.ic_attach_camera
+                    ToolbarKey.DOCUMENT -> R.drawable.ic_attach_document
+                    ToolbarKey.CONTACT -> R.drawable.ic_attach_contact
                     ToolbarKey.LANGUAGE -> R.drawable.sym_keyboard_language_switch_lxx
                 })
             }
@@ -224,6 +228,10 @@ class KeyboardIconsSet private constructor() {
                     ToolbarKey.SPLIT -> R.drawable.ic_ime_switcher
                     ToolbarKey.BACKGROUND_GATHERING -> R.drawable.ic_settings_gesture
                     ToolbarKey.TEXT_REPLACEMENT -> R.drawable.ic_text_replacement
+                    ToolbarKey.PHOTO -> R.drawable.ic_attach_photo
+                    ToolbarKey.CAMERA -> R.drawable.ic_attach_camera
+                    ToolbarKey.DOCUMENT -> R.drawable.ic_attach_document
+                    ToolbarKey.CONTACT -> R.drawable.ic_attach_contact
                     ToolbarKey.LANGUAGE -> R.drawable.sym_keyboard_language_switch_lxx
                 })
             }
@@ -290,6 +298,10 @@ class KeyboardIconsSet private constructor() {
                     ToolbarKey.SPLIT -> R.drawable.ic_ime_switcher
                     ToolbarKey.BACKGROUND_GATHERING -> R.drawable.ic_settings_gesture
                     ToolbarKey.TEXT_REPLACEMENT -> R.drawable.ic_text_replacement
+                    ToolbarKey.PHOTO -> R.drawable.ic_attach_photo
+                    ToolbarKey.CAMERA -> R.drawable.ic_attach_camera
+                    ToolbarKey.DOCUMENT -> R.drawable.ic_attach_document
+                    ToolbarKey.CONTACT -> R.drawable.ic_attach_contact
                     ToolbarKey.LANGUAGE -> R.drawable.sym_keyboard_language_switch_lxx
                 })
             }

@@ -10,17 +10,14 @@ class PlusMenuTest {
     @Test fun plusMenuIsTheShortStandardSetInOrder() {
         assertEquals(
             listOf(
+                ToolbarKey.PHOTO,
+                ToolbarKey.CAMERA,
+                ToolbarKey.DOCUMENT,
+                ToolbarKey.CONTACT,
                 ToolbarKey.EMOJI,
                 ToolbarKey.CLIPBOARD,
                 ToolbarKey.TEXT_REPLACEMENT,
                 ToolbarKey.SETTINGS,
-                ToolbarKey.LANGUAGE,
-                ToolbarKey.ONE_HANDED,
-                ToolbarKey.UNDO,
-                ToolbarKey.REDO,
-                ToolbarKey.SELECT_ALL,
-                ToolbarKey.COPY,
-                ToolbarKey.PASTE,
             ),
             enabledToolbarKeys(defaultToolbarPref),
         )

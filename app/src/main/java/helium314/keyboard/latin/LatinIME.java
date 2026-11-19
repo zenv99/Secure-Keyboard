@@ -1612,6 +1612,14 @@ public class LatinIME extends InputMethodService implements
         startActivity(intent);
     }
 
+    /** Opens the system picker for a plus-menu attachment. The activity is not exported. */
+    public void launchAttach(final String mode) {
+        final android.content.Intent intent = new android.content.Intent(this, helium314.keyboard.latin.attach.AttachPickerActivity.class);
+        intent.putExtra(helium314.keyboard.latin.attach.AttachPickerActivity.EXTRA_MODE, mode);
+        intent.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK | android.content.Intent.FLAG_ACTIVITY_NO_ANIMATION | android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+        startActivity(intent);
+    }
+
     public void launchTextReplacements() {
         launchSettings(helium314.keyboard.settings.SettingsDestination.TextReplacement);
     }
