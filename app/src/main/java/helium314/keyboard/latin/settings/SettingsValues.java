@@ -244,7 +244,9 @@ public class SettingsValues {
         mBigramPredictionEnabled = prefs.getBoolean(Settings.PREF_BIGRAM_PREDICTIONS, Defaults.PREF_BIGRAM_PREDICTIONS);
         mSuggestPunctuation = prefs.getBoolean(Settings.PREF_SUGGEST_PUNCTUATION, Defaults.PREF_SUGGEST_PUNCTUATION);
         mSuggestClipboardContent = prefs.getBoolean(Settings.PREF_SUGGEST_CLIPBOARD_CONTENT, Defaults.PREF_SUGGEST_CLIPBOARD_CONTENT);
-        mDoubleSpacePeriodTimeout = 1100; // ms
+        // Two spaces become ". " only when they are a quick double tap. 1100 ms also caught
+        // a second space that was not a double tap, which turned "I'm so" into "I'm. So".
+        mDoubleSpacePeriodTimeout = 300; // ms
         mHasHardwareKeyboard = Settings.readHasHardwareKeyboard(res.getConfiguration());
         boolean isLandscape = mDisplayOrientation == Configuration.ORIENTATION_LANDSCAPE;
         float displayWidthDp = TypedValueCompat.pxToDp(res.getDisplayMetrics().widthPixels, res.getDisplayMetrics());

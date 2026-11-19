@@ -78,6 +78,9 @@ class ProximityAutocorrectTest {
         assertTrue(AutocorrectPolicy.keepTypedWord(true, false, false, false, blocksPersonalization = true))
         assertTrue(AutocorrectPolicy.keepTypedWord(false, false, false, true, blocksPersonalization = true))
         assertFalse(AutocorrectPolicy.isLiteralToken("dont"))
+        assertTrue(AutocorrectPolicy.suppressCorrection("tired", ".", typedIsKnown = false, forced = false))
+        assertTrue(AutocorrectPolicy.suppressCorrection("I'm", ".", typedIsKnown = true, forced = false))
+        assertFalse(AutocorrectPolicy.suppressCorrection("omw", "On my way!", typedIsKnown = false, forced = true))
         assertTrue(AutocorrectPolicy.isLiteralToken("zen@example.com"))
         assertTrue(AutocorrectPolicy.isLiteralToken("v1.0"))
     }

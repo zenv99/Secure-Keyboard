@@ -125,6 +125,12 @@ public final class InputAttributes {
         mNoLearning = field.getBlockLearning();
     }
 
+    /** False in URL, email, password, and search fields, where a second space must stay a space. */
+    public boolean allowsDoubleSpacePeriod() {
+        final int imeOptions = mEditorInfo != null ? mEditorInfo.imeOptions : 0;
+        return EditorFieldPolicy.allowsDoubleSpacePeriod(mInputType, imeOptions);
+    }
+
     public boolean isTypeNull() {
         return InputType.TYPE_NULL == mInputType;
     }

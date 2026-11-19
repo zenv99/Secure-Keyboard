@@ -43,6 +43,9 @@ object AutocorrectPolicy {
      */
     fun suppressCorrection(typed: String, candidate: String, typedIsKnown: Boolean, forced: Boolean): Boolean {
         if (isLiteralToken(typed)) return true
+        // A suggestion that is only punctuation must not replace a word. Shortcuts the user
+        // defined may still expand, because those are forced.
+        if (!forced && candidate.none { it.isLetterOrDigit() } && typed.any { it.isLetterOrDigit() }) return true
         if (forced) return false
         if (isCaseApostropheOrAccentOnly(typed, candidate)) return false
         // A real word is not "fixed" into a different real word. Context can still
