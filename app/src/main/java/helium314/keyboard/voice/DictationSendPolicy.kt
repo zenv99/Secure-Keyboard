@@ -84,6 +84,24 @@ object DictationSendPolicy {
                 return steps
             }
         }
+        // No declared action. TextView sets IME_FLAG_NO_ENTER_ACTION on every multiline field,
+        // and HeliBoard then draws a return key and inserts a newline (issue 1989). This button
+        // is Send, not Return. Shopee chat and search are React Native fields in that state.
+        // FlorisBoard commits "\n" for an unspecified action, which never delivers a key event
+        // (FlorisBoard issue 3262). React Native treats KEYCODE_ENTER as send, so the enter key
+        // comes before any newline, and a field with no action does not commit a newline first.
+        if (!hasActionLabel && (
+                declared == EditorInfo.IME_ACTION_NONE || declared == EditorInfo.IME_ACTION_UNSPECIFIED
+            )
+        ) {
+            addAction(steps, EditorInfo.IME_ACTION_SEND)
+            addAction(steps, EditorInfo.IME_ACTION_GO)
+            addAction(steps, EditorInfo.IME_ACTION_SEARCH)
+            addKeyFallbacks(steps, newline = false)
+            // Done hides the IME on a plain text field, so it follows the enter key.
+            addAction(steps, EditorInfo.IME_ACTION_DONE)
+            return steps
+        }
         // Chat, including a field that declared Done. Send first so a Done action, which hides
         // the keyboard, is only a fallback when Send did not change the text.
         addAction(steps, EditorInfo.IME_ACTION_SEND)
@@ -116,17 +134,25 @@ object DictationSendPolicy {
     fun executeSendPlan(
         plan: List<SendStep>,
         inputType: Int,
+        declaredAction: Int,
         snapshot: () -> String?,
         performAction: (Int) -> Boolean,
         sendKey: (Int) -> Boolean,
         commitNewline: () -> Boolean,
     ) {
+        val declared = declaredAction and EditorInfo.IME_MASK_ACTION
         for (step in plan) {
             val before = snapshot()
             when {
                 step.isEditorAction -> {
                     if (!performAction(step.actionId)) continue
-                    if (trustsTrueReturn(step.actionId, inputType)) return
+                    // Go and Search count only when the field declared them. A fallback Go
+                    // that returns true and leaves the text must not skip the enter key.
+                    if (trustsTrueReturn(step.actionId, inputType) &&
+                        (step.actionId == EditorInfo.IME_ACTION_NEXT
+                            || step.actionId == EditorInfo.IME_ACTION_PREVIOUS
+                            || step.actionId == declared)
+                    ) return
                     if (changed(before, snapshot())) return
                 }
                 step.isEnter -> {

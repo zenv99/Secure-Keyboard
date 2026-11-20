@@ -4,6 +4,7 @@ package helium314.keyboard.smoke
 import android.content.ComponentName
 import android.content.Intent
 import android.os.ParcelFileDescriptor
+import android.view.KeyEvent
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
@@ -14,6 +15,8 @@ import helium314.keyboard.latin.LatinIME
 import helium314.keyboard.latin.common.Constants
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /** The big button follows the text in a Settings search field and in a field that never reports a selection. */
@@ -55,6 +58,48 @@ class VoiceKeyModeTest {
         assertEquals("Voice input", description())
     }
 
+    @Test fun shopeeMultilineShowsSendAndSendsEnterInsteadOfANewline() {
+        open(KeyboardTestActivity.FIELD_SHOPEE)
+        val ime = ime()
+        val field = KeyboardTestActivity.instance!!.shopee ?: throw AssertionError("shopee field missing")
+        type(ime, "hi")
+        Thread.sleep(120)
+        println("VOICE_SHOPEE desc=${description()} send=${LatinIME.voiceKeyIsSendForTest}")
+        assertEquals("Send", description())
+        assertFalse(description().contains("Return"))
+        shot("shopee-send")
+        clear(ime, field)
+        println("VOICE_SHOPEE_CLEARED desc=${description()} text=${field.text}")
+        assertEquals("Voice input", description())
+        shot("shopee-mic")
+        type(ime, "hi")
+        Thread.sleep(80)
+        field.events.clear()
+        instrumentation.runOnMainSync { ime.onSendKey() }
+        Thread.sleep(200)
+        val events = field.events.toList()
+        println("VOICE_SHOPEE_TAP $events")
+        val enter = events.indexOf("key:${KeyEvent.KEYCODE_ENTER}")
+        val newline = events.indexOf("newline")
+        assertTrue("enter key was not sent: $events", enter >= 0)
+        assertTrue("newline was committed before enter: $events", newline == -1 || newline > enter)
+    }
+
+    @Test fun unspecifiedSingleLineShowsSendThenTheMic() {
+        open(KeyboardTestActivity.FIELD_UNSPECIFIED)
+        val ime = ime()
+        type(ime, "s")
+        Thread.sleep(120)
+        println("VOICE_UNSPECIFIED desc=${description()} send=${LatinIME.voiceKeyIsSendForTest}")
+        assertEquals("Send", description())
+        shot("unspecified-send")
+        delete(ime)
+        Thread.sleep(120)
+        println("VOICE_UNSPECIFIED_CLEARED desc=${description()}")
+        assertEquals("Voice input", description())
+        shot("unspecified-mic")
+    }
+
     private fun shot(name: String) {
         val remote = "/data/local/tmp/sk-$name.png"
         ParcelFileDescriptor.AutoCloseInputStream(
@@ -67,6 +112,16 @@ class VoiceKeyModeTest {
             instrumentation.runOnMainSync {
                 ime.onEvent(Event.createEventForCodePointFromUnknownSource(ch.code))
             }
+            Thread.sleep(40)
+        }
+    }
+
+    private fun clear(ime: LatinIME, field: android.widget.EditText) {
+        repeat(8) {
+            val empty = java.util.concurrent.atomic.AtomicBoolean(false)
+            instrumentation.runOnMainSync { empty.set(field.text.isNullOrEmpty()) }
+            if (empty.get()) return
+            delete(ime)
             Thread.sleep(40)
         }
     }
