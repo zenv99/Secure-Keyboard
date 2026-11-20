@@ -10,6 +10,12 @@ HeliBoard
   The 123 and #+= pages use HeliBoard's JSON layout format (itself from FlorisBoard)
   for the iOS US symbol rows. The arrangement follows the iOS layout shared in
   HeliBoard discussion 2180.
+  A short tap tries the field's editor action, then the enter key. Flutter's input
+  connection returns true from performEditorAction and drops the action; the text
+  is checked afterwards, and the enter key, DPAD center, and numpad enter follow
+  when it did not change. FlorisBoard moves the caret with DPAD key events when
+  setSelection cannot be trusted. An index outside the text is not sent, because
+  editors clamp that index to the end of the field.
 
 OpenBoard and the Android Open Source LatinIME
   Copyright The Android Open Source Project

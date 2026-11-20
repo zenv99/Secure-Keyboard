@@ -137,6 +137,8 @@ class ShadowInputMethodService {
         var lastEditorAction: Int? = null
         var editorActionCount = 0
         var editorActionHandled = true
+        /** Returns true from performEditorAction without changing the text. Flutter does this. */
+        var editorActionIgnoresText = false
         var enterPresses = 0
 
         // convenience for access
@@ -161,6 +163,7 @@ class ShadowInputMethodService {
             lastEditorAction = null
             editorActionCount = 0
             editorActionHandled = true
+            editorActionIgnoresText = false
             enterPresses = 0
         }
     }
@@ -331,7 +334,13 @@ class ShadowInputMethodService {
         override fun performEditorAction(p0: Int): Boolean {
             lastEditorAction = p0
             editorActionCount++
-            return editorActionHandled
+            if (!editorActionHandled) return false
+            if (!editorActionIgnoresText && (p0 == EditorInfo.IME_ACTION_SEND || p0 == EditorInfo.IME_ACTION_DONE)) {
+                text = ""
+                selectionStart = 0
+                selectionEnd = 0
+            }
+            return true
         }
         override fun performContextMenuAction(p0: Int): Boolean = TODO("Not yet implemented")
         override fun clearMetaKeyStates(p0: Int): Boolean = TODO("Not yet implemented")

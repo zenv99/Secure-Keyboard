@@ -48,6 +48,16 @@ class SendButtonTest {
         assertEquals(hides, LatinIME.hideRequestsForTest)
     }
 
+    @Test fun trueReturnThatLeavesTheTextStillPressesEnter() {
+        ShadowInputMethodService.editorActionIgnoresText = true
+        startField(whatsAppOptions(), chatInput())
+        type("hello")
+        latinIME.onSendKey()
+        assertEquals(EditorInfo.IME_ACTION_SEND, ShadowInputMethodService.lastEditorAction)
+        assertTrue(ShadowInputMethodService.enterPresses >= 1)
+        assertStillShown()
+    }
+
     @Test fun ignoredSendFallsBackToEnterOnAWhatsAppField() {
         for (action in listOf(EditorInfo.IME_ACTION_NONE, EditorInfo.IME_ACTION_UNSPECIFIED, EditorInfo.IME_ACTION_SEND)) {
             ShadowInputMethodService.reset()

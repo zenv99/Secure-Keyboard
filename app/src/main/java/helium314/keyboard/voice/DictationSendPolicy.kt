@@ -39,53 +39,145 @@ object DictationSendPolicy {
     /**
      * What a short tap tries, in order.
      * HeliBoard issue 1989: apps set [EditorInfo.IME_FLAG_NO_ENTER_ACTION] and still expect the
-     * declared action (Send, Go, Search). The flag is ignored for that action.
-     * When the field declares nothing (WhatsApp and X compose often do), try Send and, if the
-     * connection returns false, the enter key. That is the fallback other IMEs use, not a newline.
-     * A URL bar stays Go and search stays Search. Enter is not used for those, or for email or password.
+     * declared action. The flag is ignored for that action.
+     * Flutter and some React Native fields (Revolut, X) return true from performEditorAction and
+     * then ignore it. [trustsTrueReturn] is false for Send and Done, so the caller keeps going
+     * when the text did not change. The rest of the chain is the enter key, then DPAD_CENTER and
+     * NUMPAD_ENTER (FlorisBoard and AOSP use arrow and enter key events when the connection will
+     * not honour an editor action), then a newline only in a multiline field.
      */
     fun sendPlan(imeOptions: Int, inputType: Int, editorActionId: Int, hasActionLabel: Boolean): List<SendStep> {
         val declared = imeOptions and EditorInfo.IME_MASK_ACTION
         val variation = inputType and InputType.TYPE_MASK_VARIATION
         val clazz = inputType and InputType.TYPE_MASK_CLASS
+        val multiline = inputType and InputType.TYPE_TEXT_FLAG_MULTI_LINE != 0
         if (InputTypeUtils.isAnyPasswordInputType(inputType)) {
             if (declared == EditorInfo.IME_ACTION_NONE || declared == EditorInfo.IME_ACTION_UNSPECIFIED)
                 return emptyList()
             return listOf(SendStep.action(declared))
         }
-        if (hasActionLabel && editorActionId != 0) return listOf(SendStep.action(editorActionId))
-        // A class of 0 is what some React Native fields (X compose and reply) report.
-        // They are chat fields, not URL bars, even when the variation bits look unset.
-        if (clazz == InputType.TYPE_CLASS_TEXT) {
+        val steps = ArrayList<SendStep>(6)
+        if (hasActionLabel && editorActionId != 0) steps.add(SendStep.action(editorActionId))
+        // A class of 0 is what some React Native fields report. Treat them as chat, not as a URL bar.
+        if (clazz == InputType.TYPE_CLASS_TEXT || clazz == 0) {
             if (variation == InputType.TYPE_TEXT_VARIATION_URI || declared == EditorInfo.IME_ACTION_GO) {
                 val action = if (declared == EditorInfo.IME_ACTION_SEARCH) EditorInfo.IME_ACTION_SEARCH
                 else EditorInfo.IME_ACTION_GO
-                return listOf(SendStep.action(action))
+                addAction(steps, action)
+                addKeyFallbacks(steps, newline = false)
+                return steps
             }
-            if (declared == EditorInfo.IME_ACTION_SEARCH) return listOf(SendStep.action(EditorInfo.IME_ACTION_SEARCH))
-            if (variation == InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS
-                || variation == InputType.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS
+            if (declared == EditorInfo.IME_ACTION_SEARCH) {
+                addAction(steps, EditorInfo.IME_ACTION_SEARCH)
+                addKeyFallbacks(steps, newline = false)
+                return steps
+            }
+            if (clazz == InputType.TYPE_CLASS_TEXT && (
+                    variation == InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS
+                        || variation == InputType.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS
+                    )
             ) {
                 val action = if (declared == EditorInfo.IME_ACTION_NONE || declared == EditorInfo.IME_ACTION_UNSPECIFIED)
                     EditorInfo.IME_ACTION_NEXT else declared
-                return listOf(SendStep.action(if (action == EditorInfo.IME_ACTION_DONE) EditorInfo.IME_ACTION_NEXT else action))
+                addAction(steps, if (action == EditorInfo.IME_ACTION_DONE) EditorInfo.IME_ACTION_NEXT else action)
+                addKeyFallbacks(steps, newline = false)
+                return steps
             }
         }
-        val steps = ArrayList<SendStep>(2)
-        steps.add(SendStep.action(EditorInfo.IME_ACTION_SEND))
-        // Enter is the fallback only for a chat field. A URL or search field stopped above.
-        val noEnter = imeOptions and EditorInfo.IME_FLAG_NO_ENTER_ACTION != 0
-        val enterIsSend = !noEnter || declared == EditorInfo.IME_ACTION_SEND
-                || declared == EditorInfo.IME_ACTION_NONE || declared == EditorInfo.IME_ACTION_UNSPECIFIED
-        if (enterIsSend) steps.add(SendStep.enter())
+        // Chat, including a field that declared Done. Send first so a Done action, which hides
+        // the keyboard, is only a fallback when Send did not change the text.
+        addAction(steps, EditorInfo.IME_ACTION_SEND)
+        if (declared == EditorInfo.IME_ACTION_DONE) addAction(steps, EditorInfo.IME_ACTION_DONE)
+        else if (!multiline && declared != EditorInfo.IME_ACTION_SEND
+            && declared != EditorInfo.IME_ACTION_NONE && declared != EditorInfo.IME_ACTION_UNSPECIFIED
+        ) {
+            addAction(steps, declared)
+        }
+        addKeyFallbacks(steps, newline = multiline)
         return steps
     }
 
+    /**
+     * A true return is enough for Next, and for a single-line Go or Search (the query stays).
+     * Send and Done are not trusted: Flutter's input connection returns true and drops the action.
+     */
+    fun trustsTrueReturn(actionId: Int, inputType: Int): Boolean {
+        if (actionId == EditorInfo.IME_ACTION_NEXT || actionId == EditorInfo.IME_ACTION_PREVIOUS) return true
+        if (actionId == EditorInfo.IME_ACTION_GO || actionId == EditorInfo.IME_ACTION_SEARCH) {
+            return inputType and InputType.TYPE_TEXT_FLAG_MULTI_LINE == 0
+        }
+        return false
+    }
+
+    /**
+     * Runs [plan] until a step is accepted. [snapshot] is the field text, or null when the
+     * connection will not say. A null snapshot never counts as a change, so the chain continues.
+     */
+    fun executeSendPlan(
+        plan: List<SendStep>,
+        inputType: Int,
+        snapshot: () -> String?,
+        performAction: (Int) -> Boolean,
+        sendKey: (Int) -> Boolean,
+        commitNewline: () -> Boolean,
+    ) {
+        for (step in plan) {
+            val before = snapshot()
+            when {
+                step.isEditorAction -> {
+                    if (!performAction(step.actionId)) continue
+                    if (trustsTrueReturn(step.actionId, inputType)) return
+                    if (changed(before, snapshot())) return
+                }
+                step.isEnter -> {
+                    sendKey(KeyEvent.KEYCODE_ENTER)
+                    if (changed(before, snapshot())) return
+                }
+                step.isDpadCenter -> {
+                    sendKey(KeyEvent.KEYCODE_DPAD_CENTER)
+                    if (changed(before, snapshot())) return
+                }
+                step.isNumpadEnter -> {
+                    sendKey(KeyEvent.KEYCODE_NUMPAD_ENTER)
+                    if (changed(before, snapshot())) return
+                }
+                step.isNewline -> {
+                    if (inputType and InputType.TYPE_TEXT_FLAG_MULTI_LINE != 0) {
+                        commitNewline()
+                        if (changed(before, snapshot())) return
+                    }
+                }
+            }
+        }
+    }
+
+    private fun changed(before: String?, after: String?): Boolean = before != null && after != null && before != after
+
+    private fun addAction(steps: MutableList<SendStep>, actionId: Int) {
+        if (steps.any { it.isEditorAction && it.actionId == actionId }) return
+        steps.add(SendStep.action(actionId))
+    }
+
+    private fun addKeyFallbacks(steps: MutableList<SendStep>, newline: Boolean) {
+        steps.add(SendStep.enter())
+        steps.add(SendStep.dpadCenter())
+        steps.add(SendStep.numpadEnter())
+        if (newline) steps.add(SendStep.newline())
+    }
+
     class SendStep private constructor(val actionId: Int) {
-        val isEnter: Boolean get() = actionId < 0
+        val isEditorAction: Boolean get() = actionId >= 0
+        val isEnter: Boolean get() = actionId == -KeyEvent.KEYCODE_ENTER
+        val isDpadCenter: Boolean get() = actionId == -KeyEvent.KEYCODE_DPAD_CENTER
+        val isNumpadEnter: Boolean get() = actionId == -KeyEvent.KEYCODE_NUMPAD_ENTER
+        val isNewline: Boolean get() = actionId == NEWLINE
         companion object {
+            private const val NEWLINE = -2
             fun action(id: Int) = SendStep(id)
             fun enter() = SendStep(-KeyEvent.KEYCODE_ENTER)
+            fun dpadCenter() = SendStep(-KeyEvent.KEYCODE_DPAD_CENTER)
+            fun numpadEnter() = SendStep(-KeyEvent.KEYCODE_NUMPAD_ENTER)
+            fun newline() = SendStep(NEWLINE)
         }
     }
 
