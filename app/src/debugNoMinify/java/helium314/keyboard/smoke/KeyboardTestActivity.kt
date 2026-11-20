@@ -252,8 +252,9 @@ class SilentEditor(context: Context) : View(context) {
             override fun getTextBeforeCursor(n: Int, flags: Int): CharSequence? = null
             override fun getTextAfterCursor(n: Int, flags: Int): CharSequence? = null
             override fun commitText(text: CharSequence, newCursorPosition: Int): Boolean {
-                buffer.append(composing).append(text)
+                // An empty commit ends the composing span. It does not keep that span.
                 composing = ""
+                if (text.isNotEmpty()) buffer.append(text)
                 return true
             }
 

@@ -183,23 +183,13 @@ public final class RichInputConnection implements PrivateCommandPerformer {
      * remaining fallback. An explicit empty read clears the flag so the mic comes back.
      */
     public boolean fieldContainsText() {
-        if (mComposingText.length() > 0 || mCommittedTextBeforeComposingText.length() > 0) {
-            mAcceptedText = true;
-            mTextUnreadable = false;
-            return true;
-        }
         if (!isConnected()) {
             mTextUnreadable = true;
-            return mAcceptedText;
+            return mComposingText.length() > 0 || mCommittedTextBeforeComposingText.length() > 0 || mAcceptedText;
         }
         final CharSequence before = mIC.getTextBeforeCursor(1, 0);
-        if (!TextUtils.isEmpty(before)) {
-            mAcceptedText = true;
-            mTextUnreadable = false;
-            return true;
-        }
         final CharSequence after = mIC.getTextAfterCursor(1, 0);
-        if (!TextUtils.isEmpty(after)) {
+        if (!TextUtils.isEmpty(before) || !TextUtils.isEmpty(after)) {
             mAcceptedText = true;
             mTextUnreadable = false;
             return true;
@@ -211,16 +201,26 @@ public final class RichInputConnection implements PrivateCommandPerformer {
             return true;
         }
         final ExtractedTextRequest request = new ExtractedTextRequest();
-        request.hintMaxChars = 1;
+        request.hintMaxChars = 64;
         final ExtractedText extracted = mIC.getExtractedText(request, 0);
-        if (extracted != null && extracted.text != null && extracted.text.length() > 0) {
+        // Cursor reads are null on some search fields. The extracted text is then the truth,
+        // even when the local cache still holds the word that was just deleted.
+        if (before == null && after == null && extracted != null && extracted.text != null) {
+            final boolean hasText = extracted.text.length() > 0;
+            mAcceptedText = hasText;
+            mTextUnreadable = false;
+            if (!hasText) {
+                mComposingText.setLength(0);
+                mCommittedTextBeforeComposingText.setLength(0);
+            }
+            return hasText;
+        }
+        if (mComposingText.length() > 0 || mCommittedTextBeforeComposingText.length() > 0) {
             mAcceptedText = true;
             mTextUnreadable = false;
             return true;
         }
-        final boolean readable = before != null || after != null
-                || (extracted != null && extracted.text != null);
-        if (readable) {
+        if (before != null || after != null || (extracted != null && extracted.text != null)) {
             mAcceptedText = false;
             mTextUnreadable = false;
             return false;
