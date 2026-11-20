@@ -49,6 +49,40 @@ class ProximityAutocorrectTest {
         assertEquals("that", correct("taht"))
     }
 
+    @Test fun brandNamesAreNotRewritten() {
+        val words = ProximityAutocorrect.ListWords(VOCAB + listOf(
+            w("well", 220), w("we", 230), w("bull", 90), w("web", 80),
+            w("venom", 30), w("robin", 70), w("hood", 60), w("coin", 80), w("base", 90),
+            w("gray", 40), w("gram", 40), w("good", 200), w("going", 210), w("am", 170),
+            w("thank", 150), w("you", 200), w("what", 160), w("time", 170),
+        ))
+        for (brand in listOf("webull", "robinhood", "coinbase", "venmo", "grab")) {
+            assertNull(ProximityAutocorrect.correct(brand, words), brand)
+            assertNull(ProximityAutocorrect.missingSpace(brand, words), brand)
+        }
+        assertEquals("good", ProximityAutocorrect.correct("gpod", words))
+        assertEquals("I am going", ProximityAutocorrect.missingSpace("iamgoing", words))
+        assertEquals("don't", ProximityAutocorrect.correct("dont", words))
+        assertEquals("there", ProximityAutocorrect.correct("their", words, previous = "over"))
+    }
+
+    @Test fun aRevertedWordIsLearnedAndNotCorrectedAgain() {
+        val dir = Files.createTempDirectory("webull-learn").toFile()
+        AcceptedTypedWords.ensureLoaded(dir)
+        assertFalse(AcceptedTypedWords.remembers("webull"))
+        // Nothing learned yet: the name is already left alone.
+        assertNull(correct("webull"))
+        // Backspace after a correction remembers the typed spelling (AOSP revertCommit).
+        AcceptedTypedWords.remember(dir, "gpod")
+        assertTrue(AcceptedTypedWords.remembers("gpod"))
+        assertNull(ProximityAutocorrect.correct("gpod", vocab, kept = AcceptedTypedWords.remembers("gpod")))
+        // A second commit of a word the user kept is the same memory.
+        AcceptedTypedWords.remember(dir, "webull")
+        AcceptedTypedWords.remember(dir, "webull")
+        assertTrue(AcceptedTypedWords.remembers("webull"))
+        assertNull(ProximityAutocorrect.correct("webull", vocab, kept = true))
+    }
+
     @Test fun contextApostropheCaseAndMixedCase() {
         assertEquals("I", ProximityAutocorrect.correct("i", vocab))
         assertNull(ProximityAutocorrect.correct("I", vocab))

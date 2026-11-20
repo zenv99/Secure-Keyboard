@@ -23,6 +23,10 @@ HeliBoard
   draws a return key (issue 1989). The big button stays Send. FlorisBoard commits a
   newline for an unspecified action, which does not deliver a key event (issue 3262).
   A field with no action gets KEYCODE_ENTER instead of that newline.
+  An unknown token is not rewritten into a shorter word or split into words unless the
+  pieces are a known bigram. AOSP's normalized-score gate is the same idea: a weak edit
+  does not replace what was typed. Backspace uses AOSP revertCommit, and the typed
+  spelling is remembered so it is not corrected again.
   A one-time toolbar migration follows HeliBoard's version-gated upgrades: only an
   unmodified built-in menu is replaced, and later updates add new keys as disabled.
   Autocorrect keeps AOSP LatinIME's proximity-weighted edit distance and bigram

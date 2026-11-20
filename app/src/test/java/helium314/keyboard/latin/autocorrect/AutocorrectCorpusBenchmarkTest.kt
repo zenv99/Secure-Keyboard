@@ -46,6 +46,7 @@ class AutocorrectCorpusBenchmarkTest {
             "lol", "brb", "yeet", "omw",
             "https://example.com", "zen@example.com", "@zen", "12345", "3.14",
             "iPhone", "eBay", "McDonald",
+            "webull", "robinhood", "coinbase", "venmo", "grab",
         ))
 
         val samples = ArrayList<Long>()

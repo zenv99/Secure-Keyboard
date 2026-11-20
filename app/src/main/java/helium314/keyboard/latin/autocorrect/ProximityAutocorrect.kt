@@ -168,6 +168,8 @@ object ProximityAutocorrect {
             val raw = alignmentCost(typedLetters, candidateLetters, distance, limit, touches, centreOf)
             if (raw > limit) continue
             if (raw > HEAVY_RAW && probability < HEAVY_MIN_PROBABILITY) continue
+            // Two extra or missing letters are not confident enough to replace a typed token.
+            if (!confidentEnough(raw, probability, typedLetters.length, lenDiff)) continue
             var score = rank(raw, probability, overlap(typedLetters, candidateLetters), lenDiff)
             val context = if (previous == null) 0 else bigram(previous, candidate)
             if (context >= 40) score -= 0.55f
@@ -345,7 +347,25 @@ object ProximityAutocorrect {
             k = prev[k]
         }
         parts.reverse()
+        // AOSP does not insert spaces into an unknown token. Only a run of known bigrams
+        // ("i am going", "thank you") is confident enough to commit.
+        for (i in 0 until parts.size - 1) {
+            val key = parts[i].lowercase(Locale.ROOT) + " " + parts[i + 1].lowercase(Locale.ROOT)
+            if (key !in bigrams) return null
+        }
         return parts.joinToString(" ") to score[n]
+    }
+
+    /**
+     * Whether a dictionary candidate is confident enough to replace what was typed.
+     * One adjacent-key slip is enough. A heavier edit needs a common word, and two extra
+     * or missing letters are not an auto-correction. Mirrors AOSP's normalized-score gate.
+     */
+    private fun confidentEnough(raw: Float, probability: Int, typedLength: Int, lenDiff: Int): Boolean {
+        // Dropping or adding two letters ("webull" → "well") is below AOSP's bar.
+        // One slip, one transposition, or one missing letter still qualifies.
+        if (lenDiff >= 2) return false
+        return raw <= maxRawCost(typedLength) && probability >= MIN_PROBABILITY
     }
 
     /**
