@@ -268,6 +268,19 @@ class SilentEditor(context: Context) : View(context) {
                 return true
             }
 
+            override fun sendKeyEvent(event: KeyEvent): Boolean {
+                if (event.action == KeyEvent.ACTION_DOWN && event.keyCode == KeyEvent.KEYCODE_DEL) {
+                    val all = contents()
+                    if (all.isNotEmpty()) {
+                        buffer.setLength(0)
+                        buffer.append(all.dropLast(1))
+                        composing = ""
+                    }
+                    return true
+                }
+                return false
+            }
+
             override fun deleteSurroundingText(beforeLength: Int, afterLength: Int): Boolean {
                 val all = contents()
                 val keep = (all.length - beforeLength).coerceAtLeast(0)

@@ -108,12 +108,12 @@ jobs:
             export SK_KEYSTORE_FILE="$RUNNER_TEMP/sk.jks"
             export SK_KEYSTORE_PASSWORD="$PW"
             export SK_VERSION_CODE=$((4300 + GITHUB_RUN_NUMBER))
-            # Published v1.0.3 is versionCode 4408. Stay above it so Obtainium and Android see an update.
-            if [ "$SK_VERSION_CODE" -le 4408 ]; then
-              export SK_VERSION_CODE=4409
+            # Published v1.0.4 is versionCode 4419. Stay above it so Obtainium and Android see an update.
+            if [ "$SK_VERSION_CODE" -le 4419 ]; then
+              export SK_VERSION_CODE=4420
             fi
-            # New release. Do not replace v1.0.3 or any older release.
-            export SK_VERSION_NAME="1.0.4"
+            # New release. Do not replace v1.0.4 or any older release.
+            export SK_VERSION_NAME="1.0.5"
             echo "SK_SIGNED=1" >> "$GITHUB_ENV"
             echo "SK_VERSION_NAME=$SK_VERSION_NAME" >> "$GITHUB_ENV"
             echo "SK_VERSION_CODE=$SK_VERSION_CODE" >> "$GITHUB_ENV"
@@ -247,14 +247,35 @@ jobs:
           export GH_REPO="$GITHUB_REPOSITORY"
           cp apk/*.apk release/SecureKeyboard.apk
           VERSION_NAME="$(tr -d '[:space:]' < buildinfo/version_name || true)"
-          if [ "$VERSION_NAME" = "1.0" ] || [ "$VERSION_NAME" = "1.0.1" ] || [ "$VERSION_NAME" = "1.0.2" ] || [ "$VERSION_NAME" = "1.0.3" ] || [ "$VERSION_NAME" = "1.0.4" ]; then
+          if [ "$VERSION_NAME" = "1.0" ] || [ "$VERSION_NAME" = "1.0.1" ] || [ "$VERSION_NAME" = "1.0.2" ] || [ "$VERSION_NAME" = "1.0.3" ] || [ "$VERSION_NAME" = "1.0.4" ] || [ "$VERSION_NAME" = "1.0.5" ]; then
             TAG="v${VERSION_NAME}"
           else
             TAG="v1.0.${GITHUB_RUN_NUMBER}"
           fi
           cp release/SecureKeyboard.apk "release/SecureKeyboard-${TAG}.apk"
           (cd release && sha256sum "SecureKeyboard-${TAG}.apk" > SHA256SUMS.txt)
-          if [ "$TAG" = "v1.0.4" ]; then
+          if [ "$TAG" = "v1.0.5" ]; then
+            cat > release/notes.md <<EOF
+          Secure Keyboard v1.0.5 (commit ${GITHUB_SHA:0:8}). Not yet independently audited.
+
+          What changed
+          - The 123 page and the #+= page follow the iOS layout.
+          - A short tap sends in every app. If the app ignores the action, the enter key is used. The keyboard stays open.
+          - Holding the space bar moves the caret left, right, up, and down, and stops at the ends of the text.
+          - The big button turns into Send after you type in Settings and in search boxes. Deleting the text turns it back into the mic.
+
+          Privacy
+          No INTERNET permission. No background location. Backup is off. Voice and learned words stay on the device.
+
+          License
+          Secure Keyboard is free software under the GNU General Public License v3.0. It is a modified version of HeliBoard (copyright Helium314 and contributors), which is based on OpenBoard and the Android Open Source Keyboard (Apache License 2.0). This is not the official HeliBoard.
+
+          Signing certificate SHA-256
+          33eacd63355ee1b19abca1f997ea25a7946960bbf934411691273dde053c78d4
+
+          Install: download SecureKeyboard-v1.0.5.apk, then enable Secure Keyboard in Settings > System > Keyboard. Check the file against SHA256SUMS.txt before installing.
+          EOF
+          elif [ "$TAG" = "v1.0.4" ]; then
             cat > release/notes.md <<EOF
           Secure Keyboard v1.0.4 (commit ${GITHUB_SHA:0:8}). Not yet independently audited.
 
@@ -376,8 +397,8 @@ jobs:
             echo "Refusing to replace existing release $TAG." >&2
             exit 1
           fi
-          # v1.0.4 is a full release. Older tags stay pre-releases and are never replaced.
-          if [ "$TAG" = "v1.0.4" ]; then
+          # v1.0.5 is a full release. Older tags stay as they are and are never replaced.
+          if [ "$TAG" = "v1.0.5" ]; then
             gh release create "$TAG" "release/SecureKeyboard-${TAG}.apk" release/SHA256SUMS.txt \
               --target "$GITHUB_SHA" --title "Secure Keyboard ${TAG}" --notes-file release/notes.md
           else

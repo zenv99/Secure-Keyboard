@@ -64,14 +64,16 @@ class SendTrackpadTest {
         open(KeyboardTestActivity.FIELD_FLUTTER)
         val ime = ime()
         val flutter = KeyboardTestActivity.instance!!.flutter ?: throw AssertionError("flutter field missing")
-        instrumentation.runOnMainSync {
-            flutter.setText("pay")
-            flutter.setSelection(3)
+        for (ch in "pay") {
+            instrumentation.runOnMainSync {
+                ime.onEvent(helium314.keyboard.event.Event.createEventForCodePointFromUnknownSource(ch.code))
+            }
+            Thread.sleep(40)
         }
         instrumentation.runOnMainSync { ime.onSendKey() }
         Thread.sleep(300)
         println("SEND_FLUTTER actions=${flutter.actions} keys=${flutter.keyDowns} text=${flutter.text}")
-        assertTrue(flutter.actions.contains(EditorInfo.IME_ACTION_SEND))
+        assertTrue("no send action, actions=${flutter.actions} text=${flutter.text}", flutter.actions.contains(EditorInfo.IME_ACTION_SEND))
         val moved = flutter.keyDowns.any {
             it == KeyEvent.KEYCODE_ENTER || it == KeyEvent.KEYCODE_NUMPAD_ENTER || it == KeyEvent.KEYCODE_DPAD_CENTER
         } || flutter.text.toString().contains("\n")
