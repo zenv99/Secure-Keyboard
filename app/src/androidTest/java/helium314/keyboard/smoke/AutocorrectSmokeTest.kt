@@ -41,13 +41,15 @@ class AutocorrectSmokeTest {
         assertNull(ProximityAutocorrect.correct("jordan", words))
         assertNull(ProximityAutocorrect.correct("iPhone", words))
 
-        val samples = LongArray(400)
-        val rng = java.util.Random(3)
-        for (i in samples.indices) {
-            val word = LEXICON[rng.nextInt(LEXICON.size)]
-            val typed = if (word.length > 4) word[0] + "x" + word.substring(2) else word
+        val typed = Array(400) { i ->
+            val word = LEXICON[i % LEXICON.size]
+            if (word.length > 4) word[0] + "x" + word.substring(2) else word
+        }
+        repeat(40) { ProximityAutocorrect.correct(typed[it % typed.size], words) }
+        val samples = LongArray(typed.size)
+        for (i in typed.indices) {
             val started = System.nanoTime()
-            ProximityAutocorrect.correct(typed, words)
+            ProximityAutocorrect.correct(typed[i], words)
             samples[i] = System.nanoTime() - started
         }
         Arrays.sort(samples)
