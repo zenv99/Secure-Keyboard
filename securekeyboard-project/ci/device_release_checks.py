@@ -31,6 +31,12 @@ def adb(*args: str, check: bool = True) -> str:
     return (result.stdout or "") + (result.stderr or "")
 
 
+def root() -> None:
+    adb("root")
+    subprocess.run(["adb", "wait-for-device"], check=True)
+    time.sleep(2)
+
+
 def shot(name: str) -> None:
     adb("shell", "screencap", "-p", f"/data/local/tmp/sk-{name}.png")
     print(f"shot {name}")
@@ -107,8 +113,7 @@ def enable_keyboard() -> None:
 
 
 def read_toolbar() -> str:
-    adb("root")
-    time.sleep(1)
+    root()
     xml = adb("shell", "cat", PREFS)
     match = re.search(r'name="toolbar_keys"[^>]*>([^<]*)<', xml)
     if not match:
@@ -127,8 +132,7 @@ def enabled_keys(serialized: str) -> list[str]:
 
 
 def write_toolbar(serialized: str) -> None:
-    adb("root")
-    time.sleep(1)
+    root()
     adb("shell", "am", "force-stop", PKG)
     xml = adb("shell", "cat", PREFS, check=False)
     if 'name="toolbar_keys"' in xml:
@@ -286,6 +290,54 @@ def chrome_package() -> str:
     raise RuntimeError(f"Chrome is not on this image. Packages:\n{packages}")
 
 
+def ime_frame() -> tuple[int, int, int, int] | None:
+    text = adb("shell", "dumpsys", "input_method")
+    match = re.search(r"mImeFrame=\[(\d+),(\d+)\]\[(\d+),(\d+)\]", text)
+    if not match:
+        return None
+    return tuple(int(n) for n in match.groups())  # type: ignore[return-value]
+
+
+def tap_key_grid(letter: str) -> None:
+    frame = ime_frame()
+    if not frame:
+        raise RuntimeError(f"keyboard window not found for {letter}")
+    x1, y1, x2, y2 = frame
+    width, height = x2 - x1, y2 - y1
+    key_top = y1 + int(height * 0.22)
+    rows = {
+        "qwertyuiop": 0.18,
+        "asdfghjkl": 0.38,
+        "zxcvbnm": 0.58,
+    }
+    wanted = letter.lower()
+    if wanted == "space":
+        tap(x1 + width // 2, y1 + int(height * 0.82))
+        time.sleep(0.15)
+        return
+    if wanted == "delete":
+        tap(x1 + int(width * 0.90), y1 + int(height * 0.58))
+        time.sleep(0.15)
+        return
+    for letters, frac in rows.items():
+        if wanted not in letters:
+            continue
+        count = len(letters)
+        inset = 0.5 if letters.startswith("a") else (1.5 if letters.startswith("z") else 0.0)
+        slot = (width * (10 - inset * 2) / 10) if letters.startswith("z") else width / (count + (1 if letters.startswith("a") else 0))
+        index = letters.index(wanted)
+        if letters.startswith("a"):
+            x = x1 + int(slot * (index + 0.5))
+        elif letters.startswith("z"):
+            x = x1 + int(width * 0.15) + int((width * 0.70) * (index + 0.5) / count)
+        else:
+            x = x1 + int(width * (index + 0.5) / count)
+        tap(x, key_top + int(height * frac))
+        time.sleep(0.15)
+        return
+    raise RuntimeError(f"no grid position for {letter}")
+
+
 def tap_key(letter: str) -> None:
     root = dump()
     wanted = {"space": "space", "delete": "delete"}.get(letter.lower(), letter.lower())
@@ -293,10 +345,11 @@ def tap_key(letter: str) -> None:
         label = (node.attrib.get("content-desc") or node.attrib.get("text") or "").strip().lower()
         if label == wanted or label.startswith(wanted + " "):
             x, y = center(parse_bounds(node.attrib["bounds"]))
-            tap(x, y)
-            time.sleep(0.15)
-            return
-    raise RuntimeError(f"key {letter} not in the accessibility tree")
+            if y > 200:
+                tap(x, y)
+                time.sleep(0.15)
+                return
+    tap_key_grid(letter)
 
 
 def type_word(word: str) -> None:

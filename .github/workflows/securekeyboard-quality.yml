@@ -200,13 +200,23 @@ jobs:
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
+      - name: Cache the emulator system image
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.android/avd
+            ~/.android/adb*
+          key: avd-34-google-apis-x86_64
       - name: Keyboard smoke tests on emulator
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 34
           arch: x86_64
           target: google_apis
+          force-avd-creation: false
           disable-animations: true
+          emulator-boot-timeout: 900
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -camera-back none
           script: bash securekeyboard-project/ci/emulator_smoke.sh
       - name: Upload emulator test report
         if: always()
