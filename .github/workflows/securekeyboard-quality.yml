@@ -3,7 +3,7 @@ name: Secure Keyboard quality gates
 on:
   workflow_dispatch:
   push:
-    branches: [main, 'securekeyboard-*', 'cursor/shopee-send-7421', 'cursor/autocorrect-tune-7421']
+    branches: [main, 'securekeyboard-*', 'cursor/shopee-send-7421', 'cursor/autocorrect-tune-7421', 'cursor/plus-menu-7421']
     paths:
       - 'securekeyboard-project/**'
       - 'app/**'

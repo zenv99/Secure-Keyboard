@@ -42,7 +42,8 @@ class App : Application() {
             },
             scope.launch { FoldableUtils.init(ctx) },
             scope.launch { Settings.init(ctx) },
-            // upgrade toolbar on every debug apk start because we may work on adding a new toolbar key
+            // Debug builds may add a toolbar key between installs. This only adds that key
+            // as disabled and drops removed keys. It must not replace a saved menu.
             scope.launch { if (BuildConfig.DEBUG) upgradeToolbarPrefs(prefs()) },
             scope.launch { transferOldPinnedClips(ctx) }, // todo: remove in a few months, maybe end 2026
             scope.launch { Defaults.initDynamicDefaults(ctx) }
