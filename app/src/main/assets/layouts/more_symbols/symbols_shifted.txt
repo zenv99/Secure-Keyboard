@@ -1,31 +1,17 @@
-~
-`
-|
-• ♪ ♥ ♠ ♦ ♣
-√
-π Π
-÷
-×
-¶ §
-∆
-
-$$$1
-$$$2
-$$$3
-$$$4
-^ ↑ ↓ ← →
-° ′ ″
-= ≠ ⁼ ≈ ∞
-{
-}
-
-\
-©
-®
-™
-% ℅
 [
+  [
+    { "label": "[" }, { "label": "]" }, { "label": "{" }, { "label": "}" }, { "label": "#" },
+    { "label": "%" }, { "label": "^" }, { "label": "*" }, { "label": "+" }, { "label": "=" }
+  ],
+  [
+    { "label": "_" }, { "label": "\\" }, { "label": "|" }, { "label": "~" }, { "label": "<" },
+    { "label": ">" }, { "label": "€" }, { "label": "£" }, { "label": "¥" }, { "label": "•" }
+  ],
+  [
+    { "label": ".", "width": 0.14 },
+    { "label": ",", "width": 0.14 },
+    { "label": "?", "width": 0.14 },
+    { "label": "!", "width": 0.14 },
+    { "label": "'", "width": 0.14 }
+  ]
 ]
-
-< !fixedColumnOrder!3 ‹ ≤ «
-> !fixedColumnOrder!3 › ≥ »

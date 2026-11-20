@@ -579,7 +579,7 @@ f""", // no newline at the end
         }
     }
 
-    private fun buildKeyboard(editorInfo: EditorInfo, subtype: InputMethodSubtype, element: KeyboardElement): Pair<Keyboard, List<List<KeyParams>>> {
+    private fun buildKeyboard(editorInfo: EditorInfo, subtype: InputMethodSubtype, element: KeyboardElement, emojiKey: Boolean = false): Pair<Keyboard, List<List<KeyParams>>> {
         val layoutParams = KeyboardLayoutSet.Params()
         val editorInfoField = KeyboardLayoutSet.Params::class.java.getDeclaredField("editorInfo").apply { isAccessible = true }
         editorInfoField.set(layoutParams, editorInfo)
@@ -592,12 +592,34 @@ f""", // no newline at the end
 
         val keysInRowsField = KeyboardBuilder::class.java.getDeclaredField("keysInRows").apply { isAccessible = true }
 
-        val id = KeyboardId(element, layoutParams)
+        val id = KeyboardId(element, layoutParams).let { if (emojiKey) it.copy(emojiKeyEnabled = true) else it }
         val builder = KeyboardBuilder(latinIME, KeyboardParams(UniqueKeysCache.NO_CACHE))
         builder.load(id)
         @Suppress("UNCHECKED_CAST")
         return builder.build() to keysInRowsField.get(builder) as ArrayList<ArrayList<KeyParams>>
     }
+
+    @Test fun iosSymbolsPagesMatchThePhoneLayout() {
+        val editorInfo = EditorInfo()
+        val subtype = SubtypeUtilsAdditional.createEmojiCapableAdditionalSubtype(Locale.ENGLISH, "qwerty", true)
+        val (_, letters) = buildKeyboard(editorInfo, subtype, KeyboardElement.ALPHABET, emojiKey = true)
+        val (_, symbols) = buildKeyboard(editorInfo, subtype, KeyboardElement.SYMBOLS, emojiKey = true)
+        val (_, more) = buildKeyboard(editorInfo, subtype, KeyboardElement.SYMBOLS_SHIFTED, emojiKey = true)
+        assertEquals("?123", labels(letters.last()).first())
+        assertTrue("#+=" !in labels(letters[2]))
+        assertEquals(listOf("1", "2", "3", "4", "5", "6", "7", "8", "9", "0"), labels(symbols[0]))
+        assertEquals(listOf("-", "/", ":", ";", "(", ")", "$", "&", "@", "\""), labels(symbols[1]))
+        assertEquals(listOf("#+=", ".", ",", "?", "!", "'", "delete_key"), labels(symbols[2]))
+        assertEquals(listOf("ABC", "emoji", "space_key"), labels(symbols[3]).take(3))
+        assertTrue(labels(symbols[3]).none { it == "." || it == "," })
+        assertEquals(listOf("[", "]", "{", "}", "#", "%", "^", "*", "+", "="), labels(more[0]))
+        assertEquals(listOf("_", "\\", "|", "~", "<", ">", "€", "£", "¥", "•"), labels(more[1]))
+        assertEquals(listOf("123", ".", ",", "?", "!", "'", "delete_key"), labels(more[2]))
+        assertEquals(listOf("ABC", "emoji", "space_key"), labels(more[3]).take(3))
+    }
+
+    private fun labels(row: List<KeyParams>): List<String> =
+        row.filter { !it.isSpacer }.map { it.mLabel ?: it.mIconName ?: "" }
 
     @Test fun placeholderAsOnlyPopup() { // https://github.com/HeliBorg/HeliBoard/issues/1324
         val keyParams = LayoutParser.parseJsonString("""[[{ "label": "ক", "popup": { "relevant": [

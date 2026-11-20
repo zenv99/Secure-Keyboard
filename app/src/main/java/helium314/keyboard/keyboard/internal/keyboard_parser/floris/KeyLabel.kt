@@ -140,7 +140,8 @@ object KeyLabel {
     }
 
     private fun getShiftLabel(params: KeyboardParams) = when (params.mId.element) {
-        KeyboardElement.SYMBOLS_SHIFTED -> params.mLocaleKeyboardInfos.labelSymbol
+        // iOS uses 123 to return from the second symbols page, and #+= to open it.
+        KeyboardElement.SYMBOLS_SHIFTED -> "123"
         KeyboardElement.SYMBOLS -> params.mLocaleKeyboardInfos.getShiftSymbolLabel(
             Settings.getInstance().isTablet)
         KeyboardElement.ALPHABET_MANUAL_SHIFTED, KeyboardElement.ALPHABET_AUTOMATIC_SHIFTED -> "!icon/${KeyboardIconsSet.NAME_SHIFT_KEY_SHIFTED}"

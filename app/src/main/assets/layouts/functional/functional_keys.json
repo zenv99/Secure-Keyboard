@@ -11,14 +11,12 @@
       "uri":      { "label": "/", "labelFlags": 1073741824, "groupId": 1, "type": "function" },
       "default":  { "$": "keyboard_state_selector",
         "alphabet": { "$": "keyboard_state_selector", "emojiKeyEnabled": { "label": "emoji", "width": 0.10 } },
+        "symbols": { "$": "keyboard_state_selector", "emojiKeyEnabled": { "label": "emoji", "width": 0.10 } },
+        "moreSymbols": { "$": "keyboard_state_selector", "emojiKeyEnabled": { "label": "emoji", "width": 0.10 } },
         "default": { "label": "comma", "labelFlags": 1073741824 }
       }
     },
     { "label": "space" },
-    { "$": "keyboard_state_selector",
-      "symbols": { "label": "period", "labelFlags": 1073741824 },
-      "moreSymbols": { "label": "period", "labelFlags": 1073741824 }
-    },
     { "label": "action", "width": 0.22, "labelFlags": 1073741824 }
   ]
 ]

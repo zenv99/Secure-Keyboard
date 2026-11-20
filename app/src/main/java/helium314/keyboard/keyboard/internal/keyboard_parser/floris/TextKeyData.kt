@@ -442,7 +442,9 @@ sealed interface KeyData : AbstractKeyData {
                         KeyboardTheme.getThemeActionAndEmojiKeyLabelFlags(params.mThemeId)
             }
             KeyLabel.SPACE -> if (params.mId.element.isNumberLayout) Key.LABEL_FLAGS_ALIGN_ICON_TO_BOTTOM else 0
-            KeyLabel.SHIFT -> Key.LABEL_FLAGS_PRESERVE_CASE
+            KeyLabel.SHIFT -> Key.LABEL_FLAGS_PRESERVE_CASE or
+                    if (params.mId.element == KeyboardElement.SYMBOLS || params.mId.element == KeyboardElement.SYMBOLS_SHIFTED)
+                        Key.LABEL_FLAGS_AUTO_X_SCALE else 0
             toolbarKeyStrings[ToolbarKey.EMOJI] -> KeyboardTheme.getThemeActionAndEmojiKeyLabelFlags(params.mThemeId)
             KeyLabel.COM -> Key.LABEL_FLAGS_AUTO_X_SCALE or Key.LABEL_FLAGS_FONT_NORMAL or Key.LABEL_FLAGS_PRESERVE_CASE
             KeyLabel.CURRENCY -> Key.LABEL_FLAGS_FOLLOW_KEY_LETTER_RATIO

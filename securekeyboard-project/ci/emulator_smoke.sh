@@ -15,7 +15,7 @@ adb shell pm grant "$PKG" android.permission.RECORD_AUDIO || true
   -Pandroid.testInstrumentationRunnerArguments.package=helium314.keyboard.smoke
 mkdir -p emulator-screenshots
 adb shell ls -l /data/local/tmp/sk-*.png
-for name in plus-menu plus-menu-scrolled trackpad; do
+for name in plus-menu plus-menu-scrolled trackpad symbols symbols-shifted; do
   adb pull "/data/local/tmp/sk-${name}.png" "emulator-screenshots/${name}.png"
 done
 find emulator-screenshots -type f -name '*.png' -print

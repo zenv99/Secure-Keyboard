@@ -373,8 +373,8 @@ jobs:
           fi
           cp release/SecureKeyboard.apk "release/SecureKeyboard-${TAG}.apk"
           if gh release view "$TAG" >/dev/null 2>&1; then
-            echo "Refusing to replace existing release $TAG." >&2
-            exit 1
+            echo "Release $TAG already exists. Leaving it in place."
+            exit 0
           fi
           # v1.0.4 is a full release. Older tags stay pre-releases and are never replaced.
           if [ "$TAG" = "v1.0.4" ]; then
