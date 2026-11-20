@@ -488,7 +488,9 @@ public final class InputLogic {
      */
     public InputTransaction onCodeInput(SettingsValues settingsValues, @NonNull Event event,
             CapsMode keyboardCapsMode, LatinIME.UIHandler handler) {
-        mJustRevertedACommit = false;
+        // A backspace that reverts a commit sets mJustRevertedACommit. That flag has to
+        // survive this method so the next space can see it. Any other key consumes it.
+        final boolean revertedAtStart = mJustRevertedACommit;
 
         if (GestureDataGatheringKt.useBackgroundGathering && mConnection.hasSelection())
             BackgroundGatheringCache.INSTANCE.onEditSelection(mConnection.getSelectedText(0), mConnection.getTextBeforeCursor(40, 0), mConnection.getTextAfterCursor(40, 0));
@@ -533,6 +535,9 @@ public final class InputLogic {
                 && processedEvent.getKeyCode() != KeyCode.ALPHA
                 && processedEvent.getKeyCode() != KeyCode.SYMBOL)
             mLastComposedWord.deactivate();
+        if (revertedAtStart || !mJustRevertedACommit) {
+            mJustRevertedACommit = false;
+        }
         mConnection.endBatchEdit();
         return inputTransaction;
     }
@@ -1161,6 +1166,24 @@ public final class InputLogic {
         final boolean shouldAvoidSendingCode = Constants.CODE_SPACE == codePoint
                 && !settingsValues.mSpacingAndPunctuations.mCurrentLanguageHasSpaces
                 && wasComposingWord;
+
+        // Backspace just rejected an autocorrection and removed the space it inserted.
+        // AOSP keeps that space as a phantom and would otherwise run autocorrect again,
+        // because restarting suggestions puts the typed word back into composing.
+        // This space commits the typed word exactly once: same letters, same capitals,
+        // one space, cursor after that space. It is not the second tap of a double-space period.
+        if (mJustRevertedACommit && Constants.CODE_SPACE == codePoint && !event.isKeyRepeat()) {
+            if (mWordComposer.isComposingWord()) {
+                commitTyped(settingsValues, LastComposedWord.NOT_A_SEPARATOR);
+            }
+            mSpaceState = SpaceState.WEAK;
+            if (!shouldAvoidSendingCode) {
+                mConnection.commitCodePoint(codePoint);
+            }
+            startDoubleSpacePeriodCountdown(inputTransaction);
+            inputTransaction.setRequiresUpdateSuggestions();
+            return;
+        }
 
         if (mWordComposer.isCursorFrontOrMiddleOfComposingWord()) {
             // If we are in the middle of a recorrection, we need to commit the recorrection

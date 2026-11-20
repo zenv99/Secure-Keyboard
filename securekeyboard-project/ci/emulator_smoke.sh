@@ -27,8 +27,12 @@ done
 for name in trackpad-left trackpad-right trackpad-up trackpad-down send-single settings-search-send settings-search-mic shopee-send shopee-mic unspecified-send unspecified-mic autocorrect-sentence \
   plus-legacy-before plus-legacy-after-4435 plus-legacy-after-4436 \
   plus-custom-before plus-custom-after-4435 plus-custom-after-4436 \
-  webull-chrome-bar webull-chrome-bar-backspace webull-chrome-bar-retype \
-  webull-chrome-page webull-chrome-page-backspace webull-chrome-page-retype; do
+  webull-chrome-bar-key-1-w webull-chrome-bar-key-2-e webull-chrome-bar-key-3-b \
+  webull-chrome-bar-key-4-u webull-chrome-bar-key-5-l webull-chrome-bar-key-6-l \
+  webull-chrome-bar-space webull-chrome-bar-backspace webull-chrome-bar-space-again \
+  webull-chrome-page-key-1-w webull-chrome-page-key-2-e webull-chrome-page-key-3-b \
+  webull-chrome-page-key-4-u webull-chrome-page-key-5-l webull-chrome-page-key-6-l \
+  webull-chrome-page-space webull-chrome-page-backspace webull-chrome-page-space-again; do
   test -s "emulator-screenshots/sk-${name}.png"
 done
 find emulator-screenshots -type f -name '*.png' -print

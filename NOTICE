@@ -25,8 +25,11 @@ HeliBoard
   A field with no action gets KEYCODE_ENTER instead of that newline.
   An unknown token is not rewritten into a shorter word or split into words unless the
   pieces are a known bigram. AOSP's normalized-score gate is the same idea: a weak edit
-  does not replace what was typed. Backspace uses AOSP revertCommit, and the typed
-  spelling is remembered so it is not corrected again.
+  does not replace what was typed. Backspace uses AOSP revertCommit: it restores the
+  typed word, including its capitals, and removes the space the correction inserted.
+  The next space commits that typed word once. It does not correct, split, or
+  recapitalize it, and a quick tap does not start the space-bar trackpad. The typed
+  spelling is remembered so a later suggestion does not apply the rejected correction.
   A one-time toolbar migration follows HeliBoard's version-gated upgrades: only an
   unmodified built-in menu is replaced, and later updates add new keys as disabled.
   Autocorrect keeps AOSP LatinIME's proximity-weighted edit distance and bigram

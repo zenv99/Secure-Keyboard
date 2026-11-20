@@ -352,11 +352,12 @@ def tap_key(letter: str) -> None:
     tap_key_grid(letter)
 
 
-def type_word(word: str) -> None:
-    for ch in word:
+def type_letters(word: str, shot_prefix: str | None = None) -> None:
+    for index, ch in enumerate(word, start=1):
         tap_key(ch)
-    tap_key("space")
-    time.sleep(0.4)
+        time.sleep(0.15)
+        if shot_prefix:
+            shot(f"{shot_prefix}-key-{index}-{ch}")
 
 
 def tap_delete() -> None:
@@ -380,22 +381,31 @@ def field_contains(text: str) -> bool:
 
 
 def webull_in(focus_tap: str | None, shot_name: str) -> None:
+    """Type, space, backspace, space. Screenshot after every key.
+
+    Space may autocorrect. Backspace must restore the typed spelling, and the
+    next space must leave that spelling in place with a single space.
+    """
     if focus_tap:
         tap_text(focus_tap)
         time.sleep(1)
-    type_word("webull")
-    time.sleep(0.5)
-    shot(shot_name)
+    type_letters("webull", shot_name)
+    time.sleep(0.3)
     if not field_contains("webull"):
-        raise RuntimeError(f"{shot_name}: webull was not left as typed")
-    tap_delete()
+        raise RuntimeError(f"{shot_name}: webull was not in the field after typing")
+    tap_key("space")
+    time.sleep(0.4)
+    shot(shot_name + "-space")
+    tap_key("delete")
     time.sleep(0.4)
     shot(shot_name + "-backspace")
-    type_word("webull")
-    time.sleep(0.4)
-    shot(shot_name + "-retype")
     if not field_contains("webull"):
-        raise RuntimeError(f"{shot_name}: retype did not stay webull")
+        raise RuntimeError(f"{shot_name}: backspace did not restore webull")
+    tap_key("space")
+    time.sleep(0.4)
+    shot(shot_name + "-space-again")
+    if not field_contains("webull"):
+        raise RuntimeError(f"{shot_name}: the space after backspace rewrote webull")
 
 
 def chrome_checks() -> None:
