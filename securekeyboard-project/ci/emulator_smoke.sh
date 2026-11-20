@@ -16,8 +16,10 @@ adb shell pm grant "$PKG" android.permission.RECORD_AUDIO || true
   -Pandroid.testInstrumentationRunnerArguments.package=helium314.keyboard.smoke
 mkdir -p emulator-screenshots
 adb shell ls -l /data/local/tmp/sk-*.png
-for name in plus-menu plus-menu-scrolled trackpad symbols symbols-shifted trackpad-clamped webview-field; do
-  adb pull "/data/local/tmp/sk-${name}.png" "emulator-screenshots/${name}.png"
+adb shell 'ls /data/local/tmp/sk-*.png' | tr -d '\r' | while read -r remote; do
+  adb pull "$remote" "emulator-screenshots/$(basename "$remote")"
+done
+for name in trackpad-left trackpad-right trackpad-up trackpad-down send-single settings-search-send settings-search-mic; do
+  test -s "emulator-screenshots/sk-${name}.png"
 done
 find emulator-screenshots -type f -name '*.png' -print
-test -n "$(find emulator-screenshots -type f -name '*.png' -print)"

@@ -46,6 +46,7 @@ class SendTrackpadTest {
         println("SEND_SINGLE actions=$single text=${text()}")
         assertEquals(EditorInfo.IME_ACTION_SEND, single.firstOrNull())
         assertTrue(shown(ime))
+        shot("send-single")
         close()
 
         open(KeyboardTestActivity.FIELD_MULTI)
@@ -76,6 +77,7 @@ class SendTrackpadTest {
         } || flutter.text.toString().contains("\n")
         assertTrue("ignored action was not followed by a key, text=${flutter.text}", moved)
         assertTrue(shown(ime))
+        shot("send-flutter")
     }
 
     @Test fun trackpadMovesLeftRightUpDownAndDoesNotWrap() {
@@ -87,6 +89,7 @@ class SendTrackpadTest {
         println("TRACKPAD_LEFT from=3 to=$afterLeft")
         assertTrue("left stayed or moved forward: $afterLeft", afterLeft < 3)
         assertTrue("left wrapped to the end: $afterLeft", afterLeft < 6)
+        shot("trackpad-left")
 
         setText("abcdef", 0)
         drag(ime, dx = -500f, dy = 0f)
@@ -104,19 +107,21 @@ class SendTrackpadTest {
         println("TRACKPAD_RIGHT from=2 to=$afterRight")
         assertTrue("right did not move: $afterRight", afterRight > 2)
         assertTrue(afterRight <= 6)
+        shot("trackpad-right")
 
         setText("hello\nworld", 1)
         drag(ime, dx = 0f, dy = 500f)
         val afterDown = selection()
         println("TRACKPAD_DOWN from=1 to=$afterDown")
         assertTrue("down stayed on the first line: $afterDown", afterDown > "hello\n".length)
+        shot("trackpad-down")
 
         setText("hello\nworld", 8)
         drag(ime, dx = 0f, dy = -500f)
         val afterUp = selection()
         println("TRACKPAD_UP from=8 to=$afterUp")
         assertTrue("up stayed on the second line: $afterUp", afterUp < "hello\n".length)
-        shot("trackpad-clamped")
+        shot("trackpad-up")
     }
 
     @Test fun flutterTrackpadDoesNotJumpToTheEnd() {

@@ -3,6 +3,7 @@ package helium314.keyboard.smoke
 
 import android.content.ComponentName
 import android.content.Intent
+import android.os.ParcelFileDescriptor
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
@@ -32,10 +33,12 @@ class VoiceKeyModeTest {
         Thread.sleep(120)
         println("VOICE_SEARCH desc=${description()} send=${LatinIME.voiceKeyIsSendForTest}")
         assertEquals("Send", description())
+        shot("settings-search-send")
         delete(ime)
         Thread.sleep(120)
         println("VOICE_SEARCH_CLEARED desc=${description()} send=${LatinIME.voiceKeyIsSendForTest}")
         assertEquals("Voice input", description())
+        shot("settings-search-mic")
     }
 
     @Test fun silentFieldFlipsWithoutSelectionUpdates() {
@@ -50,6 +53,13 @@ class VoiceKeyModeTest {
         Thread.sleep(120)
         println("VOICE_SILENT_CLEARED text=${silent?.contents()} desc=${description()} send=${LatinIME.voiceKeyIsSendForTest}")
         assertEquals("Voice input", description())
+    }
+
+    private fun shot(name: String) {
+        val remote = "/data/local/tmp/sk-$name.png"
+        ParcelFileDescriptor.AutoCloseInputStream(
+            instrumentation.uiAutomation.executeShellCommand("screencap -p $remote"),
+        ).use { it.readBytes() }
     }
 
     private fun type(ime: LatinIME, word: String) {
