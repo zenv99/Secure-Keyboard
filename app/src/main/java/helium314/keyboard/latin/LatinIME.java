@@ -1330,43 +1330,69 @@ public class LatinIME extends InputMethodService implements
         final android.view.inputmethod.EditorInfo ei = getCurrentInputEditorInfo();
         final android.view.inputmethod.InputConnection ic = getCurrentInputConnection();
         if (ei == null || ic == null) return;
+        final boolean noEnter = (ei.imeOptions & android.view.inputmethod.EditorInfo.IME_FLAG_NO_ENTER_ACTION) != 0;
+        final boolean multiline = (ei.inputType & android.text.InputType.TYPE_TEXT_FLAG_MULTI_LINE) != 0;
+        final String pkg = android.os.Build.VERSION.SDK_INT >= 23 ? String.valueOf(ei.packageName) : "";
+        android.util.Log.i("SecureKeyboard.Send",
+                "imeOptions=0x" + Integer.toHexString(ei.imeOptions)
+                        + " actionId=" + ei.actionId
+                        + " inputType=0x" + Integer.toHexString(ei.inputType)
+                        + " noEnter=" + noEnter
+                        + " multiline=" + multiline
+                        + " pkg=" + pkg);
         final java.util.List<helium314.keyboard.voice.DictationSendPolicy.SendStep> plan =
                 helium314.keyboard.voice.DictationSendPolicy.INSTANCE.sendPlan(
                         ei.imeOptions, ei.inputType, ei.actionId, ei.actionLabel != null);
-        for (int i = 0; i < plan.size(); i++) {
-            final helium314.keyboard.voice.DictationSendPolicy.SendStep step = plan.get(i);
-            if (step.isEnter()) {
-                final long now = android.os.SystemClock.uptimeMillis();
-                ic.sendKeyEvent(new android.view.KeyEvent(now, now, android.view.KeyEvent.ACTION_DOWN, android.view.KeyEvent.KEYCODE_ENTER, 0));
-                ic.sendKeyEvent(new android.view.KeyEvent(now, now, android.view.KeyEvent.ACTION_UP, android.view.KeyEvent.KEYCODE_ENTER, 0));
-                break;
-            }
-            if (ic.performEditorAction(step.getActionId())) break;
-        }
+        helium314.keyboard.voice.DictationSendPolicy.INSTANCE.executeSendPlan(
+                plan,
+                ei.inputType,
+                () -> fieldSnapshot(ic),
+                actionId -> ic.performEditorAction(actionId),
+                keyCode -> sendDownUp(ic, keyCode),
+                () -> ic.commitText("\n", 1));
         updateVoiceKeyMode();
     }
 
+    /** Text around the caret, or null when the editor will not say. The text itself is not logged. */
+    private static String fieldSnapshot(final android.view.inputmethod.InputConnection ic) {
+        final CharSequence before = ic.getTextBeforeCursor(240, 0);
+        final CharSequence after = ic.getTextAfterCursor(240, 0);
+        if (before == null && after == null) return null;
+        return String.valueOf(before) + "\u0001" + String.valueOf(after);
+    }
+
+    private static boolean sendDownUp(final android.view.inputmethod.InputConnection ic, final int keyCode) {
+        final long now = android.os.SystemClock.uptimeMillis();
+        ic.sendKeyEvent(new android.view.KeyEvent(now, now, android.view.KeyEvent.ACTION_DOWN, keyCode, 0));
+        ic.sendKeyEvent(new android.view.KeyEvent(now, now + 1, android.view.KeyEvent.ACTION_UP, keyCode, 0));
+        return true;
+    }
+
+    /** Observed by tests. The big button is Send exactly when the field has text. */
+    public static boolean voiceKeyIsSendForTest;
+
+    private int mVoiceProbeTries;
+    private final Runnable mVoiceProbe = this::updateVoiceKeyMode;
+
     /** The big mic key becomes the send key while the field contains text, including text just dictated. */
     private void updateVoiceKeyMode() {
-        if (!hasSuggestionStripView()) return;
-        mSuggestionStripView.setVoiceKeySendMode(fieldHasText());
+        final boolean send = fieldHasText();
+        voiceKeyIsSendForTest = send;
+        if (hasSuggestionStripView()) mSuggestionStripView.setVoiceKeySendMode(send);
+        // SearchView restarts input before the text is readable. One later look catches it.
+        final boolean unreadable = mInputLogic.mConnection.wasTextUnreadable();
+        if (unreadable && mVoiceProbeTries < 3) {
+            mVoiceProbeTries++;
+            mHandler.removeCallbacks(mVoiceProbe);
+            mHandler.postDelayed(mVoiceProbe, 48);
+        } else if (!unreadable) {
+            mVoiceProbeTries = 0;
+        }
     }
 
     private boolean fieldHasText() {
         if (mInputLogic.getComposingLength() > 0) return true;
-        if (mInputLogic.mConnection.editorLikelyHasText()) return true;
-        final int start = mInputLogic.mConnection.getExpectedSelectionStart();
-        final int end = mInputLogic.mConnection.getExpectedSelectionEnd();
-        if (start > 0 || end > 0) return true;
-        // Cursor parked at the start of a field that already has text.
-        if (start == 0 && end == 0) return mInputLogic.mConnection.hasTextAfterCursor();
-        if (start < 0 || end < 0) {
-            final CharSequence before = mInputLogic.mConnection.getTextBeforeCursor(1, 0);
-            if (before != null && before.length() > 0) return true;
-            final CharSequence after = mInputLogic.mConnection.getTextAfterCursor(1, 0);
-            return after != null && after.length() > 0;
-        }
-        return false;
+        return mInputLogic.mConnection.fieldContainsText();
     }
 
     public void onPushToTalkRelease() {

@@ -127,6 +127,18 @@ class TrackpadMotion {
 data class TrackpadSteps(val graphemes: Int, val lines: Int, val latencyMs: Float)
 
 /**
+ * A caret move that stays inside the text the editor just reported.
+ * [charDelta] is negative to move toward the start. The result is never past either end,
+ * so setSelection cannot be handed an index the editor would clamp to the far end.
+ */
+fun clampedSelection(selection: Int, charDelta: Int, textBefore: Int, textAfter: Int): Int {
+    if (selection < 0) return selection
+    val lo = (selection - textBefore.coerceAtLeast(0)).coerceAtLeast(0)
+    val hi = selection + textAfter.coerceAtLeast(0)
+    return (selection + charDelta).coerceIn(lo, hi)
+}
+
+/**
  * A window of text around the caret. Horizontal steps walk graphemes and cross line breaks.
  * Vertical steps keep the column the finger was aiming at.
  */

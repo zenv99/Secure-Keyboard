@@ -36,8 +36,6 @@ import helium314.keyboard.latin.utils.SubtypeSettings
 import helium314.keyboard.latin.utils.prefs
 import kotlin.math.abs
 
-private const val TRACKPAD_WINDOW = 4_000
-
 class KeyboardActionListenerImpl(private val latinIME: LatinIME, private val inputLogic: InputLogic) : KeyboardActionListener {
 
     private val connection = inputLogic.mConnection
@@ -321,10 +319,13 @@ class KeyboardActionListenerImpl(private val latinIME: LatinIME, private val inp
     }
 
     private val trackpadMotion = TrackpadMotion()
-    private var trackpadDoc: TrackpadDocument? = null
-    private var trackpadWindowStart = 0
     private var trackpadFramePosted = false
-    /** WebView and some browsers ignore setSelection. Arrow keys still move the caret there. */
+    /**
+     * WebView, Flutter, and React Native often report selection -1 or ignore setSelection
+     * (an out-of-range index jumps to the end of the text). Arrow keys are the fallback
+     * FlorisBoard and AOSP use when the connection cannot be trusted.
+     */
+    private var trackpadActive = false
     private var trackpadArrows = false
     private val trackpadFrame = Choreographer.FrameCallback {
         trackpadFramePosted = false
@@ -333,20 +334,15 @@ class KeyboardActionListenerImpl(private val latinIME: LatinIME, private val inp
     }
 
     private fun beginTrackpad() {
-        // Leave any half-typed word as the user typed it, then take a snapshot to move inside.
+        // Leave any half-typed word as the user typed it.
         inputLogic.finishInput()
         val variation = settings.current.mInputAttributes.mInputType and InputType.TYPE_MASK_VARIATION
         val web = variation == InputType.TYPE_TEXT_VARIATION_WEB_EDIT_TEXT
                 || variation == InputType.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS
-        val before = connection.getTextBeforeCursor(TRACKPAD_WINDOW, 0)?.toString()
-        // X and some React Native fields report selection -1 and a null or stale extract.
-        // Arrow keys still move the caret when setSelection cannot be trusted.
+        val before = connection.getTextBeforeCursor(1, 0)
         val selectionLost = connection.expectedSelectionStart < 0 || connection.expectedSelectionEnd < 0
         trackpadArrows = web || before == null || selectionLost
-        val after = if (trackpadArrows) "" else connection.getTextAfterCursor(TRACKPAD_WINDOW, 0)?.toString() ?: ""
-        trackpadDoc = TrackpadDocument(before ?: "", after)
-        trackpadWindowStart = if (trackpadArrows) 0
-            else connection.expectedSelectionStart - (before?.length ?: 0)
+        trackpadActive = true
         trackpadMotion.reset()
         trackpadMotion.configure(
             Resources.getSystem().displayMetrics.density,
@@ -362,16 +358,20 @@ class KeyboardActionListenerImpl(private val latinIME: LatinIME, private val inp
             trackpadFramePosted = false
             applyTrackpadSteps(trackpadMotion.consume(System.nanoTime()))
         }
-        trackpadDoc = null
-        trackpadArrows = false
         keyboardSwitcher.mainKeyboardView?.setTrackpadLabelAlpha(1f)
-        val end = connection.expectedSelectionStart
-        if (end >= 0) connection.setSelection(end, end) // refresh the text cache once, not every frame
+        // Arrow-key moves do not update the cached selection. Setting it from that cache
+        // is what jumped the caret to the end of the field.
+        if (!trackpadArrows) {
+            val end = connection.expectedSelectionStart
+            if (end >= 0) connection.setSelection(end, end)
+        }
+        trackpadArrows = false
+        trackpadActive = false
         inputLogic.restartSuggestionsOnWordTouchedByCursor(settings.current)
     }
 
     override fun onTouchpadDelta(dxPx: Float, dyPx: Float, eventNs: Long) {
-        if (trackpadDoc == null) return
+        if (!trackpadActive) return
         trackpadMotion.offer(dxPx, dyPx, eventNs)
         if (!trackpadFramePosted) {
             trackpadFramePosted = true
@@ -381,26 +381,54 @@ class KeyboardActionListenerImpl(private val latinIME: LatinIME, private val inp
 
     private fun applyTrackpadSteps(steps: TrackpadSteps) {
         if (steps.graphemes == 0 && steps.lines == 0) return
-        if (trackpadArrows) {
-            nudgeCaretWithArrows(steps.graphemes, steps.lines)
-            return
-        }
-        val doc = trackpadDoc ?: return
-        val crossed = doc.move(steps.graphemes, steps.lines)
-        if (crossed == 0) return
-        val target = (trackpadWindowStart + doc.charOffset()).coerceAtLeast(0)
-        if (!connection.moveCursorTo(target)) {
-            // The editor ignored setSelection (common in a browser). Use arrows for the rest of the drag.
+        // Vertical movement is a visual line. Wrapped text has no newline, so DPAD_UP/DOWN
+        // is the move every editor already clamps at the top and bottom.
+        if (steps.lines != 0) {
+            val vertical = if (steps.lines < 0) KeyEvent.KEYCODE_DPAD_UP else KeyEvent.KEYCODE_DPAD_DOWN
+            repeat(abs(steps.lines)) { tapKey(vertical) }
             trackpadArrows = true
-            nudgeCaretWithArrows(steps.graphemes, steps.lines)
+        }
+        if (steps.graphemes != 0) moveGraphemes(steps.graphemes)
+    }
+
+    private fun moveGraphemes(delta: Int) {
+        if (trackpadArrows || !moveGraphemesBySelection(delta)) {
+            trackpadArrows = true
+            val horizontal = if (delta < 0) KeyEvent.KEYCODE_DPAD_LEFT else KeyEvent.KEYCODE_DPAD_RIGHT
+            repeat(abs(delta)) { tapKey(horizontal) }
         }
     }
 
-    private fun nudgeCaretWithArrows(graphemes: Int, lines: Int) {
-        val horizontal = if (graphemes < 0) KeyEvent.KEYCODE_DPAD_LEFT else KeyEvent.KEYCODE_DPAD_RIGHT
-        val vertical = if (lines < 0) KeyEvent.KEYCODE_DPAD_UP else KeyEvent.KEYCODE_DPAD_DOWN
-        repeat(abs(graphemes)) { tapKey(horizontal) }
-        repeat(abs(lines)) { tapKey(vertical) }
+    /**
+     * Move by graphemes using only text the connection just returned, and never past that text.
+     * An index outside the buffer is what made a left drag jump to the end of the field.
+     * @return false when arrow keys should be used instead.
+     */
+    private fun moveGraphemesBySelection(delta: Int): Boolean {
+        val start = connection.expectedSelectionStart
+        val end = connection.expectedSelectionEnd
+        if (start < 0 || end < 0) return false
+        if (start != end) {
+            val collapse = if (delta < 0) minOf(start, end) else maxOf(start, end)
+            return connection.moveCursorTo(collapse)
+        }
+        val iterator = CompatBreakIterator.graphemeInstance
+        if (delta < 0) {
+            val before = connection.getTextBeforeCursor(abs(delta) * 4 + 8, 0)?.toString() ?: return false
+            if (before.isEmpty()) return true
+            val move = -stepsToCharCount(before, delta, iterator)
+            if (move <= 0) return true
+            val clamped = clampedSelection(start, -move, before.length, 0)
+            if (clamped == start) return true
+            return connection.moveCursorTo(clamped)
+        }
+        val after = connection.getTextAfterCursor(delta * 4 + 8, 0)?.toString() ?: return false
+        if (after.isEmpty()) return true
+        val move = stepsToCharCount(after, delta, iterator)
+        if (move <= 0) return true
+        val clamped = clampedSelection(start, move, 0, after.length)
+        if (clamped == start) return true
+        return connection.moveCursorTo(clamped)
     }
 
     private fun tapKey(keyCode: Int) {

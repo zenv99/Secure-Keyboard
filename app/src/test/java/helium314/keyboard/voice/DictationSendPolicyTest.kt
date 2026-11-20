@@ -104,7 +104,9 @@ class DictationSendPolicyTest {
             val options = action or EditorInfo.IME_FLAG_NO_ENTER_ACTION
             val plan = DictationSendPolicy.sendPlan(options, InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_MULTI_LINE, 0, false)
             assertEquals(EditorInfo.IME_ACTION_SEND, plan[0].actionId, "action $action")
-            assertTrue(plan.last().isEnter, "action $action")
+            assertTrue(plan.any { it.isEnter }, "action $action")
+            assertTrue(plan.any { it.isDpadCenter }, "action $action")
+            assertTrue(plan.last().isNewline, "action $action")
         }
     }
 
@@ -116,16 +118,19 @@ class DictationSendPolicyTest {
             false,
         )
         assertEquals(EditorInfo.IME_ACTION_SEND, plan[0].actionId)
-        assertTrue(plan.last().isEnter)
+        assertTrue(plan.any { it.isEnter })
+        assertTrue(plan.any { it.isNumpadEnter })
     }
 
     @Test fun urlAndSearchKeepTheirOwnAction() {
         val url = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_URI
         val go = DictationSendPolicy.sendPlan(EditorInfo.IME_ACTION_GO, url, 0, false)
-        assertEquals(EditorInfo.IME_ACTION_GO, go.single().actionId)
-        assertEquals(false, go.single().isEnter)
+        assertEquals(EditorInfo.IME_ACTION_GO, go.first().actionId)
+        assertTrue(DictationSendPolicy.trustsTrueReturn(EditorInfo.IME_ACTION_GO, url))
+        assertTrue(go.any { it.isEnter })
         val search = DictationSendPolicy.sendPlan(EditorInfo.IME_ACTION_SEARCH, InputType.TYPE_CLASS_TEXT, 0, false)
-        assertEquals(EditorInfo.IME_ACTION_SEARCH, search.single().actionId)
+        assertEquals(EditorInfo.IME_ACTION_SEARCH, search.first().actionId)
+        assertTrue(DictationSendPolicy.trustsTrueReturn(EditorInfo.IME_ACTION_SEARCH, InputType.TYPE_CLASS_TEXT))
     }
 
     @Test fun whatsAppStyleFieldSendsAndDoesNotReturnEnter() {

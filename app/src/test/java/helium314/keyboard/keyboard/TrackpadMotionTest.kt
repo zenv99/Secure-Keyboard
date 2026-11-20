@@ -158,6 +158,14 @@ class TrackpadMotionTest {
             "same 8 px stream moved ${horizontal.graphemes} characters but ${vertical.lines} lines")
     }
 
+    @Test fun selectionNeverWrapsPastEitherEnd() {
+        assertEquals(0, clampedSelection(3, -10, textBefore = 3, textAfter = 4))
+        assertEquals(5, clampedSelection(3, 10, textBefore = 3, textAfter = 2))
+        assertEquals(0, clampedSelection(0, -1, textBefore = 0, textAfter = 5))
+        assertEquals(5, clampedSelection(5, 1, textBefore = 5, textAfter = 0))
+        assertEquals(2, clampedSelection(3, -1, textBefore = 3, textAfter = 4))
+    }
+
     @Test fun cursorCrossesLinesAndKeepsItsColumn() {
         val doc = TrackpadDocument("hello", "\nworld\n!")
         assertEquals(5, doc.charOffset()) // after "hello", before the newline
