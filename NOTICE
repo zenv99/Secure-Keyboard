@@ -19,6 +19,10 @@ HeliBoard
   The mic becomes Send from the composing text, the committed text, or a direct
   read of the field. AOSP LatinIME keeps that text in the connection cache. Search
   fields and Compose report no selection, so the cache is not the only source.
+  TextView sets IME_FLAG_NO_ENTER_ACTION on a multiline field, and HeliBoard then
+  draws a return key (issue 1989). The big button stays Send. FlorisBoard commits a
+  newline for an unspecified action, which does not deliver a key event (issue 3262).
+  A field with no action gets KEYCODE_ENTER instead of that newline.
 
 OpenBoard and the Android Open Source LatinIME
   Copyright The Android Open Source Project

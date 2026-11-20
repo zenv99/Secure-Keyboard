@@ -6,6 +6,7 @@ import android.view.inputmethod.EditorInfo
 import helium314.keyboard.latin.utils.InputTypeUtils
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 
@@ -100,14 +101,60 @@ class DictationSendPolicyTest {
     }
 
     @Test fun chatFieldsWithNoEnterFlagPlanSendThenEnter() {
-        for (action in listOf(EditorInfo.IME_ACTION_NONE, EditorInfo.IME_ACTION_UNSPECIFIED, EditorInfo.IME_ACTION_SEND)) {
+        val send = DictationSendPolicy.sendPlan(
+            EditorInfo.IME_ACTION_SEND or EditorInfo.IME_FLAG_NO_ENTER_ACTION,
+            InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_MULTI_LINE,
+            0,
+            false,
+        )
+        assertEquals(EditorInfo.IME_ACTION_SEND, send[0].actionId)
+        assertTrue(send.any { it.isEnter })
+        assertTrue(send.any { it.isDpadCenter })
+        assertTrue(send.last().isNewline)
+    }
+
+    @Test fun shopeeStyleFieldIsSendAndDoesNotCommitANewlineFirst() {
+        for (action in listOf(EditorInfo.IME_ACTION_NONE, EditorInfo.IME_ACTION_UNSPECIFIED)) {
             val options = action or EditorInfo.IME_FLAG_NO_ENTER_ACTION
-            val plan = DictationSendPolicy.sendPlan(options, InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_MULTI_LINE, 0, false)
-            assertEquals(EditorInfo.IME_ACTION_SEND, plan[0].actionId, "action $action")
-            assertTrue(plan.any { it.isEnter }, "action $action")
-            assertTrue(plan.any { it.isDpadCenter }, "action $action")
-            assertTrue(plan.last().isNewline, "action $action")
+            val input = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_MULTI_LINE
+            assertEquals(DictationSendPolicy.FACE_SEND, DictationSendPolicy.face(true))
+            assertEquals(DictationSendPolicy.SEND_DRAWABLE, DictationSendPolicy.drawableName(true))
+            assertNotEquals(DictationSendPolicy.RETURN_DRAWABLE, DictationSendPolicy.drawableName(true))
+            val plan = DictationSendPolicy.sendPlan(options, input, 0, false)
+            assertEquals(EditorInfo.IME_ACTION_SEND, plan[0].actionId)
+            assertFalse(plan.first().isNewline)
+            val enter = plan.indexOfFirst { it.isEnter }
+            val newline = plan.indexOfFirst { it.isNewline }
+            assertTrue(enter >= 0, "enter key missing for $action")
+            assertTrue(newline == -1 || newline > enter, "newline committed before enter for $action")
+            val events = mutableListOf<String>()
+            var text = "hi"
+            DictationSendPolicy.executeSendPlan(
+                plan,
+                input,
+                action,
+                snapshot = { text },
+                performAction = { id -> events.add("action:$id"); true },
+                sendKey = { code ->
+                    events.add("key:$code")
+                    if (code == android.view.KeyEvent.KEYCODE_ENTER) text += "\n"
+                    true
+                },
+                commitNewline = { events.add("newline"); text += "\n"; true },
+            )
+            val sentEnter = events.indexOf("key:${android.view.KeyEvent.KEYCODE_ENTER}")
+            val sentNewline = events.indexOf("newline")
+            assertTrue(sentEnter >= 0)
+            assertTrue(sentNewline == -1 || sentNewline > sentEnter)
         }
+    }
+
+    @Test fun unspecifiedSingleLineIsStillSend() {
+        val plan = DictationSendPolicy.sendPlan(EditorInfo.IME_ACTION_UNSPECIFIED, InputType.TYPE_CLASS_TEXT, 0, false)
+        assertEquals(DictationSendPolicy.FACE_SEND, DictationSendPolicy.face(true))
+        assertEquals(EditorInfo.IME_ACTION_SEND, plan[0].actionId)
+        assertTrue(plan.any { it.isEnter })
+        assertFalse(plan.any { it.isNewline })
     }
 
     @Test fun reactNativeComposeWithNoClassStillSendsThenEnter() {

@@ -2,6 +2,19 @@ name: Secure Keyboard lint and unit tests
 
 on:
   workflow_dispatch:
+  push:
+    branches: ['cursor/shopee-send-7421']
+    paths:
+      - 'securekeyboard-project/**'
+      - 'app/**'
+      - 'asr/**'
+      - 'third_party/**'
+      - '.gitmodules'
+      - 'build.gradle.kts'
+      - 'settings.gradle'
+      - 'gradle/**'
+      - '.github/workflows/securekeyboard-lint-tests.yml'
+      - '.github/workflows/securekeyboard-quality.yml'
   pull_request:
     branches: [main]
     paths:

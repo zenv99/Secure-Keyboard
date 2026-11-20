@@ -600,11 +600,12 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
     private var micIcon: android.graphics.drawable.Drawable? = null
     private var sendMode = false
 
-    /** Empty field: the mic. Any text, typed or dictated: the paper-plane send icon. Never the return arrow. */
+    /** Empty field: the mic. Any text: the paper-plane Send icon. Never the return arrow, whatever the field declares. */
     fun setVoiceKeySendMode(send: Boolean) {
-        if (send == sendMode) return
         sendMode = send
         val view = voiceKeyView ?: return
+        // The keyboard's own enter key may be Return for a multiline field with no action.
+        // This button does not follow that icon. The face comes only from whether the field has text.
         if (send) view.setImageResource(R.drawable.sym_keyboard_send_lxx) else view.setImageDrawable(micIcon)
         view.contentDescription = context.getString(if (send) R.string.label_send_key else R.string.voice)
     }

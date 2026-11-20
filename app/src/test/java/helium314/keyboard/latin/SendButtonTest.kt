@@ -68,7 +68,11 @@ class SendButtonTest {
             startField(action or EditorInfo.IME_FLAG_NO_ENTER_ACTION or EditorInfo.IME_FLAG_NO_EXTRACT_UI, chatInput())
             type("hello")
             latinIME.onSendKey()
-            assertEquals(EditorInfo.IME_ACTION_SEND, ShadowInputMethodService.lastEditorAction)
+            // A field with no action tries Search, then the enter key. The enter key changes
+            // the text, so Done, which would hide the keyboard, is not reached.
+            val expectedLast = if (action == EditorInfo.IME_ACTION_SEND) EditorInfo.IME_ACTION_SEND
+                else EditorInfo.IME_ACTION_SEARCH
+            assertEquals(expectedLast, ShadowInputMethodService.lastEditorAction)
             assertEquals(1, ShadowInputMethodService.enterPresses)
             assertStillShown()
         }

@@ -26,6 +26,7 @@ class KeyboardTestActivity : Activity() {
     lateinit var field: EditText
     var web: WebView? = null
     var flutter: IgnoringSendField? = null
+    var shopee: ActionRecordingField? = null
     var silent: SilentEditor? = null
     @Volatile var webLoaded: Boolean = false
     val editorActions = java.util.Collections.synchronizedList(mutableListOf<Int>())
@@ -79,6 +80,16 @@ class KeyboardTestActivity : Activity() {
                     inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_MULTI_LINE
                     imeOptions = EditorInfo.IME_ACTION_SEND or EditorInfo.IME_FLAG_NO_ENTER_ACTION
                 }
+                FIELD_SHOPEE -> {
+                    // React Native multiline chat and search: no action, and the no-enter flag
+                    // that TextView also sets on every multiline field.
+                    inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_CAP_SENTENCES or InputType.TYPE_TEXT_FLAG_MULTI_LINE
+                    imeOptions = EditorInfo.IME_ACTION_NONE or EditorInfo.IME_FLAG_NO_ENTER_ACTION
+                }
+                FIELD_UNSPECIFIED -> {
+                    inputType = InputType.TYPE_CLASS_TEXT
+                    imeOptions = EditorInfo.IME_ACTION_UNSPECIFIED
+                }
                 else -> inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_MULTI_LINE
             }
             contentDescription = "smoke-field"
@@ -98,6 +109,16 @@ class KeyboardTestActivity : Activity() {
             }
             field = ignoring
             flutter = ignoring
+        }
+        if (kind == FIELD_SHOPEE || kind == FIELD_UNSPECIFIED) {
+            val recording = ActionRecordingField(this).apply {
+                setSingleLine(kind == FIELD_UNSPECIFIED)
+                inputType = field.inputType
+                imeOptions = field.imeOptions
+                contentDescription = "smoke-field"
+            }
+            field = recording
+            shopee = recording
         }
         if (kind == FIELD_SETTINGS_SEARCH) {
             val search = SearchView(this)
@@ -182,6 +203,8 @@ world</textarea>
         const val FIELD_WEB_PAGE = "web-page"
         const val FIELD_SETTINGS_SEARCH = "settings-search"
         const val FIELD_SILENT = "silent"
+        const val FIELD_SHOPEE = "shopee"
+        const val FIELD_UNSPECIFIED = "unspecified"
         @Volatile var instance: KeyboardTestActivity? = null
     }
 }
@@ -215,6 +238,37 @@ class IgnoringSendField(context: Context) : EditText(context) {
                     return super.setSelection(len, len)
                 }
                 return super.setSelection(start, end)
+            }
+        }
+    }
+}
+
+/**
+ * Records editor actions, key events, and a committed newline, in order.
+ * performEditorAction returns true and leaves the text, the way a React Native field
+ * ignores an action it did not declare.
+ */
+class ActionRecordingField(context: Context) : EditText(context) {
+    val events = java.util.Collections.synchronizedList(mutableListOf<String>())
+
+    override fun onCreateInputConnection(outAttrs: EditorInfo): InputConnection? {
+        val base = super.onCreateInputConnection(outAttrs) ?: return null
+        outAttrs.imeOptions = imeOptions
+        outAttrs.inputType = inputType
+        return object : InputConnectionWrapper(base, true) {
+            override fun performEditorAction(editorAction: Int): Boolean {
+                events.add("action:$editorAction")
+                return true
+            }
+
+            override fun sendKeyEvent(event: KeyEvent): Boolean {
+                if (event.action == KeyEvent.ACTION_DOWN) events.add("key:${event.keyCode}")
+                return super.sendKeyEvent(event)
+            }
+
+            override fun commitText(text: CharSequence, newCursorPosition: Int): Boolean {
+                if (text.toString() == "\n") events.add("newline")
+                return super.commitText(text, newCursorPosition)
             }
         }
     }

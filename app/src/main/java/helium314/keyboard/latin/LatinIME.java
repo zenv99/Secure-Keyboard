@@ -1346,6 +1346,7 @@ public class LatinIME extends InputMethodService implements
         helium314.keyboard.voice.DictationSendPolicy.INSTANCE.executeSendPlan(
                 plan,
                 ei.inputType,
+                ei.imeOptions,
                 () -> fieldSnapshot(ic),
                 actionId -> ic.performEditorAction(actionId),
                 keyCode -> sendDownUp(ic, keyCode),
