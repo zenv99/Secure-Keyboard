@@ -72,12 +72,13 @@ class AutocorrectCorpusBenchmarkTest {
                 falseWords.add("$typed→$got")
             }
         }
-        val sorted = samples.toLongArray()
-        Arrays.sort(sorted)
-        val p50 = sorted[sorted.size / 2] / 1_000_000.0
-        val p95 = sorted[(sorted.size * 95) / 100] / 1_000_000.0
+        // The first calls load the geometry tables. Steady-state calls are the ones that matter.
+        val steady = samples.drop(40).toLongArray()
+        Arrays.sort(steady)
+        val p50 = steady[steady.size / 2] / 1_000_000.0
+        val p95 = steady[(steady.size * 95) / 100] / 1_000_000.0
         val falseRate = falseCount.toDouble() / guard.size
-        println("AUTOCORRECT_LATENCY n=${sorted.size} p50_ms=${"%.4f".format(p50)} p95_ms=${"%.4f".format(p95)}")
+        println("AUTOCORRECT_LATENCY n=${steady.size} p50_ms=${"%.4f".format(p50)} p95_ms=${"%.4f".format(p95)}")
         println("AUTOCORRECT_FALSE n=${guard.size} false=$falseCount rate=${"%.4f".format(falseRate)} $falseWords")
 
         assertTrue(buckets.getValue("public-misspelling").rate >= 0.90)
