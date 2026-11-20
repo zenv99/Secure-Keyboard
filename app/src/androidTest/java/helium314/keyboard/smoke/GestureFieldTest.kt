@@ -93,25 +93,20 @@ class GestureFieldTest {
     @Test fun plusMenuShowsTheWhatsAppSet() {
         open(KeyboardTestActivity.FIELD_PLAIN)
         val ime = LatinIME.instanceForTest ?: throw AssertionError("keyboard service was not created")
+        val prefs = DeviceProtectedUtils.getSharedPreferences(instrumentation.targetContext)
         instrumentation.runOnMainSync {
-            val prefs = DeviceProtectedUtils.getSharedPreferences(instrumentation.targetContext)
-            prefs.edit().putString(
-                Settings.PREF_TOOLBAR_KEYS,
-                "SETTINGS:true|UNDO:true|REDO:true|LEFT:true|RIGHT:true|NUMPAD:true",
-            ).commit()
-            upgradeToolbarPrefs(prefs)
+            prefs.edit().remove(Settings.PREF_TOOLBAR_KEYS).commit()
             ime.reloadToolbarForTest()
         }
-        val labels = mutableListOf<String>()
-        instrumentation.runOnMainSync { labels.addAll(ime.toolbarLabelsForTest()) }
+        val fresh = mutableListOf<String>()
+        instrumentation.runOnMainSync { fresh.addAll(ime.toolbarLabelsForTest()) }
         val expected = listOf(
             "Photos and Video", "Camera", "Location", "Contact", "Document",
             "Emoji", "Clipboard", "Text shortcuts", "Settings",
         )
         for (label in expected) {
-            assertTrue("menu is $labels", labels.contains(label))
+            assertTrue("fresh menu is $fresh", fresh.contains(label))
         }
-        assertFalse(labels.contains("Undo"))
         val plus = device.wait(Until.findObject(By.desc("More keys")), 15000)
             ?: throw AssertionError("plus button not shown")
         plus.click()
@@ -120,6 +115,18 @@ class GestureFieldTest {
         instrumentation.runOnMainSync { ime.scrollToolbarForTest(2000) }
         Thread.sleep(200)
         shot("plus-menu-scrolled")
+        // A menu the user changed is not a built-in default, so an upgrade must not replace it.
+        instrumentation.runOnMainSync {
+            prefs.edit().putString(
+                Settings.PREF_TOOLBAR_KEYS,
+                "SETTINGS:true|UNDO:true|REDO:true|LEFT:true|RIGHT:true|NUMPAD:true",
+            ).commit()
+            upgradeToolbarPrefs(prefs)
+            ime.reloadToolbarForTest()
+        }
+        val kept = mutableListOf<String>()
+        instrumentation.runOnMainSync { kept.addAll(ime.toolbarLabelsForTest()) }
+        assertEquals(listOf("Settings", "Undo", "Redo", "Left", "Right", "Numpad"), kept)
     }
 
     private fun expect(field: String, action: Int, sample: String, dropSelection: Boolean = false) {

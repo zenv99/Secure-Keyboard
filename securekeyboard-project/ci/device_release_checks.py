@@ -97,11 +97,16 @@ def wait_text(text: str, timeout: float = 20) -> None:
 
 
 def ime_id() -> str:
-    listing = adb("shell", "ime", "list", "-a", "-s")
-    for line in listing.splitlines():
-        if PKG in line and ".debug" not in line:
-            return line.strip()
-    raise RuntimeError(f"release IME not listed: {listing}")
+    deadline = time.time() + 30
+    last = ""
+    while time.time() < deadline:
+        last = adb("shell", "ime", "list", "-a", "-s")
+        for line in last.splitlines():
+            if PKG in line and ".debug" not in line:
+                return line.strip()
+        time.sleep(2)
+    packages = adb("shell", "pm", "path", PKG, check=False)
+    raise RuntimeError(f"release IME not listed: {last} path={packages}")
 
 
 def enable_keyboard() -> None:
