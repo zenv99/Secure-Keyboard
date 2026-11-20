@@ -156,15 +156,77 @@ public final class RichInputConnection implements PrivateCommandPerformer {
 
     /** True after this session committed text, even if the app then reports an unknown selection. */
     private boolean mAcceptedText;
+    /** The last probe could not read the editor. Not the same as an empty field. */
+    private boolean mTextUnreadable;
 
     public void onStartInput() {
         mLastSlowInputConnectionTime = -SLOW_INPUTCONNECTION_PERSIST_MS;
         mAcceptedText = false;
+        mTextUnreadable = false;
     }
 
     /** Text we put in the field, or a cursor past the start. Survives a host that drops the selection. */
     public boolean editorLikelyHasText() {
         return mAcceptedText || mExpectedSelStart > 0 || mExpectedSelEnd > 0 || mComposingText.length() > 0;
+    }
+
+    public boolean wasTextUnreadable() {
+        final boolean unreadable = mTextUnreadable;
+        mTextUnreadable = false;
+        return unreadable;
+    }
+
+    /**
+     * Whether the field currently holds text. Composing and committed text count, then a direct
+     * read of the connection (not the selection cache). SearchView and Compose report selection
+     * 0 or -1 and sometimes return null from getTextBeforeCursor; the extracted text is the
+     * remaining fallback. An explicit empty read clears the flag so the mic comes back.
+     */
+    public boolean fieldContainsText() {
+        if (mComposingText.length() > 0 || mCommittedTextBeforeComposingText.length() > 0) {
+            mAcceptedText = true;
+            mTextUnreadable = false;
+            return true;
+        }
+        if (!isConnected()) {
+            mTextUnreadable = true;
+            return mAcceptedText;
+        }
+        final CharSequence before = mIC.getTextBeforeCursor(1, 0);
+        if (!TextUtils.isEmpty(before)) {
+            mAcceptedText = true;
+            mTextUnreadable = false;
+            return true;
+        }
+        final CharSequence after = mIC.getTextAfterCursor(1, 0);
+        if (!TextUtils.isEmpty(after)) {
+            mAcceptedText = true;
+            mTextUnreadable = false;
+            return true;
+        }
+        final CharSequence selected = mIC.getSelectedText(0);
+        if (!TextUtils.isEmpty(selected)) {
+            mAcceptedText = true;
+            mTextUnreadable = false;
+            return true;
+        }
+        final ExtractedTextRequest request = new ExtractedTextRequest();
+        request.hintMaxChars = 1;
+        final ExtractedText extracted = mIC.getExtractedText(request, 0);
+        if (extracted != null && extracted.text != null && extracted.text.length() > 0) {
+            mAcceptedText = true;
+            mTextUnreadable = false;
+            return true;
+        }
+        final boolean readable = before != null || after != null
+                || (extracted != null && extracted.text != null);
+        if (readable) {
+            mAcceptedText = false;
+            mTextUnreadable = false;
+            return false;
+        }
+        mTextUnreadable = true;
+        return mAcceptedText;
     }
 
     private void checkConsistencyForDebug() {

@@ -10,8 +10,8 @@ adb shell ime enable "$IME"
 adb shell ime set "$IME"
 adb shell settings put secure show_ime_with_hard_keyboard 1
 adb shell pm grant "$PKG" android.permission.RECORD_AUDIO || true
-# Dictation hold, send (including a field that ignores the action), the trackpad
-# (left, right, up, down, both ends), and the plus menu live in this package.
+# Dictation hold, send, the trackpad, the plus menu, and the mic/Send face
+# (Settings search and a field that never reports a selection) live in this package.
 ./gradlew --no-daemon :app:connectedDebugNoMinifyAndroidTest \
   -Pandroid.testInstrumentationRunnerArguments.package=helium314.keyboard.smoke
 mkdir -p emulator-screenshots

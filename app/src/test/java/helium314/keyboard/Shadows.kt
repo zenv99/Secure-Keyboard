@@ -140,6 +140,9 @@ class ShadowInputMethodService {
         /** Returns true from performEditorAction without changing the text. Flutter does this. */
         var editorActionIgnoresText = false
         var enterPresses = 0
+        /** SearchView / Compose sometimes refuse cursor reads and never call onUpdateSelection. */
+        var cursorReadsReturnNull = false
+        var extractedTextIncludesContents = false
 
         // convenience for access
         val textBeforeCursor get() = text.substring(0, selectionStart)
@@ -165,6 +168,8 @@ class ShadowInputMethodService {
             editorActionHandled = true
             editorActionIgnoresText = false
             enterPresses = 0
+            cursorReadsReturnNull = false
+            extractedTextIncludesContents = false
         }
     }
 
@@ -182,9 +187,11 @@ class ShadowInputMethodService {
     private val ic = object : InputConnection {
         // pretty clear (though this may be slow depending on the editor)
         // bad return value here is likely the cause for that weird bug improved/fixed by fixIncorrectLength
-        override fun getTextBeforeCursor(p0: Int, p1: Int): CharSequence = textBeforeCursor.take(p0)
+        override fun getTextBeforeCursor(p0: Int, p1: Int): CharSequence? =
+            if (cursorReadsReturnNull) null else textBeforeCursor.take(p0)
         // pretty clear (though this may be slow depending on the editor)
-        override fun getTextAfterCursor(p0: Int, p1: Int): CharSequence = textAfterCursor.take(p0)
+        override fun getTextAfterCursor(p0: Int, p1: Int): CharSequence? =
+            if (cursorReadsReturnNull) null else textAfterCursor.take(p0)
         // pretty clear
         override fun getSelectedText(p0: Int): CharSequence? = if (selectionStart == selectionEnd) null
         else text.substring(selectionStart, selectionEnd)
@@ -321,8 +328,9 @@ class ShadowInputMethodService {
         override fun getExtractedText(p0: ExtractedTextRequest?, p1: Int): ExtractedText {
             return ExtractedText().also {
                 it.startOffset = 0
-                it.selectionStart = selectionStart
-                it.selectionEnd = selectionEnd
+                it.selectionStart = if (cursorReadsReturnNull) -1 else selectionStart
+                it.selectionEnd = if (cursorReadsReturnNull) -1 else selectionEnd
+                if (extractedTextIncludesContents) it.text = text
             }
         }
         // only effect is flashing, so whatever...

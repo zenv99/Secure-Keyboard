@@ -1368,27 +1368,31 @@ public class LatinIME extends InputMethodService implements
         return true;
     }
 
+    /** Observed by tests. The big button is Send exactly when the field has text. */
+    public static boolean voiceKeyIsSendForTest;
+
+    private int mVoiceProbeTries;
+    private final Runnable mVoiceProbe = this::updateVoiceKeyMode;
+
     /** The big mic key becomes the send key while the field contains text, including text just dictated. */
     private void updateVoiceKeyMode() {
-        if (!hasSuggestionStripView()) return;
-        mSuggestionStripView.setVoiceKeySendMode(fieldHasText());
+        final boolean send = fieldHasText();
+        voiceKeyIsSendForTest = send;
+        if (hasSuggestionStripView()) mSuggestionStripView.setVoiceKeySendMode(send);
+        // SearchView restarts input before the text is readable. One later look catches it.
+        final boolean unreadable = mInputLogic.mConnection.wasTextUnreadable();
+        if (unreadable && mVoiceProbeTries < 3) {
+            mVoiceProbeTries++;
+            mHandler.removeCallbacks(mVoiceProbe);
+            mHandler.postDelayed(mVoiceProbe, 48);
+        } else if (!unreadable) {
+            mVoiceProbeTries = 0;
+        }
     }
 
     private boolean fieldHasText() {
         if (mInputLogic.getComposingLength() > 0) return true;
-        if (mInputLogic.mConnection.editorLikelyHasText()) return true;
-        final int start = mInputLogic.mConnection.getExpectedSelectionStart();
-        final int end = mInputLogic.mConnection.getExpectedSelectionEnd();
-        if (start > 0 || end > 0) return true;
-        // Cursor parked at the start of a field that already has text.
-        if (start == 0 && end == 0) return mInputLogic.mConnection.hasTextAfterCursor();
-        if (start < 0 || end < 0) {
-            final CharSequence before = mInputLogic.mConnection.getTextBeforeCursor(1, 0);
-            if (before != null && before.length() > 0) return true;
-            final CharSequence after = mInputLogic.mConnection.getTextAfterCursor(1, 0);
-            return after != null && after.length() > 0;
-        }
-        return false;
+        return mInputLogic.mConnection.fieldContainsText();
     }
 
     public void onPushToTalkRelease() {

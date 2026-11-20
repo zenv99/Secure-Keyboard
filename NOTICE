@@ -16,6 +16,9 @@ HeliBoard
   when it did not change. FlorisBoard moves the caret with DPAD key events when
   setSelection cannot be trusted. An index outside the text is not sent, because
   editors clamp that index to the end of the field.
+  The mic becomes Send from the composing text, the committed text, or a direct
+  read of the field. AOSP LatinIME keeps that text in the connection cache. Search
+  fields and Compose report no selection, so the cache is not the only source.
 
 OpenBoard and the Android Open Source LatinIME
   Copyright The Android Open Source Project

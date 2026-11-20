@@ -4,9 +4,11 @@ package helium314.keyboard.latin
 import android.text.InputType
 import android.view.inputmethod.EditorInfo
 import helium314.keyboard.ShadowInputMethodManager2
+import helium314.keyboard.event.Event
+import helium314.keyboard.keyboard.internal.keyboard_parser.floris.KeyCode
+import helium314.keyboard.latin.common.Constants
 import helium314.keyboard.ShadowInputMethodService
 import helium314.keyboard.ShadowLocaleManagerCompat
-import helium314.keyboard.event.Event
 import org.junit.runner.RunWith
 import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
@@ -111,6 +113,39 @@ class SendButtonTest {
         assertEquals(EditorInfo.IME_ACTION_SEND, ShadowInputMethodService.lastEditorAction)
         assertEquals(1, ShadowInputMethodService.editorActionCount)
         assertStillShown()
+    }
+
+    @Test fun searchFieldShowsSendAfterOneLetterAndMicWhenCleared() {
+        startField(EditorInfo.IME_ACTION_SEARCH or EditorInfo.IME_FLAG_NO_ENTER_ACTION, InputType.TYPE_CLASS_TEXT)
+        type("s")
+        assertEquals(true, LatinIME.voiceKeyIsSendForTest)
+        latinIME.onEvent(Event.createSoftwareKeypressEvent(
+            KeyCode.DELETE, 0, Constants.NOT_A_COORDINATE, Constants.NOT_A_COORDINATE, false,
+        ))
+        ShadowLooper.idleMainLooper()
+        assertEquals(false, LatinIME.voiceKeyIsSendForTest)
+    }
+
+    @Test fun silentFieldUsesExtractedTextWhenSelectionIsNeverReported() {
+        val options = EditorInfo.IME_ACTION_SEARCH or EditorInfo.IME_FLAG_NO_ENTER_ACTION or EditorInfo.IME_FLAG_NO_EXTRACT_UI
+        startField(options, InputType.TYPE_CLASS_TEXT)
+        type("s")
+        ShadowInputMethodService.cursorReadsReturnNull = true
+        ShadowInputMethodService.extractedTextIncludesContents = true
+        val info = EditorInfo()
+        info.inputType = InputType.TYPE_CLASS_TEXT
+        info.imeOptions = options
+        info.initialSelStart = -1
+        info.initialSelEnd = -1
+        latinIME.mHandler.onStartInput(info, true)
+        latinIME.mHandler.onStartInputView(info, true)
+        ShadowLooper.idleMainLooper()
+        assertEquals(true, LatinIME.voiceKeyIsSendForTest)
+        ShadowInputMethodService.text = ""
+        latinIME.mHandler.onStartInput(info, true)
+        latinIME.mHandler.onStartInputView(info, true)
+        ShadowLooper.idleMainLooper()
+        assertEquals(false, LatinIME.voiceKeyIsSendForTest)
     }
 
     @Test fun emptyFieldDoesNotSend() {
