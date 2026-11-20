@@ -25,8 +25,8 @@ class LocaleKeyboardInfos(dataStream: InputStream?, locale: Locale) {
     val labelSymbolInNumpad = "!?#"
     var labelAlphabet = "ABC"
         private set
-    private var labelShiftSymbol = "= \\\\ <"
-    private var labelShiftSymbolTablet = "~ [ <"
+    private var labelShiftSymbol = "#+="
+    private var labelShiftSymbolTablet = "#+="
     var labelComma = ","
         private set
     var labelPeriod = "."
@@ -95,8 +95,8 @@ class LocaleKeyboardInfos(dataStream: InputStream?, locale: Locale) {
     fun getTabletExtraKeys(element: KeyboardElement): Pair<List<KeyData>, List<KeyData>> {
         val flags = Key.LABEL_FLAGS_FONT_DEFAULT
         return when (element) {
-            KeyboardElement.SYMBOLS -> listOf("\\".toTextKey(labelFlags = flags), "=".toTextKey(labelFlags = flags)) to emptyList()
-            KeyboardElement.SYMBOLS_SHIFTED -> emptyList<KeyData>() to listOf("¡".toTextKey(labelFlags = flags), "¿".toTextKey(labelFlags = flags))
+            // The iOS symbols rows already fill the space between #+= and backspace.
+            KeyboardElement.SYMBOLS, KeyboardElement.SYMBOLS_SHIFTED -> emptyList<KeyData>() to emptyList()
             else -> emptyList<KeyData>() to listOf("!".toTextKey(labelFlags = flags), labelQuestion.toTextKey(labelFlags = flags)) // assume alphabet
         }
     }

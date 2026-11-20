@@ -7,6 +7,9 @@ HeliBoard
   This keyboard is a modified HeliBoard. The big button performs the field's declared
   editor action even when the field sets IME_FLAG_NO_ENTER_ACTION, which is the approach
   discussed in HeliBoard issue 1989 (Pixel launcher and browser search fields).
+  The 123 and #+= pages use HeliBoard's JSON layout format (itself from FlorisBoard)
+  for the iOS US symbol rows. The arrangement follows the iOS layout shared in
+  HeliBoard discussion 2180.
 
 OpenBoard and the Android Open Source LatinIME
   Copyright The Android Open Source Project
