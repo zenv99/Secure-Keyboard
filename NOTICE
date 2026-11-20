@@ -23,6 +23,10 @@ HeliBoard
   draws a return key (issue 1989). The big button stays Send. FlorisBoard commits a
   newline for an unspecified action, which does not deliver a key event (issue 3262).
   A field with no action gets KEYCODE_ENTER instead of that newline.
+  Autocorrect keeps AOSP LatinIME's proximity-weighted edit distance and bigram
+  score (a near-key slip costs less than a far one; the previous word can prefer
+  there over their). FlorisBoard can use Presage as a language model; that library
+  is not included, so the on-device table stays a few dozen common pairs.
 
 OpenBoard and the Android Open Source LatinIME
   Copyright The Android Open Source Project

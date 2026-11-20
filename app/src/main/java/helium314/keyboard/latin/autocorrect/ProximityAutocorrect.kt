@@ -44,6 +44,16 @@ object ProximityAutocorrect {
                 if (prev == null || item.probability > prev.second) this[key] = item.word to item.probability
             }
         }
+        /** First-letter buckets, same idea as the dictionary vocabulary index. */
+        private val byFirst: Map<Char, IntArray> = buildMap {
+            val groups = HashMap<Char, ArrayList<Int>>()
+            for (i in items.indices) {
+                val w = items[i].word
+                if (w.isEmpty()) continue
+                groups.getOrPut(KeyGeometry.baseLetter(w[0])) { ArrayList() }.add(i)
+            }
+            for ((ch, list) in groups) put(ch, list.toIntArray())
+        }
         override val size: Int get() = items.size
         override fun word(index: Int) = items[index].word
         override fun probability(index: Int) = items[index].probability
@@ -51,11 +61,10 @@ object ProximityAutocorrect {
         override fun indexesNear(first: Char, distance: (Char, Char) -> Float): IntArray {
             val out = ArrayList<Int>()
             val f = KeyGeometry.baseLetter(first)
-            for (i in items.indices) {
-                val w = items[i].word
-                if (w.isEmpty()) continue
-                val c = KeyGeometry.baseLetter(w[0])
-                if (distance(f, c) <= 2.3f) out.add(i)
+            for ((ch, arr) in byFirst) {
+                if (distance(f, ch) <= 2.3f) {
+                    for (n in arr) out.add(n)
+                }
             }
             return out.toIntArray()
         }
@@ -88,6 +97,15 @@ object ProximityAutocorrect {
         "weve" to "we've",
         "ive" to "I've",
         "im" to "I'm",
+        "thats" to "that's",
+        "whats" to "what's",
+        "heres" to "here's",
+        "youll" to "you'll",
+        "theyll" to "they'll",
+        "itll" to "it'll",
+        "couldve" to "could've",
+        "shouldve" to "should've",
+        "wouldve" to "would've",
     )
 
     fun correct(
@@ -101,14 +119,23 @@ object ProximityAutocorrect {
         touches: Array<FloatArray?>? = null,
         centreOf: ((Char) -> FloatArray?)? = null,
     ): String? {
-        if (typed.length !in 2..MAX_LENGTH) return null
-        if (kept || AutocorrectPolicy.isLiteralToken(typed)) return null
+        if (kept || AutocorrectPolicy.isLiteralToken(typed) || isMixedCase(typed)) return null
         val typedLetters = AutocorrectPolicy.lettersOf(typed)
-        if (typedLetters.length !in 2..MAX_LENGTH) return null
+        // A lone "i" is the pronoun. Mixed forms such as "iPhone" already returned above.
+        if (typedLetters == "i" && typed.length == 1) return if (typed == "I") null else "I"
+        if (typed.length !in 2..MAX_LENGTH || typedLetters.length !in 2..MAX_LENGTH) return null
         if (typedLetters == "ill" && !adjectiveBeforeIll(previous)) {
             return applyCase(typed, "I'll", sentenceStart)
         }
-        if (isExactVocabularyWord(typed, words, distance)) return null
+        // Both spellings are real words. Only a strong previous word may switch them.
+        // AOSP ranks candidates with the previous word's bigram; this is that idea on a closed set.
+        contextRewrite(typedLetters, previous)?.let { return applyCase(typed, it, sentenceStart) }
+        if (isExactVocabularyWord(typed, words, distance)) {
+            if (sentenceStart && typed.first().isLowerCase()) {
+                return applyCase(typed, typed, true)
+            }
+            return null
+        }
 
         contractions[typedLetters]?.let { form ->
             return applyCase(typed, form, sentenceStart)
@@ -142,7 +169,9 @@ object ProximityAutocorrect {
             if (raw > limit) continue
             if (raw > HEAVY_RAW && probability < HEAVY_MIN_PROBABILITY) continue
             var score = rank(raw, probability, overlap(typedLetters, candidateLetters), lenDiff)
-            if (previous != null && bigram(previous, candidate) > 12) score -= 0.25f
+            val context = if (previous == null) 0 else bigram(previous, candidate)
+            if (context >= 40) score -= 0.55f
+            else if (context > 12) score -= 0.25f
             val sameAsBest = bestWord != null && AutocorrectPolicy.lettersOf(bestWord!!) == candidateLetters
             if (score < bestScore) {
                 if (!sameAsBest) secondScore = bestScore
@@ -258,6 +287,12 @@ object ProximityAutocorrect {
     }
 
     /** Common pairs. The number is added to the sum of the two word probabilities. */
+    private val THERE_AFTER = setOf("over", "out", "go", "get", "right", "been", "down", "up")
+    private val THEIR_AFTER = setOf("and", "of", "with", "for", "all", "ask", "told", "on")
+    private val ITS_CONTRACTED_AFTER = setOf("know", "think", "hope", "sure", "guess", "said", "say", "believe")
+    private val FROM_AFTER = setOf("away", "come", "came", "far", "apart", "heard")
+    private val FORM_AFTER = setOf("a", "this", "that", "the", "fill", "tax", "application")
+
     private val bigrams = hashMapOf(
         "i am" to 80, "am going" to 80, "see you" to 80, "you tomorrow" to 70,
         "thank you" to 80, "on my" to 70, "my way" to 70, "what time" to 80,
@@ -313,6 +348,29 @@ object ProximityAutocorrect {
         return parts.joinToString(" ") to score[n]
     }
 
+    /**
+     * Closed confusion pairs. The typed word stays unless the previous word is a strong cue.
+     * "its" is a real word, so it is not in the contraction table.
+     */
+    private fun contextRewrite(typedLetters: String, previous: String?): String? {
+        val prev = AutocorrectPolicy.lettersOf(previous ?: return null)
+        if (prev.isEmpty()) return null
+        return when (typedLetters) {
+            "their" -> if (prev in THERE_AFTER) "there" else null
+            "there" -> if (prev in THEIR_AFTER) "their" else null
+            "its" -> if (prev in ITS_CONTRACTED_AFTER) "it's" else null
+            "form" -> if (prev in FROM_AFTER) "from" else null
+            "from" -> if (prev in FORM_AFTER) "form" else null
+            else -> null
+        }
+    }
+
+    private fun isMixedCase(typed: String): Boolean {
+        val letters = typed.filter { it.isLetter() }
+        if (letters.length < 2 || letters.all { it.isUpperCase() }) return false
+        return letters.drop(1).any { it.isUpperCase() }
+    }
+
     private fun adjectiveBeforeIll(previous: String?): Boolean {
         val word = previous?.lowercase(Locale.ROOT)?.trim().orEmpty()
         return word in setOf(
@@ -348,14 +406,23 @@ object ProximityAutocorrect {
     }
 
     private fun isExactVocabularyWord(typed: String, words: WordSource, distance: (Char, Char) -> Float): Boolean {
-        val folded = typed.lowercase(Locale.ROOT)
         val letters = AutocorrectPolicy.lettersOf(typed)
         if (letters.isEmpty()) return false
+        val hit = words.exact(letters)
+        if (hit != null) {
+            val word = hit.first
+            if (word.equals(letters, ignoreCase = true)) return true
+            // "don't" is stored under "dont". That is a missing apostrophe, not a known spelling.
+            if (word.none { it == '\'' || it == '’' } && AutocorrectPolicy.lettersOf(word) == letters && word.length == letters.length) {
+                return true
+            }
+            return false
+        }
+        val folded = typed.lowercase(Locale.ROOT)
         val indexes = words.indexesNear(letters[0], distance)
         for (index in indexes) {
             val word = words.word(index)
             if (word.equals(folded, ignoreCase = true)) return true
-            // Same letters and same apostrophes: "don't" is known, "dont" is not.
             if (word.none { it == '\'' || it == '’' } && AutocorrectPolicy.lettersOf(word) == letters && word.length == letters.length) {
                 return true
             }
