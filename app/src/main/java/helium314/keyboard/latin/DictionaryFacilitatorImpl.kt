@@ -558,9 +558,10 @@ class DictionaryFacilitatorImpl : DictionaryFacilitator {
             && !AutocorrectPolicy.isLiteralToken(typedForFuzzy)) {
             val main = dictionaryGroups[0].getDict(Dictionary.TYPE_MAIN)
             if (main != null) {
-                // Case follows what was typed. A wrong "start of sentence" flag was
-                // capitalizing corrections in the middle of a line.
-                val sentenceStart = typedForFuzzy.firstOrNull()?.isUpperCase() == true
+                // Case follows what was typed, and also a real sentence boundary.
+                // A bare "start of sentence" flag was capitalizing corrections in the middle of a line.
+                val sentenceStart = isSentenceBoundary(previousWord)
+                    || typedForFuzzy.firstOrNull()?.isUpperCase() == true
                 val corrected = helium314.keyboard.latin.glide.GlideTyping.proximityCorrection(
                     main, typedForFuzzy, keyboard, sentenceStart, composedData.mInputPointers, previousWord
                 )
@@ -664,6 +665,12 @@ class DictionaryFacilitatorImpl : DictionaryFacilitator {
             null
         } ?: return helium314.keyboard.latin.glide.GlideTyping.spaceSlip(main, previous, fragment, null)
         return helium314.keyboard.latin.glide.GlideTyping.spaceSlip(main, previous, fragment, keyboard)
+    }
+
+    private fun isSentenceBoundary(previousWord: String?): Boolean {
+        if (previousWord.isNullOrEmpty()) return true
+        val last = previousWord.last()
+        return last == '.' || last == '!' || last == '?'
     }
 
     override fun isValidSpellingWord(word: String): Boolean =

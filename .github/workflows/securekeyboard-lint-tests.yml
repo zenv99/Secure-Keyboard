@@ -3,7 +3,7 @@ name: Secure Keyboard lint and unit tests
 on:
   workflow_dispatch:
   push:
-    branches: ['cursor/shopee-send-7421']
+    branches: ['cursor/shopee-send-7421', 'cursor/autocorrect-tune-7421']
     paths:
       - 'securekeyboard-project/**'
       - 'app/**'

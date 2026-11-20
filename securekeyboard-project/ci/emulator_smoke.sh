@@ -19,7 +19,7 @@ adb shell ls -l /data/local/tmp/sk-*.png
 adb shell 'ls /data/local/tmp/sk-*.png' | tr -d '\r' | while read -r remote; do
   adb pull "$remote" "emulator-screenshots/$(basename "$remote")"
 done
-for name in trackpad-left trackpad-right trackpad-up trackpad-down send-single settings-search-send settings-search-mic shopee-send shopee-mic unspecified-send unspecified-mic; do
+for name in trackpad-left trackpad-right trackpad-up trackpad-down send-single settings-search-send settings-search-mic shopee-send shopee-mic unspecified-send unspecified-mic autocorrect-sentence; do
   test -s "emulator-screenshots/sk-${name}.png"
 done
 find emulator-screenshots -type f -name '*.png' -print

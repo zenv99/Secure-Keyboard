@@ -49,6 +49,27 @@ class ProximityAutocorrectTest {
         assertEquals("that", correct("taht"))
     }
 
+    @Test fun contextApostropheCaseAndMixedCase() {
+        assertEquals("I", ProximityAutocorrect.correct("i", vocab))
+        assertNull(ProximityAutocorrect.correct("I", vocab))
+        assertEquals("Hello", ProximityAutocorrect.correct("hello", vocab, sentenceStart = true))
+        assertNull(correct("hello"))
+        assertEquals("there", ProximityAutocorrect.correct("their", vocab, previous = "over"))
+        assertEquals("their", ProximityAutocorrect.correct("there", vocab, previous = "of"))
+        assertNull(correct("their"))
+        assertEquals("it's", ProximityAutocorrect.correct("its", vocab, previous = "know"))
+        assertNull(correct("its"))
+        assertEquals("from", ProximityAutocorrect.correct("form", vocab, previous = "away"))
+        assertEquals("form", ProximityAutocorrect.correct("from", vocab, previous = "a"))
+        assertNull(correct("form"))
+        assertEquals("that's", correct("thats"))
+        assertEquals("what's", correct("whats"))
+        assertEquals("you'll", correct("youll"))
+        assertNull(correct("iPhone"))
+        assertNull(correct("eBay"))
+        assertNull(correct("@zen"))
+    }
+
     @Test fun validWordsNamesSlangAndLiteralsStay() {
         for (word in listOf(
             "cat", "ok", "lol", "the", "auto", "correct", "because", "zen", "yeet", "its", "to", "on", "in",
