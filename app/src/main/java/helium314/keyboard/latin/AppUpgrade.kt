@@ -40,6 +40,7 @@ import helium314.keyboard.latin.utils.locale
 import helium314.keyboard.latin.utils.mainLayoutNameOrQwerty
 import helium314.keyboard.latin.utils.prefs
 import helium314.keyboard.latin.utils.protectedPrefs
+import helium314.keyboard.latin.utils.migrateKnownPlusMenu
 import helium314.keyboard.latin.utils.upgradeToolbarPrefs
 import helium314.keyboard.latin.utils.writeCustomKeyCodes
 import helium314.keyboard.settings.screens.colorPrefsAndResIds
@@ -740,6 +741,11 @@ private object AppUpgrade {
                     remove("delete_swipe")
                 }
             }
+        }
+        if (oldVersion <= 4434) {
+            // v1.0.6 and earlier. Once, the same way HeliBoard gates its other migrations.
+            // Only an unmodified built-in menu is replaced. A custom or reordered menu stays.
+            migrateKnownPlusMenu(prefs)
         }
         upgradeToolbarPrefs(prefs)
         LayoutUtilsCustom.onLayoutFileChanged() // just to be sure

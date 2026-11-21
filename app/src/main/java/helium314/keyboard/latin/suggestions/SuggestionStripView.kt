@@ -122,6 +122,7 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
     private val toolbarContainer: View = findViewById(R.id.toolbar_container)
     private val pinnedKeys: ViewGroup = findViewById(R.id.pinned_keys)
     private val leftKeys = LinearLayout(context).apply { orientation = LinearLayout.HORIZONTAL }
+    private var stripEmojiKey: View? = null
     private val plusIcon: Drawable? = androidx.core.content.ContextCompat.getDrawable(context, R.drawable.ic_plus)
     private val suggestionsStrip: ViewGroup = findViewById(R.id.suggestions_strip)
     private val toolbarExpandKey = findViewById<ImageButton>(R.id.suggestions_strip_toolbar_key)
@@ -172,9 +173,15 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
             if (pinnedKeyInToolbar != null && Settings.getValues().mQuickPinToolbarKeys)
                 pinnedKeyInToolbar.background = enabledToolKeyBackground
         }
-        // Left side: just the (+) tools button; emoji lives in the bottom row like on iOS / WhatsApp.
+        // Emoji opens the same panel the old bottom-row key opened (KeyCode.EMOJI). It sits at the top left.
+        val emoji = createToolbarKey(context, ToolbarKey.EMOJI)
+        emoji.layoutParams = toolbarKeyLayoutParams
+        setupKey(emoji, colors)
+        stripEmojiKey = emoji
+        val wrapper = findViewById<ViewGroup>(R.id.suggestions_strip_wrapper)
+        wrapper.addView(emoji, 0)
         leftKeys.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.MATCH_PARENT)
-        (findViewById<ViewGroup>(R.id.suggestions_strip_wrapper)).addView(leftKeys, 1)
+        wrapper.addView(leftKeys, 2)
         // The big mic is always there, even when restored settings / an old backup say otherwise.
         if (pinnedKeys.findViewWithTag<View>(ToolbarKey.VOICE) == null) {
             val mic = createToolbarKey(context, ToolbarKey.VOICE)
@@ -253,6 +260,7 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
         toolbarContainer.isVisible = toolbarVisible
         applyPinnedKeysVisibility()
         leftKeys.isVisible = !toolbarVisible
+        stripEmojiKey?.isVisible = !toolbarVisible
         suggestionsStrip.isVisible = !toolbarVisible
 
         if (DEBUG_SUGGESTIONS) {

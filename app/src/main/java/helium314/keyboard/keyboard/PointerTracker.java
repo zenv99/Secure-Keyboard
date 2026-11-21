@@ -774,6 +774,9 @@ public final class PointerTracker implements PointerTrackerQueue.Element,
      */
     public static final boolean DELETE_SWIPE_SELECTS_TEXT = false;
 
+    /** Hold this long on space, without sliding, before the keyboard becomes a trackpad. */
+    public static final int SPACE_HOLD_FOR_TRACKPAD_MILLIS = 300;
+
     private boolean isSwiper(final int code) {
         final SettingsValues sv = Settings.getValues();
         return switch (code) {
@@ -1340,7 +1343,9 @@ public final class PointerTracker implements PointerTrackerQueue.Element,
     private int getLongPressTimeout(int code) {
         int longpressTimeout = Settings.getValues().mKeyLongpressTimeout;
         return switch (code) {
-            case Constants.CODE_SPACE -> 300; // iOS turns the keyboard into a trackpad after about 300 ms
+            // A quick tap, including the space right after backspace-undo, sends the space.
+            // The trackpad starts only when this hold completes, or when the finger actually slides.
+            case Constants.CODE_SPACE -> SPACE_HOLD_FOR_TRACKPAD_MILLIS;
             case KeyCode.SHIFT, KeyCode.SYMBOL_ALPHA
                 // We use slightly longer timeout for shift-lock and the numpad long-press.
                 -> longpressTimeout * 3 / 2

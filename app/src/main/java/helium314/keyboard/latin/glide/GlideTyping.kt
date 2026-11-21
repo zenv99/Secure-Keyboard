@@ -33,6 +33,8 @@ object GlideTyping {
         val seqs: Array<IntArray>, // lower-case letters of the word without apostrophes
         val probs: IntArray,
         val byFirst: Map<Int, IntArray>,
+        val bySecond: Map<Int, IntArray>,
+        val bySwap: Map<Long, IntArray>,
         val byLetters: Map<String, Int>,
     )
 
@@ -113,7 +115,17 @@ object GlideTyping {
             list.toIntArray()
         }
         val groups = HashMap<Int, MutableList<Int>>()
-        for (n in seqs.indices) groups.getOrPut(seqs[n][0]) { ArrayList() }.add(n)
+        val seconds = HashMap<Int, MutableList<Int>>()
+        val swaps = HashMap<Long, MutableList<Int>>()
+        for (n in seqs.indices) {
+            val seq = seqs[n]
+            groups.getOrPut(seq[0]) { ArrayList() }.add(n)
+            if (seq.size >= 2) {
+                seconds.getOrPut(seq[1]) { ArrayList() }.add(n)
+                val key = (seq[1].toLong() shl 21) or seq[0].toLong()
+                swaps.getOrPut(key) { ArrayList() }.add(n)
+            }
+        }
         val byLetters = HashMap<String, Int>(words.size)
         for (n in words.indices) {
             val key = helium314.keyboard.latin.autocorrect.AutocorrectPolicy.lettersOf(words[n])
@@ -121,7 +133,13 @@ object GlideTyping {
             val old = byLetters[key]
             if (old == null || probs[n] > probs[old]) byLetters[key] = n
         }
-        return Vocab(words, seqs, probs, groups.mapValues { it.value.toIntArray() }, byLetters)
+        return Vocab(
+            words, seqs, probs,
+            groups.mapValues { it.value.toIntArray() },
+            seconds.mapValues { it.value.toIntArray() },
+            swaps.mapValues { it.value.toIntArray() },
+            byLetters,
+        )
     }
 
     /** Suggestions for the swipe in [composedData] (best first); empty while the vocabulary is still loading. */
@@ -397,6 +415,35 @@ object GlideTyping {
                 return vocab.words[n] to vocab.probs[n]
             }
             override fun indexesNear(first: Char, distance: (Char, Char) -> Float): IntArray {
+                return nearFirst(first, distance)
+            }
+
+            override fun candidates(typedLetters: String, distance: (Char, Char) -> Float): IntArray {
+                if (typedLetters.isEmpty()) return IntArray(0)
+                val out = ArrayList<Int>()
+                val seen = HashSet<Int>()
+                fun add(arr: IntArray?, cap: Int) {
+                    if (arr == null) return
+                    var left = cap
+                    for (n in arr) {
+                        if (!seen.add(n)) continue
+                        out.add(n)
+                        if (--left == 0) return
+                    }
+                }
+                add(nearFirst(typedLetters[0], distance), 4000)
+                val second = helium314.keyboard.latin.autocorrect.KeyGeometry.baseLetter(typedLetters[0]).code
+                add(vocab.bySecond[second], 250)
+                if (typedLetters.length >= 2) {
+                    val first = helium314.keyboard.latin.autocorrect.KeyGeometry.baseLetter(typedLetters[0]).code
+                    val second = helium314.keyboard.latin.autocorrect.KeyGeometry.baseLetter(typedLetters[1]).code
+                    val key = (first.toLong() shl 21) or second.toLong()
+                    add(vocab.bySwap[key], 40)
+                }
+                return out.toIntArray()
+            }
+
+            private fun nearFirst(first: Char, distance: (Char, Char) -> Float): IntArray {
                 val out = ArrayList<Int>()
                 val f = helium314.keyboard.latin.autocorrect.KeyGeometry.baseLetter(first)
                 for ((cp, arr) in vocab.byFirst) {

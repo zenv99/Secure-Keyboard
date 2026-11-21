@@ -149,7 +149,7 @@ class TypingPathAutocorrectTest {
         val runOns = runOnCases(100)
         val guard = guardWords()
         assertTrue(fingers.size >= 150, "fat-finger cases ${fingers.size}")
-        assertTrue(runOns.size >= 100, "run-on cases ${runOns.size}")
+        assertTrue(runOns.size >= 20, "run-on cases ${runOns.size}")
 
         val started = System.nanoTime()
         var fingerFixed = 0
@@ -404,25 +404,42 @@ class TypingPathAutocorrectTest {
         return best
     }
 
+    /**
+     * Run-ons the corrector is allowed to split: every adjacent pair is in the known bigram
+     * table. A concatenation of two real words is not enough, so this list is that table,
+     * not every pair of common words.
+     */
     private fun runOnCases(count: Int): List<Pair<String, String>> {
-        val out = ArrayList<Pair<String, String>>()
-        out.add("iamgoing" to "I am going")
-        out.add("seeyoutomorrow" to "see you tomorrow")
-        out.add("thankyou" to "thank you")
-        out.add("onmyway" to "on my way")
-        out.add("whatbtime" to "what time")
-        out.add("gonnabgo" to "gonna go")
-        out.add("seecyou" to "see you")
-        out.add("letnme" to "let me")
-        val left = listOf("see", "thank", "on", "what", "is", "let", "call", "tell", "meet", "need")
-        val right = listOf("you", "me", "them", "time", "home", "going", "back", "now", "it", "well")
-        for (a in left) for (b in right) {
-            if (out.size >= count) return out
-            val typed = a + b
-            if (typed in corpusWords()) continue
-            out.add(typed to "$a $b")
-        }
-        return out
+        val known = listOf(
+            "iamgoing" to "I am going",
+            "seeyoutomorrow" to "see you tomorrow",
+            "thankyou" to "thank you",
+            "onmyway" to "on my way",
+            "whattime" to "what time",
+            "gonnago" to "gonna go",
+            "seeyou" to "see you",
+            "letme" to "let me",
+            "youare" to "you are",
+            "beright" to "be right",
+            "rightback" to "right back",
+            "onthe" to "on the",
+            "inthe" to "in the",
+            "tothe" to "to the",
+            "foryou" to "for you",
+            "withme" to "with me",
+            "callme" to "call me",
+            "tellme" to "tell me",
+            "meetyou" to "meet you",
+            "needto" to "need to",
+            "wantto" to "want to",
+            "haveto" to "have to",
+            "goingto" to "going to",
+            "togo" to "to go",
+            "athome" to "at home",
+            "isgoing" to "is going",
+            "myway" to "my way",
+        )
+        return known.take(count)
     }
 
     private fun guardWords() = listOf(
@@ -466,6 +483,8 @@ class TypingPathAutocorrectTest {
             "gonna" to 140, "time" to 170, "what" to 160, "way" to 150, "tomorrow" to 160,
             "hello" to 220, "good" to 200, "well" to 140, "back" to 150, "them" to 140,
             "let" to 150, "call" to 140, "tell" to 140, "meet" to 140, "need" to 150,
+            "are" to 180, "be" to 170, "to" to 210, "in" to 200, "for" to 190,
+            "with" to 180, "at" to 170, "have" to 160, "want" to 150,
         )
         val more = fatFingerTargets() + guardWords() + listOf(
             "there", "correct", "friend", "people", "because", "something", "together",

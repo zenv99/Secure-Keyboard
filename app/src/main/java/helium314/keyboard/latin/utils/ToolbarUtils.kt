@@ -188,12 +188,28 @@ fun plusMenuBeforeLocation() = listOf(
     PHOTO, CAMERA, DOCUMENT, CONTACT, EMOJI, CLIPBOARD, TEXT_REPLACEMENT, SETTINGS,
 )
 
-fun upgradeToolbarPrefs(prefs: SharedPreferences) {
-    // Any saved menu that is not the current set is replaced. Adding the new keys as
-    // disabled left upgraders on the old arrows-and-undo row, which is what v1.0.3 showed.
-    val enabled = if (prefs.contains(Settings.PREF_TOOLBAR_KEYS)) getEnabledToolbarKeys(prefs) else standardPlusMenu
-    if (enabled != standardPlusMenu)
+/** HeliBoard's original enabled row. Credit: HeliBoard ToolbarUtils defaultToolbarPref. */
+fun heliBoardDefaultPlusMenu() = listOf(
+    SETTINGS, VOICE, CLIPBOARD, UNDO, REDO, SELECT_WORD, COPY, PASTE, LEFT, RIGHT,
+)
+
+/**
+ * One-time menu replacement. Only an unmodified built-in default is replaced.
+ * A customized or reordered menu is not one of these lists, so it is left alone.
+ */
+fun migrateKnownPlusMenu(prefs: SharedPreferences) {
+    if (!prefs.contains(Settings.PREF_TOOLBAR_KEYS)) return
+    val enabled = getEnabledToolbarKeys(prefs)
+    val knownOld = enabled == legacyPlusMenu()
+        || enabled == previousPlusMenu()
+        || enabled == plusMenuBeforeLocation()
+        || enabled == heliBoardDefaultPlusMenu()
+    if (knownOld)
         prefs.edit { putString(Settings.PREF_TOOLBAR_KEYS, defaultToolbarPref) }
+}
+
+/** Add keys that did not exist yet, as disabled, and drop keys that were removed. Never replaces a saved menu. */
+fun upgradeToolbarPrefs(prefs: SharedPreferences) {
     upgradeToolbarPref(prefs, Settings.PREF_TOOLBAR_KEYS, defaultToolbarPref)
     upgradeToolbarPref(prefs, Settings.PREF_PINNED_TOOLBAR_KEYS, defaultPinnedToolbarPref)
     upgradeToolbarPref(prefs, Settings.PREF_CLIPBOARD_TOOLBAR_KEYS, defaultClipboardToolbarPref)

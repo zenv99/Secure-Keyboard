@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 package helium314.keyboard
 
+import android.text.InputType
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodSubtype
 import com.android.inputmethod.keyboard.ProximityInfo
@@ -21,6 +22,7 @@ import helium314.keyboard.keyboard.internal.keyboard_parser.LocaleKeyboardInfos
 import helium314.keyboard.keyboard.internal.keyboard_parser.floris.KeyCode
 import helium314.keyboard.latin.LatinIME
 import helium314.keyboard.latin.RichInputMethodSubtype
+import helium314.keyboard.latin.common.Constants
 import helium314.keyboard.latin.utils.LayoutUtilsCustom
 import helium314.keyboard.latin.utils.POPUP_KEYS_LAYOUT
 import helium314.keyboard.latin.utils.SubtypeUtilsAdditional
@@ -37,6 +39,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFails
 import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 @RunWith(RobolectricTestRunner::class)
@@ -499,6 +502,27 @@ f""", // no newline at the end
         }
     }
 
+    @Test fun letterBottomRowIsNumbersSpacePeriodAndTheActionKey() {
+        val editorInfo = EditorInfo()
+        editorInfo.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_MULTI_LINE
+        val subtype = SubtypeUtilsAdditional.createEmojiCapableAdditionalSubtype(Locale.ENGLISH, "qwerty", true)
+        val (_, keys) = buildKeyboard(editorInfo, subtype, KeyboardElement.ALPHABET, emojiKey = true)
+        val bottom = keys.last()
+        val codes = bottom.map { it.mCode }
+        assertFalse(codes.contains(KeyCode.EMOJI))
+        val space = bottom.indexOfFirst { it.mCode == Constants.CODE_SPACE }
+        assertTrue(space > 0)
+        assertEquals(KeyCode.SYMBOL_ALPHA, bottom.first().mCode)
+        val period = bottom[space + 1]
+        assertEquals(".", period.mLabel)
+        assertTrue((period.mPopupKeys?.size ?: 0) > 1)
+        assertEquals(Constants.CODE_ENTER, bottom.last().mCode)
+        val spaceWidth = bottom[space].mWidth.toFloat()
+        var row = 0f
+        for (key in bottom) row += key.mWidth
+        assertTrue(spaceWidth > row * 0.45f)
+    }
+
     @Test fun simpleWithLabelPopupHasCode() {
         val keys = LayoutParser.parseSimpleString("""
             a symbol_alpha
@@ -610,12 +634,13 @@ f""", // no newline at the end
         assertEquals(listOf("1", "2", "3", "4", "5", "6", "7", "8", "9", "0"), labels(symbols[0]))
         assertEquals(listOf("-", "/", ":", ";", "(", ")", "$", "&", "@", "\""), labels(symbols[1]))
         assertEquals(listOf("#+=", ".", ",", "?", "!", "'", "delete_key"), labels(symbols[2]))
-        assertEquals(listOf("ABC", "emoji", "space_key"), labels(symbols[3]).take(3))
-        assertTrue(labels(symbols[3]).none { it == "." || it == "," })
+        assertEquals(listOf("ABC", "space_key"), labels(symbols[3]).take(2))
+        assertTrue(labels(symbols[3]).none { it == "emoji" || it == "." || it == "," })
         assertEquals(listOf("[", "]", "{", "}", "#", "%", "^", "*", "+", "="), labels(more[0]))
         assertEquals(listOf("_", "\\", "|", "~", "<", ">", "€", "£", "¥", "•"), labels(more[1]))
         assertEquals(listOf("123", ".", ",", "?", "!", "'", "delete_key"), labels(more[2]))
-        assertEquals(listOf("ABC", "emoji", "space_key"), labels(more[3]).take(3))
+        assertEquals(listOf("ABC", "space_key"), labels(more[3]).take(2))
+        assertTrue(labels(more[3]).none { it == "emoji" || it == "." || it == "," })
     }
 
     private fun labels(row: List<KeyParams>): List<String> =

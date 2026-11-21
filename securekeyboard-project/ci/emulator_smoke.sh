@@ -12,14 +12,29 @@ adb shell settings put secure show_ime_with_hard_keyboard 1
 adb shell pm grant "$PKG" android.permission.RECORD_AUDIO || true
 # Dictation hold, send, the trackpad, the plus menu, and the mic/Send face
 # (Settings search and a field that never reports a selection) live in this package.
+set +e
 ./gradlew --no-daemon :app:connectedDebugNoMinifyAndroidTest \
   -Pandroid.testInstrumentationRunnerArguments.package=helium314.keyboard.smoke
+instrumented=$?
+python3 securekeyboard-project/ci/device_release_checks.py
+device_checks=$?
+set -e
 mkdir -p emulator-screenshots
 adb shell ls -l /data/local/tmp/sk-*.png
 adb shell 'ls /data/local/tmp/sk-*.png' | tr -d '\r' | while read -r remote; do
   adb pull "$remote" "emulator-screenshots/$(basename "$remote")"
 done
-for name in trackpad-left trackpad-right trackpad-up trackpad-down send-single settings-search-send settings-search-mic shopee-send shopee-mic unspecified-send unspecified-mic autocorrect-sentence; do
+for name in trackpad-left trackpad-right trackpad-up trackpad-down send-single settings-search-send settings-search-mic shopee-send shopee-mic unspecified-send unspecified-mic autocorrect-sentence \
+  plus-legacy-before plus-legacy-after-4435 plus-legacy-after-4436 \
+  plus-custom-before plus-custom-after-4435 plus-custom-after-4436 \
+  webull-chrome-bar-key-1-w webull-chrome-bar-key-2-e webull-chrome-bar-key-3-b \
+  webull-chrome-bar-key-4-u webull-chrome-bar-key-5-l webull-chrome-bar-key-6-l \
+  webull-chrome-bar-space webull-chrome-bar-backspace webull-chrome-bar-space-again \
+  webull-chrome-page-key-1-w webull-chrome-page-key-2-e webull-chrome-page-key-3-b \
+  webull-chrome-page-key-4-u webull-chrome-page-key-5-l webull-chrome-page-key-6-l \
+  webull-chrome-page-space webull-chrome-page-backspace webull-chrome-page-space-again \
+  bottom-letters bottom-multiline bottom-web emoji-hug; do
   test -s "emulator-screenshots/sk-${name}.png"
 done
 find emulator-screenshots -type f -name '*.png' -print
+exit "$(( instrumented || device_checks ))"

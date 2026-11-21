@@ -1050,6 +1050,17 @@ public class LatinIME extends InputMethodService implements
     /** The running service, so an instrumented chat field can see the real keyboard. */
     public static LatinIME instanceForTest;
 
+    /** Suggestions currently in the strip, for the emulator emoji test. */
+    public String joinedSuggestionsForTest() {
+        final SuggestedWords words = mInputLogic.mSuggestedWords;
+        final StringBuilder joined = new StringBuilder();
+        for (int i = 0; i < words.size(); i++) {
+            if (i > 0) joined.append('\n');
+            joined.append(words.getWord(i));
+        }
+        return joined.toString();
+    }
+
     /** Reloads the (+) row from preferences. The emulator test uses this after an old menu is upgraded. */
     public void reloadToolbarForTest() {
         if (mSuggestionStripView != null) mSuggestionStripView.rebuildToolbarKeys();

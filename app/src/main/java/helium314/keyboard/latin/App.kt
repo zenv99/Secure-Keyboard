@@ -36,13 +36,16 @@ class App : Application() {
         // other inits can be in parallel, except what depends on SubtypeSettings
         val jobs = listOf(
             scope.launch {
+                // Subtype setup reads Settings (isTablet). Init settings first, or a
+                // null context skips the version upgrade that migrates the plus menu.
+                Settings.init(ctx)
                 SubtypeSettings.init(ctx)
                 RichInputMethodManager.init(ctx)
                 checkVersionUpgrade(ctx)
             },
             scope.launch { FoldableUtils.init(ctx) },
-            scope.launch { Settings.init(ctx) },
-            // upgrade toolbar on every debug apk start because we may work on adding a new toolbar key
+            // Debug builds may add a toolbar key between installs. This only adds that key
+            // as disabled and drops removed keys. It must not replace a saved menu.
             scope.launch { if (BuildConfig.DEBUG) upgradeToolbarPrefs(prefs()) },
             scope.launch { transferOldPinnedClips(ctx) }, // todo: remove in a few months, maybe end 2026
             scope.launch { Defaults.initDynamicDefaults(ctx) }

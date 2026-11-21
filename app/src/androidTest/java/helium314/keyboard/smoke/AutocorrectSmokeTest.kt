@@ -14,6 +14,7 @@ import helium314.keyboard.latin.autocorrect.ProximityAutocorrect
 import helium314.keyboard.latin.common.Constants
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -77,6 +78,34 @@ class AutocorrectSmokeTest {
         println("AUTOCORRECT_FIELD ${text.get()}")
         shot("autocorrect-sentence")
         assertTrue(text.get()!!.isNotBlank())
+    }
+
+    @Test fun bottomRowAndHugEmoji() {
+        open(KeyboardTestActivity.FIELD_PLAIN)
+        shot("bottom-letters")
+        open(KeyboardTestActivity.FIELD_MULTI)
+        shot("bottom-multiline")
+        open(KeyboardTestActivity.FIELD_WEB)
+        shot("bottom-web")
+        open(KeyboardTestActivity.FIELD_PLAIN)
+        val ime = ime()
+        type(ime, "hug")
+        val shown = java.util.concurrent.atomic.AtomicReference("")
+        val field = java.util.concurrent.atomic.AtomicReference("")
+        val end = System.currentTimeMillis() + 8000
+        while (System.currentTimeMillis() < end) {
+            instrumentation.runOnMainSync {
+                shown.set(ime.joinedSuggestionsForTest())
+                field.set(KeyboardTestActivity.instance?.field?.text?.toString().orEmpty())
+            }
+            if (shown.get()!!.contains("🤗")) break
+            Thread.sleep(200)
+        }
+        println("EMOJI_HUG suggestions=${shown.get()} field=${field.get()}")
+        shot("emoji-hug")
+        assertTrue(shown.get(), shown.get()!!.contains("🤗"))
+        assertTrue(field.get(), field.get()!!.contains("hug", ignoreCase = true))
+        assertFalse(field.get()!!.contains("🤗"))
     }
 
     private fun fix(typed: String): String =

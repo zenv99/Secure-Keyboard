@@ -23,6 +23,18 @@ HeliBoard
   draws a return key (issue 1989). The big button stays Send. FlorisBoard commits a
   newline for an unspecified action, which does not deliver a key event (issue 3262).
   A field with no action gets KEYCODE_ENTER instead of that newline.
+  A correction is committed only when it passes AOSP LatinIME's normalized score
+  (AutocorrectionThresholdUtils) at HeliBoard's autocorrect-confidence setting.
+  An unknown token is not rewritten into a shorter word or split unless the pieces
+  are a known bigram. All-caps words, mid-sentence capitals, dictionary words, and
+  words with digits, URLs, emails, @handles, or #tags are left as typed. Password,
+  email, URL, and no-suggestion fields are not corrected, matching AOSP InputAttributes.
+  Backspace uses AOSP revertCommit: it restores the typed word, including its capitals,
+  and removes the space the correction inserted. The next space commits that typed word
+  once. It does not correct, split, or recapitalize it, and a quick tap does not start
+  the space-bar trackpad. The typed spelling is remembered so it is not corrected again.
+  A one-time toolbar migration follows HeliBoard's version-gated upgrades: only an
+  unmodified built-in menu is replaced, and later updates add new keys as disabled.
   Autocorrect keeps AOSP LatinIME's proximity-weighted edit distance and bigram
   score (a near-key slip costs less than a far one; the previous word can prefer
   there over their). FlorisBoard can use Presage as a language model; that library

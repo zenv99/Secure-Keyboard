@@ -812,6 +812,93 @@ class InputLogicTest {
         assertEquals(5, cursor)
     }
 
+    /**
+     * v1.0.6: space autocorrects, backspace should restore the typed word, and the next
+     * space should commit that word unchanged. Logged after every key.
+     */
+    @Test fun backspaceThenSpaceKeepsWebull() {
+        val cases = listOf(
+            RevertCase("lowercase", "", "webull", "well"),
+            RevertCase("sentence start", "", "Webull", "Well"),
+            RevertCase("mid-sentence", "say ", "Webull", "well"),
+            RevertCase("split", "", "webull", "we bull"),
+            RevertCase("split sentence", "", "Webull", "We bull"),
+            RevertCase("split mid-sentence", "say ", "Webull", "we bull"),
+            RevertCase("run-on", "", "iamgoing", "I am going"),
+            RevertCase("apostrophe", "", "dont", "don't"),
+            RevertCase("context", "over ", "their", "there"),
+            RevertCase("capital i", "", "i", "I"),
+        )
+        for (item in cases) {
+            reset()
+            setInputType(InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_AUTO_CORRECT or InputType.TYPE_TEXT_FLAG_CAP_SENTENCES)
+            if (item.prefix.isNotEmpty()) setText(item.prefix)
+            chainInput(item.typed)
+            logStep(item.name, "typed", item.typed)
+            getAutocorrectedWithSpaceAfter(item.correction, item.typed)
+            logStep(item.name, "space", item.prefix + item.correction + " ")
+            assertEquals(item.prefix + item.correction + " ", text, item.name)
+            assertEquals(text.length, cursor, item.name)
+            functionalKeyPress(KeyCode.DELETE)
+            logStep(item.name, "backspace", item.prefix + item.typed)
+            assertEquals(item.prefix + item.typed, text, item.name)
+            assertEquals(text.length, cursor, item.name)
+            press(' '.code)
+            logStep(item.name, "space again", item.prefix + item.typed + " ")
+            assertEquals(item.prefix + item.typed + " ", text, item.name)
+            assertEquals(text.length, cursor, item.name)
+            // The dictionary may offer the same correction again. It must not be applied.
+            reset()
+            setInputType(InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_AUTO_CORRECT or InputType.TYPE_TEXT_FLAG_CAP_SENTENCES)
+            if (item.prefix.isNotEmpty()) setText(item.prefix)
+            chainInput(item.typed)
+            getAutocorrectedWithSpaceAfter(item.correction, item.typed)
+            assertEquals(item.prefix + item.correction + " ", text, item.name)
+            functionalKeyPress(KeyCode.DELETE)
+            assertEquals(item.prefix + item.typed, text, item.name)
+            assertEquals(text.length, cursor, item.name)
+            getReadyToAutocorrect(item.correction, item.typed)
+            press(' '.code)
+            logStep(item.name, "space with the correction offered again", item.prefix + item.typed + " ")
+            assertEquals(item.prefix + item.typed + " ", text, item.name)
+            assertEquals(text.length, cursor, item.name)
+            assertEquals("", textAfterCursor, item.name)
+        }
+    }
+
+    @Test fun spaceAfterRevertIsNotADoubleSpacePeriod() {
+        setInputType(InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_AUTO_CORRECT)
+        chainInput("webull")
+        getAutocorrectedWithSpaceAfter("well", "webull")
+        functionalKeyPress(KeyCode.DELETE)
+        advance(50)
+        press(' '.code)
+        assertEquals("webull ", text)
+        // A real second space, still inside the 300 ms window, is the period shortcut.
+        advance(50)
+        press(' '.code)
+        assertEquals("webull. ", text)
+    }
+
+    private data class RevertCase(val name: String, val prefix: String, val typed: String, val correction: String)
+
+    private fun logStep(name: String, step: String, expected: String) {
+        println("REVERT $name after $step: text='$text' cursor=$cursor composing='$composingText' expected='$expected'")
+    }
+
+    private fun press(codePoint: Int) {
+        latinIME.onEvent(Event.createEventForCodePointFromUnknownSource(codePoint))
+        handleMessages()
+        checkConnectionConsistency()
+    }
+
+    private fun getReadyToAutocorrect(suggestion: String, typedWord: String) {
+        val info = SuggestedWordInfo(suggestion, "", 0, 0, dict, 0, 0)
+        val typedInfo = SuggestedWordInfo(typedWord, "", 0, 0, dict, 0, 0)
+        val sw = SuggestedWords(ArrayList(listOf(typedInfo, info)), null, typedInfo, false, true, false, InputStyle.NONE, 0)
+        latinIME.mInputLogic.setSuggestedWords(sw)
+    }
+
     @Test fun dictationInsertsTheFullSentenceAfterAComposingWord() {
         chainInput("hello")
         val sentence = "please remember every word of this long spoken sentence including the final clause about the garden gate"

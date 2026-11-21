@@ -42,19 +42,19 @@ class EditorFieldPolicyTest {
         assertTrue(area.showSuggestions)
     }
 
-    @Test fun chromiumSearchBoxCorrectsDespiteNoSuggestionsAndAutoComplete() {
-        // input type=search: web edit text, autocomplete off, action Search. No AUTO_CORRECT flag.
+    @Test fun chromiumSearchBoxDoesNotAutocorrectWhenSuggestionsAreOff() {
+        // AOSP: TYPE_TEXT_FLAG_NO_SUGGESTIONS does not auto-correct. The strip may still show.
         val type = InputType.TYPE_CLASS_TEXT or
             InputType.TYPE_TEXT_VARIATION_WEB_EDIT_TEXT or
             InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS or
             InputType.TYPE_TEXT_FLAG_AUTO_COMPLETE
         val decision = EditorFieldPolicy.decide(type, EditorInfo.IME_ACTION_SEARCH)
         assertTrue(decision.showSuggestions)
-        assertTrue(decision.autoCorrect)
+        assertFalse(decision.autoCorrect)
         assertFalse(decision.blockLearning)
     }
 
-    @Test fun duckDuckGoSearchBarCorrectsAndDoesNotLearn() {
+    @Test fun duckDuckGoSearchBarDoesNotAutocorrectAndDoesNotLearn() {
         // view_search_bar.xml: textUri|textNoSuggestions, actionGo|flagNoExtractUi|flagNoPersonalizedLearning
         val type = InputType.TYPE_CLASS_TEXT or
             InputType.TYPE_TEXT_VARIATION_URI or
@@ -64,17 +64,17 @@ class EditorFieldPolicyTest {
             EditorInfo.IME_FLAG_NO_PERSONALIZED_LEARNING
         val decision = EditorFieldPolicy.decide(type, options)
         assertTrue(decision.showSuggestions)
-        assertTrue(decision.autoCorrect)
+        assertFalse(decision.autoCorrect)
         assertTrue(decision.blockLearning)
     }
 
-    @Test fun genericTextCorrectsEvenWithNoSuggestions() {
+    @Test fun noSuggestionsFlagDoesNotAutocorrect() {
         val normal = InputType.TYPE_CLASS_TEXT
         assertTrue(EditorFieldPolicy.decide(normal, EditorInfo.IME_ACTION_DONE).autoCorrect)
         val noSuggestions = normal or InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
         val decision = EditorFieldPolicy.decide(noSuggestions, EditorInfo.IME_ACTION_DONE)
         assertTrue(decision.showSuggestions)
-        assertTrue(decision.autoCorrect)
+        assertFalse(decision.autoCorrect)
         assertFalse(decision.blockLearning)
     }
 
@@ -122,10 +122,10 @@ class EditorFieldPolicyTest {
         assertFalse(decision.blockLearning)
     }
 
-    @Test fun searchActionOnUriStillCorrects() {
+    @Test fun urlFieldDoesNotAutocorrectEvenAsSearch() {
         val type = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_URI
         val decision = EditorFieldPolicy.decide(type, EditorInfo.IME_ACTION_SEARCH)
-        assertTrue(decision.autoCorrect)
+        assertFalse(decision.autoCorrect)
         assertTrue(decision.showSuggestions)
     }
 }
