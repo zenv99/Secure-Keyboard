@@ -451,28 +451,34 @@ def tap_editor() -> bool:
     return False
 
 
+def screen_size() -> tuple[int, int]:
+    text = adb("shell", "wm", "size", check=False)
+    match = re.search(r"(\d+)x(\d+)", text)
+    if not match:
+        return 1080, 2400
+    return int(match.group(1)), int(match.group(2))
+
+
 def ime_frame() -> tuple[int, int, int, int] | None:
-    text = adb("shell", "dumpsys", "input_method", check=False)
-    patterns = (
-        r"mImeFrame=\[(\d+),(\d+)\]\[(\d+),(\d+)\]",
-        r"mInputFrame=\[(\d+),(\d+)\]\[(\d+),(\d+)\]",
-        r"imeFrame=\[(\d+),(\d+)\]\[(\d+),(\d+)\]",
-        r"mImeFrame=Rect\((\d+),\s*(\d+)\s*-\s*(\d+),\s*(\d+)\)",
-    )
-    for pattern in patterns:
-        match = re.search(pattern, text)
-        if match:
-            box = tuple(int(n) for n in match.groups())
-            if box[2] - box[0] > 100 and box[3] - box[1] > 100:
-                return box  # type: ignore[return-value]
+    """The on-screen keyboard rectangle.
+
+    API 34 no longer prints mImeFrame. While input is shown, the keyboard is
+    the wide tall window in the bottom half of the screen.
+    """
+    method = adb("shell", "dumpsys", "input_method", check=False)
     windows = adb("shell", "dumpsys", "window", "windows", check=False)
-    for match in re.finditer(
-        r"(?:InputMethod|helium314\.keyboard)[\s\S]{0,500}?mFrame=\[(\d+),(\d+)\]\[(\d+),(\d+)\]",
-        windows,
-    ):
-        box = tuple(int(n) for n in match.groups())
-        if box[2] - box[0] > 100 and box[3] - box[1] > 200:
-            return box  # type: ignore[return-value]
+    width, height = screen_size()
+    candidates: list[tuple[int, int, int, int]] = []
+    for blob in (method, windows):
+        for match in re.finditer(r"\[(\d+),(\d+)\]\[(\d+),(\d+)\]", blob):
+            box = tuple(int(n) for n in match.groups())
+            box_w, box_h = box[2] - box[0], box[3] - box[1]
+            if box_w > width * 0.8 and 280 < box_h < height * 0.7 and box[1] > height * 0.35:
+                candidates.append(box)  # type: ignore[arg-type]
+    if candidates:
+        return max(candidates, key=lambda box: (box[3] - box[1], box[1]))
+    if "mInputShown=true" in method:
+        return (0, int(height * 0.58), width, height)
     return None
 
 
