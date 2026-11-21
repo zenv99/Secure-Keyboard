@@ -314,6 +314,8 @@ def shot_menu(name: str) -> None:
 
 
 def upgrade_checks() -> None:
+    # The debug test build uses the same provider authority. Remove it before the release APK.
+    adb("uninstall", PKG + ".debug", check=False)
     adb("uninstall", PKG, check=False)
     install("release-apks/SecureKeyboard-v1.0.6.apk")
     enable_keyboard()
