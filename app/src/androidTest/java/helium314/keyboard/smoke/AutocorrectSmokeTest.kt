@@ -88,16 +88,22 @@ class AutocorrectSmokeTest {
         open(KeyboardTestActivity.FIELD_WEB)
         shot("bottom-web")
         open(KeyboardTestActivity.FIELD_PLAIN)
-        type(ime(), "hug")
-        Thread.sleep(500)
-        val emoji = device.wait(Until.findObject(By.text("🤗")), 8000)
+        val ime = ime()
+        type(ime, "hug")
+        val shown = java.util.concurrent.atomic.AtomicReference("")
         val field = java.util.concurrent.atomic.AtomicReference("")
-        instrumentation.runOnMainSync {
-            field.set(KeyboardTestActivity.instance?.field?.text?.toString().orEmpty())
+        val end = System.currentTimeMillis() + 8000
+        while (System.currentTimeMillis() < end) {
+            instrumentation.runOnMainSync {
+                shown.set(ime.joinedSuggestionsForTest())
+                field.set(KeyboardTestActivity.instance?.field?.text?.toString().orEmpty())
+            }
+            if (shown.get()!!.contains("🤗")) break
+            Thread.sleep(200)
         }
-        println("EMOJI_HUG field=${field.get()} emojiShown=${emoji != null}")
+        println("EMOJI_HUG suggestions=${shown.get()} field=${field.get()}")
         shot("emoji-hug")
-        assertTrue("hug emoji was not offered", emoji != null)
+        assertTrue(shown.get(), shown.get()!!.contains("🤗"))
         assertTrue(field.get(), field.get()!!.contains("hug", ignoreCase = true))
         assertFalse(field.get()!!.contains("🤗"))
     }

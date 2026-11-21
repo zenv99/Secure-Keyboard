@@ -135,15 +135,38 @@ def enable_keyboard() -> None:
     print("IME", ime)
 
 
+def prefs_file() -> str:
+    """The preferences file the running app last wrote."""
+    root()
+    best = ""
+    best_time = -1
+    for path in PREF_FILES:
+        stamp = adb("shell", "stat", "-c", "%Y", path, check=False).strip()
+        if stamp.isdigit() and int(stamp) >= best_time:
+            best_time = int(stamp)
+            best = path
+    if not best:
+        raise RuntimeError("the keyboard did not write a preferences file")
+    print("prefs file", best)
+    return best
+
+
 def read_toolbar() -> str:
     root()
     found = []
+    chosen = ""
+    chosen_ver = -1
     for path in PREF_FILES:
         xml = adb("shell", "cat", path, check=False)
-        found.append(f"{path}: {xml[:240].replace(chr(10), ' ')}")
+        found.append(f"{path}: {xml[:300].replace(chr(10), ' ')}")
         match = re.search(r'name="toolbar_keys"[^>]*>([^<]*)<', xml)
-        if match:
-            return match.group(1)
+        ver = re.search(r'name="version_code" value="(\d+)"', xml)
+        version = int(ver.group(1)) if ver else -1
+        if match and version >= chosen_ver:
+            chosen = match.group(1)
+            chosen_ver = version
+    if chosen:
+        return chosen
     raise RuntimeError("toolbar_keys missing from prefs: " + " | ".join(found))
 
 
@@ -155,10 +178,11 @@ def enabled_keys(serialized: str) -> list[str]:
     return out
 
 
-def write_toolbar(serialized: str) -> None:
+def write_toolbar(serialized: str, path: str | None = None) -> None:
+    target = path or prefs_file()
     adb("shell", "am", "force-stop", PKG)
     root()
-    xml = adb("shell", "cat", PREFS, check=False)
+    xml = adb("shell", "cat", target, check=False)
     if "<map>" not in xml:
         xml = (
             "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>\n<map>\n"
@@ -177,19 +201,24 @@ def write_toolbar(serialized: str) -> None:
             "</map>",
             f'    <string name="toolbar_keys">{serialized}</string>\n</map>\n',
         )
+    xml = re.sub(
+        r'<int name="version_code" value="\d+" />',
+        '<int name="version_code" value="4434" />',
+        xml,
+        count=1,
+    )
     if 'name="version_code"' not in xml:
         xml = xml.replace("</map>", '    <int name="version_code" value="4434" />\n</map>\n')
     local = Path("/tmp/sk-prefs.xml")
     local.write_text(xml)
-    for path in PREF_FILES:
-        adb("shell", "mkdir", "-p", path.rsplit("/", 1)[0])
-        adb("push", str(local), path)
-        adb("shell", "chmod", "660", path)
+    adb("shell", "mkdir", "-p", target.rsplit("/", 1)[0])
+    adb("push", str(local), target)
+    adb("shell", "chmod", "660", target)
     adb("shell", "am", "force-stop", PKG)
     time.sleep(0.4)
-    check = read_toolbar()
-    if check != serialized and serialized not in check:
-        raise RuntimeError(f"toolbar pref did not stick: {check}")
+    check = adb("shell", "cat", target, check=False)
+    if serialized not in check or 'value="4434"' not in check:
+        raise RuntimeError(f"toolbar pref did not stick in {target}: {check[:400]}")
 
 
 def run_upgrade() -> None:
