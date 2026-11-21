@@ -183,8 +183,9 @@ def enabled_keys(serialized: str) -> list[str]:
 
 
 def write_toolbar(serialized: str, path: str | None = None) -> None:
-    target = path or prefs_file()
+    target = path or PREFS
     adb("shell", "am", "force-stop", PKG)
+    time.sleep(1.5)
     root()
     xml = adb("shell", "cat", target, check=False)
     if "<map>" not in xml:
@@ -219,7 +220,7 @@ def write_toolbar(serialized: str, path: str | None = None) -> None:
     adb("push", str(local), target)
     adb("shell", "chmod", "660", target)
     adb("shell", "am", "force-stop", PKG)
-    time.sleep(0.4)
+    time.sleep(1.5)
     check = adb("shell", "cat", target, check=False)
     if serialized not in check or 'value="4434"' not in check:
         raise RuntimeError(f"toolbar pref did not stick in {target}: {check[:400]}")
@@ -352,11 +353,9 @@ def upgrade_checks() -> None:
     adb("uninstall", PKG, check=False)
     install("release-apks/SecureKeyboard-v1.0.6.apk")
     enable_keyboard()
-    launch_toolbar()
-    time.sleep(2)
     print("v1.0.6 version", version_code())
-    # Known old built-in default. The next two updates must migrate it once.
-    write_toolbar(menu_string(LEGACY))
+    # Known old built-in default. Do not start v1.0.6 after this write.
+    write_toolbar(menu_string(LEGACY), PREFS)
     # Do not start v1.0.6 here. A running process flushes its old prefs over the file.
     shot("plus-legacy-before")
     install("release-apks/sk-4435.apk")
