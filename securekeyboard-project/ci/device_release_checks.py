@@ -417,10 +417,26 @@ def chrome_package() -> str:
 
 def ime_frame() -> tuple[int, int, int, int] | None:
     text = adb("shell", "dumpsys", "input_method")
-    match = re.search(r"mImeFrame=\[(\d+),(\d+)\]\[(\d+),(\d+)\]", text)
-    if not match:
-        return None
-    return tuple(int(n) for n in match.groups())  # type: ignore[return-value]
+    for pattern in (
+        r"mImeFrame=\[(\d+),(\d+)\]\[(\d+),(\d+)\]",
+        r"mInputFrame=\[(\d+),(\d+)\]\[(\d+),(\d+)\]",
+        r"imeFrame=\[(\d+),(\d+)\]\[(\d+),(\d+)\]",
+    ):
+        match = re.search(pattern, text)
+        if match:
+            return tuple(int(n) for n in match.groups())  # type: ignore[return-value]
+    return None
+
+
+def wait_for_keyboard() -> None:
+    enable_keyboard()
+    deadline = time.time() + 12
+    while time.time() < deadline:
+        if ime_frame():
+            return
+        time.sleep(0.5)
+    snippet = adb("shell", "dumpsys", "input_method", check=False)[:800].replace("\n", " ")
+    print("keyboard not shown:", snippet)
 
 
 def tap_key_grid(letter: str) -> None:
@@ -478,6 +494,7 @@ def tap_key(letter: str) -> None:
 
 
 def type_letters(word: str, shot_prefix: str | None = None) -> None:
+    wait_for_keyboard()
     for index, ch in enumerate(word, start=1):
         tap_key(ch)
         time.sleep(0.15)
@@ -534,6 +551,7 @@ def webull_in(focus_tap: str | None, shot_name: str) -> None:
 
 
 def chrome_checks() -> None:
+    enable_keyboard()
     chrome = chrome_package()
     page = Path("/tmp/sk-box.html")
     page.write_text("<html><body><textarea autofocus style='width:90%;height:40%'>type here</textarea></body></html>")
