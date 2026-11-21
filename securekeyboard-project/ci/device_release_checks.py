@@ -531,7 +531,8 @@ def tap_key_grid(letter: str) -> None:
         slot = (width * (10 - inset * 2) / 10) if letters.startswith("z") else width / (count + (1 if letters.startswith("a") else 0))
         index = letters.index(wanted)
         if letters.startswith("a"):
-            x = x1 + int(slot * (index + 0.5))
+            # The home row is shifted right by half a key. 0.85*width lands on k, not l.
+            x = x1 + int(width * (index + 1.0) / 10)
         elif letters.startswith("z"):
             x = x1 + int(width * 0.15) + int((width * 0.70) * (index + 0.5) / count)
         else:
