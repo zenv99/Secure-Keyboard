@@ -56,8 +56,12 @@ class ProximityAutocorrectTest {
             w("gray", 40), w("gram", 40), w("good", 200), w("going", 210), w("am", 170),
             w("thank", 150), w("you", 200), w("what", 160), w("time", 170),
         ))
-        for (brand in listOf("webull", "robinhood", "coinbase", "venmo", "grab")) {
+        for (brand in listOf(
+            "webull", "Webull", "WEBULL", "robinhood", "coinbase", "venmo", "grab",
+            "shopee", "revolut", "whatsapp",
+        )) {
             assertNull(ProximityAutocorrect.correct(brand, words), brand)
+            assertNull(ProximityAutocorrect.correct(brand, words, sentenceStart = true), brand)
             assertNull(ProximityAutocorrect.missingSpace(brand, words), brand)
         }
         assertEquals("good", ProximityAutocorrect.correct("gpod", words))

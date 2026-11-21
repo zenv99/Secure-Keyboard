@@ -94,6 +94,45 @@ class AutocorrectCorpusBenchmarkTest {
         assertTrue(p95 < 1.0, "p95 $p95 ms")
     }
 
+    @Test fun guardSetOfCommonWordsAndBrandsNeverChanges() {
+        val common = COMMON_WORDS.split(Regex("\\s+")).map { it.lowercase() }.filter { it.length >= 2 }.distinct()
+        assertTrue(common.size >= 500, "guard lexicon ${common.size}")
+        val source = ProximityAutocorrect.ListWords(common.map { ProximityAutocorrect.VocabWord(it, 160) })
+        val brands = listOf(
+            "webull", "Webull", "WEBULL", "robinhood", "coinbase", "venmo", "grab",
+            "shopee", "revolut", "whatsapp", "gonna", "lol", "omw", "idk", "Zen", "zen",
+        )
+        // Names and slang that must stay are in the dictionary, the way a user dictionary holds them.
+        val kept = listOf("gonna", "lol", "omw", "idk", "zen")
+        val withKept = ProximityAutocorrect.ListWords((common + kept).distinct().map {
+            ProximityAutocorrect.VocabWord(it, 160)
+        })
+        var changed = 0
+        val bad = ArrayList<String>()
+        for (word in common) {
+            val got = ProximityAutocorrect.correct(word, source)
+            if (got != null && !got.equals(word, ignoreCase = true)) {
+                changed++
+                if (bad.size < 12) bad.add("$word→$got")
+            }
+        }
+        for (brand in brands) {
+            val got = ProximityAutocorrect.correct(brand, withKept)
+            val split = ProximityAutocorrect.missingSpace(brand, withKept)
+            if (got != null && !got.equals(brand, ignoreCase = true)) {
+                changed++
+                bad.add("$brand→$got")
+            }
+            if (split != null) {
+                changed++
+                bad.add("$brand split→$split")
+            }
+        }
+        val bytes = common.sumOf { it.length * 2 }
+        println("AUTOCORRECT_GUARD n=${common.size}+${brands.size} changed=$changed memory_chars=$bytes $bad")
+        assertEquals(0, changed, bad.toString())
+    }
+
     private fun fix(typed: String, previous: String?, sentenceStart: Boolean): String {
         return ProximityAutocorrect.correct(typed, words, previous = previous, sentenceStart = sentenceStart)
             ?: ProximityAutocorrect.missingSpace(typed, words)
@@ -197,5 +236,61 @@ class AutocorrectCorpusBenchmarkTest {
             jordan taylor zoe nora amber bailey carter dylan finn harper logan mason owen parker
             quinn riley sage umber violet wesley xander yara
         """.trimIndent().split(Regex("\\s+")).map { it.lowercase() }.distinct()
+
+        /** Common English words. A word in the dictionary must not be rewritten into a different word. */
+        private val COMMON_WORDS = """
+            the of and to in is it you that he was for on are as with his they at be this have from
+            or one had by word but not what all were we when your can said there use an each which
+            she do how their if will up other about out many then them these so some her would make
+            like him into time has look two more write go see number no way could people my than
+            first water been call who oil its now find long down day did get come made may part
+            over new sound take only little work know place year live me back give most very after
+            thing our just name good sentence man think say great where help through much before
+            line right too mean old any same tell boy follow came want show also around form three
+            small set put end does another well large must big even such because turn here why ask
+            went men read need land different home us move try kind hand picture again change off
+            play spell air away animal house point page letter mother answer found study still learn
+            should america world high every near add food between own below country plant last school
+            father keep tree never start city earth eye light thought head under story saw left don
+            few while along might close something seem next hard open example begin life always
+            those both paper together got group often run important until children side feet car
+            mile night walk white sea began grow took river four carry state once book hear stop
+            without second later miss idea enough eat face watch far indian real almost let above
+            girl sometimes mountain cut young talk soon list song being leave family body music
+            color stand sun fish area mark dog horse birds room problem complete since ever piece
+            told usually didn friends easy heard order red door sure become top ship across today
+            during short better best however low hours black products happened whole measure remember
+            early waves reached listen wind rock space covered fast several hold himself toward five
+            step morning passed true hundred against pattern numeral table north slowly money map
+            farm pulled draw voice seen cold cried plan notice south sing war ground fall king town
+            unit figure certain field travel wood fire upon english road half ten fly gave box
+            finally wait correct oh quickly person became shown minutes strong verb stars front feel
+            fact inches street decided contain course surface produce building ocean class note
+            nothing rest carefully scientists inside wheels stay green known island week less machine
+            base ago stood plane system behind ran round boat game force brought understand warm
+            common bring explain dry though language shape deep thousands yes clear equation yet
+            government filled heat full hot check object am rule among noun power cannot able six
+            size dark ball material special heavy fine pair circle include built can not
+            done nothing else someone everyone anyone something nothing myself yourself himself
+            herself itself ourselves themselves today tomorrow yesterday morning evening night
+            monday tuesday wednesday thursday friday saturday sunday january february march april
+            june july august september october november december spring summer autumn winter
+            coffee water bread rice milk sugar salt pepper butter cheese meat fruit apple orange
+            banana grape lemon bread egg chicken fish beef pork soup salad rice pasta pizza
+            phone computer screen keyboard mouse window door table chair desk lamp clock watch
+            shirt shoes coat hat bag book pen paper money bank shop store market street road
+            train bus plane ship bike car truck taxi hotel room ticket passport visa airport
+            doctor nurse hospital school teacher student class lesson question answer problem
+            friend family mother father sister brother son daughter husband wife baby child
+            happy sad angry tired hungry thirsty cold hot warm cool big small long short
+            early late fast slow new old young good bad right wrong true false yes no
+            please thanks sorry hello goodbye welcome okay sure maybe already still again
+            always never often sometimes usually really very just only also even though
+            because while where when what which who whose how why
+            london paris tokyo berlin rome madrid lisbon dublin vienna prague warsaw athens
+            cairo delhi mumbai bangkok singapore sydney melbourne auckland toronto chicago
+            boston seattle denver miami austin dallas houston phoenix atlanta seattle
+            gonna lol omw idk brb yeet zen
+        """.trimIndent()
     }
 }

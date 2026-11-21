@@ -29,7 +29,7 @@ object AutocorrectPolicy {
     fun isLiteralToken(word: String): Boolean {
         if (word.isEmpty()) return false
         for (ch in word) {
-            if (ch.isDigit() || ch == '@' || ch == '.' || ch == '/' || ch == ':' || ch == '%' || ch == '+' || ch == '?' || ch == '&' || ch == '=') {
+            if (ch.isDigit() || ch == '@' || ch == '#' || ch == '.' || ch == '/' || ch == ':' || ch == '%' || ch == '+' || ch == '?' || ch == '&' || ch == '=') {
                 return true
             }
         }

@@ -31,6 +31,14 @@ object ProximityAutocorrect {
         fun word(index: Int): String
         fun probability(index: Int): Int
         fun indexesNear(first: Char, distance: (Char, Char) -> Float): IntArray
+        /**
+         * Words the edit search should score. AOSP's dictionary walk also tries a missing
+         * first letter and a swap of the first two, not only the first key's neighbours.
+         */
+        fun candidates(typedLetters: String, distance: (Char, Char) -> Float): IntArray {
+            if (typedLetters.isEmpty()) return IntArray(0)
+            return indexesNear(typedLetters[0], distance)
+        }
         /** Dictionary hit for these letters, or null. "don't" is stored under "dont" only when the source says so. */
         fun exact(letters: String): Pair<String, Int>? = null
     }
@@ -45,14 +53,20 @@ object ProximityAutocorrect {
             }
         }
         /** First-letter buckets, same idea as the dictionary vocabulary index. */
-        private val byFirst: Map<Char, IntArray> = buildMap {
-            val groups = HashMap<Char, ArrayList<Int>>()
-            for (i in items.indices) {
-                val w = items[i].word
-                if (w.isEmpty()) continue
-                groups.getOrPut(KeyGeometry.baseLetter(w[0])) { ArrayList() }.add(i)
+        private val byFirst: Map<String, IntArray> = bucket { word ->
+            if (word.isEmpty()) null else KeyGeometry.baseLetter(word[0]).toString()
+        }
+        /** Second letter, so a missing first letter ("ater" → "water") is still found. */
+        private val bySecond: Map<Char, IntArray> = bucket { word ->
+            if (word.length < 2) null else KeyGeometry.baseLetter(word[1]).toString()
+        }.mapKeys { it.key[0] }
+        /** First two letters swapped, so "baout" is scored against "about". */
+        private val bySwap: Map<String, IntArray> = bucket { word ->
+            if (word.length < 2) null else {
+                val a = KeyGeometry.baseLetter(word[0])
+                val b = KeyGeometry.baseLetter(word[1])
+                "$b$a"
             }
-            for ((ch, list) in groups) put(ch, list.toIntArray())
         }
         override val size: Int get() = items.size
         override fun word(index: Int) = items[index].word
@@ -61,12 +75,38 @@ object ProximityAutocorrect {
         override fun indexesNear(first: Char, distance: (Char, Char) -> Float): IntArray {
             val out = ArrayList<Int>()
             val f = KeyGeometry.baseLetter(first)
-            for ((ch, arr) in byFirst) {
-                if (distance(f, ch) <= 2.3f) {
+            for ((key, arr) in byFirst) {
+                if (distance(f, key[0]) <= 2.3f) {
                     for (n in arr) out.add(n)
                 }
             }
             return out.toIntArray()
+        }
+
+        override fun candidates(typedLetters: String, distance: (Char, Char) -> Float): IntArray {
+            if (typedLetters.isEmpty()) return IntArray(0)
+            val out = ArrayList<Int>()
+            val seen = HashSet<Int>()
+            fun add(arr: IntArray?) {
+                if (arr == null) return
+                for (n in arr) if (seen.add(n)) out.add(n)
+            }
+            add(indexesNear(typedLetters[0], distance))
+            add(bySecond[KeyGeometry.baseLetter(typedLetters[0])])
+            if (typedLetters.length >= 2) {
+                val key = "" + KeyGeometry.baseLetter(typedLetters[0]) + KeyGeometry.baseLetter(typedLetters[1])
+                add(bySwap[key])
+            }
+            return out.toIntArray()
+        }
+
+        private fun bucket(keyOf: (String) -> String?): Map<String, IntArray> = buildMap {
+            val groups = HashMap<String, ArrayList<Int>>()
+            for (i in items.indices) {
+                val key = keyOf(items[i].word) ?: continue
+                groups.getOrPut(key) { ArrayList() }.add(i)
+            }
+            for ((key, list) in groups) put(key, list.toIntArray())
         }
     }
 
@@ -140,6 +180,8 @@ object ProximityAutocorrect {
         contractions[typedLetters]?.let { form ->
             return applyCase(typed, form, sentenceStart)
         }
+        // "DONT" / "NASA": caps-lock still expands a contraction. An unknown all-caps word stays.
+        if (isAllCaps(typed)) return null
         // A general two-letter edit turned "yo" into "to". Only the one slip we know is safe.
         if (typedLetters.length == 2) {
             if (typedLetters == "iw") return applyCase(typed, "is", sentenceStart)
@@ -149,7 +191,7 @@ object ProximityAutocorrect {
         val limit = maxRawCost(typedLetters.length)
         if (limit <= 0f) return null
         val first = typedLetters[0]
-        val indexes = words.indexesNear(first, distance)
+        val indexes = words.candidates(typedLetters, distance)
         var bestScore = INF
         var bestWord: String? = null
         var bestRaw = INF
@@ -168,9 +210,11 @@ object ProximityAutocorrect {
             val raw = alignmentCost(typedLetters, candidateLetters, distance, limit, touches, centreOf)
             if (raw > limit) continue
             if (raw > HEAVY_RAW && probability < HEAVY_MIN_PROBABILITY) continue
-            // Two extra or missing letters are not confident enough to replace a typed token.
-            if (!confidentEnough(raw, probability, typedLetters.length, lenDiff)) continue
+            // AOSP normalized score, not a whitelist. Two-letter length gaps stay below the bar.
+            if (!AospAutoCommit.commits(typed, candidate, probability, raw, sentenceStart)) continue
             var score = rank(raw, probability, overlap(typedLetters, candidateLetters), lenDiff)
+            // AOSP weights the first key more: the user did press a key next to that letter.
+            if (typedLetters[0] == candidateLetters[0]) score -= 0.12f
             val context = if (previous == null) 0 else bigram(previous, candidate)
             if (context >= 40) score -= 0.55f
             else if (context > 12) score -= 0.25f
@@ -357,18 +401,6 @@ object ProximityAutocorrect {
     }
 
     /**
-     * Whether a dictionary candidate is confident enough to replace what was typed.
-     * One adjacent-key slip is enough. A heavier edit needs a common word, and two extra
-     * or missing letters are not an auto-correction. Mirrors AOSP's normalized-score gate.
-     */
-    private fun confidentEnough(raw: Float, probability: Int, typedLength: Int, lenDiff: Int): Boolean {
-        // Dropping or adding two letters ("webull" → "well") is below AOSP's bar.
-        // One slip, one transposition, or one missing letter still qualifies.
-        if (lenDiff >= 2) return false
-        return raw <= maxRawCost(typedLength) && probability >= MIN_PROBABILITY
-    }
-
-    /**
      * Closed confusion pairs. The typed word stays unless the previous word is a strong cue.
      * "its" is a real word, so it is not in the contraction table.
      */
@@ -383,6 +415,12 @@ object ProximityAutocorrect {
             "from" -> if (prev in FORM_AFTER) "form" else null
             else -> null
         }
+    }
+
+    /** "NASA" is intentional. AOSP does not rewrite an all-caps word. */
+    private fun isAllCaps(typed: String): Boolean {
+        val letters = typed.filter { it.isLetter() }
+        return letters.length >= 2 && letters.all { it.isUpperCase() }
     }
 
     private fun isMixedCase(typed: String): Boolean {

@@ -560,16 +560,23 @@ class DictionaryFacilitatorImpl : DictionaryFacilitator {
             if (main != null) {
                 // Case follows what was typed, and also a real sentence boundary.
                 // A bare "start of sentence" flag was capitalizing corrections in the middle of a line.
+                // A typed capital is not a sentence boundary. applyCase still keeps that capital.
                 val sentenceStart = isSentenceBoundary(previousWord)
-                    || typedForFuzzy.firstOrNull()?.isUpperCase() == true
                 val corrected = helium314.keyboard.latin.glide.GlideTyping.proximityCorrection(
                     main, typedForFuzzy, keyboard, sentenceStart, composedData.mInputPointers, previousWord
                 )
-                val merged = corrected
-                    ?: helium314.keyboard.latin.glide.GlideTyping.missingSpace(main, typedForFuzzy, keyboard)
-                if (merged != null) {
-                    suggestionResults.add(SuggestedWordInfo(merged, "", SuggestedWordInfo.MAX_SCORE - 100,
-                        SuggestedWordInfo.KIND_WHITELIST, main, SuggestedWordInfo.NOT_AN_INDEX, SuggestedWordInfo.NOT_A_CONFIDENCE))
+                if (corrected != null) {
+                    // Already passed AOSP's normalized-score bar. Not a whitelist bypass.
+                    suggestionResults.add(SuggestedWordInfo(corrected, "", 700_000,
+                        SuggestedWordInfo.KIND_CORRECTION or SuggestedWordInfo.KIND_FLAG_APPROPRIATE_FOR_AUTO_CORRECTION,
+                        main, SuggestedWordInfo.NOT_AN_INDEX, SuggestedWordInfo.NOT_A_CONFIDENCE))
+                } else {
+                    val merged = helium314.keyboard.latin.glide.GlideTyping.missingSpace(main, typedForFuzzy, keyboard)
+                    if (merged != null) {
+                        // A run of known bigrams ("i am going"). AOSP promotes that omission.
+                        suggestionResults.add(SuggestedWordInfo(merged, "", SuggestedWordInfo.MAX_SCORE - 100,
+                            SuggestedWordInfo.KIND_WHITELIST, main, SuggestedWordInfo.NOT_AN_INDEX, SuggestedWordInfo.NOT_A_CONFIDENCE))
+                    }
                 }
             }
         }
@@ -651,7 +658,8 @@ class DictionaryFacilitatorImpl : DictionaryFacilitator {
         } catch (_: Exception) {
             null
         } ?: return null
-        val sentenceStart = typed.firstOrNull()?.isUpperCase() == true
+        // No previous word here. A capital is scored as a name unless the edit is strong.
+        val sentenceStart = false
         return helium314.keyboard.latin.glide.GlideTyping.proximityCorrection(
             main, typed, keyboard, sentenceStart, null
         ) ?: helium314.keyboard.latin.glide.GlideTyping.missingSpace(main, typed, keyboard)
