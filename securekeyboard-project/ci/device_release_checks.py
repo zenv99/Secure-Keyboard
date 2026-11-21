@@ -151,10 +151,16 @@ def enabled_keys(serialized: str) -> list[str]:
 
 
 def write_toolbar(serialized: str) -> None:
-    root()
     adb("shell", "am", "force-stop", PKG)
+    root()
     xml = adb("shell", "cat", PREFS, check=False)
-    if 'name="toolbar_keys"' in xml:
+    if "<map>" not in xml:
+        xml = (
+            "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>\n<map>\n"
+            f'    <string name="toolbar_keys">{serialized}</string>\n'
+            '    <int name="version_code" value="4434" />\n</map>\n'
+        )
+    elif 'name="toolbar_keys"' in xml:
         xml = re.sub(
             r'(<string name="toolbar_keys">)[^<]*(</string>)',
             rf"\1{serialized}\2",
@@ -170,6 +176,18 @@ def write_toolbar(serialized: str) -> None:
     local.write_text(xml)
     adb("push", str(local), PREFS)
     adb("shell", "chmod", "660", PREFS)
+    check = adb("shell", "cat", PREFS, check=False)
+    if serialized not in check:
+        raise RuntimeError(f"toolbar pref did not stick: {check[:400]}")
+
+
+def run_upgrade() -> None:
+    """Start the app so a version change migrates prefs, then stop before reading the file."""
+    adb("shell", "am", "start", "-n", f"{PKG}/helium314.keyboard.settings.SettingsActivity",
+        "--es", "start_destination", "toolbar")
+    time.sleep(3)
+    adb("shell", "am", "force-stop", PKG)
+    time.sleep(0.5)
 
 
 def menu_string(enabled: list[str]) -> str:
@@ -296,12 +314,14 @@ def upgrade_checks() -> None:
     shot_menu("plus-legacy-before")
     install("release-apks/sk-4435.apk")
     enable_keyboard()
+    run_upgrade()
     print("after 4435", version_code())
     assert_enabled(STANDARD, "legacy migrated on 4435")
     saved = read_toolbar()
     shot_menu("plus-legacy-after-4435")
     install("release-apks/sk-4436.apk")
     enable_keyboard()
+    run_upgrade()
     print("after 4436", version_code())
     if read_toolbar() != saved:
         raise RuntimeError("second update changed a menu that was already migrated")
@@ -327,10 +347,12 @@ def upgrade_checks() -> None:
     assert_enabled(expected_custom(), "custom before update")
     install("release-apks/sk-4435.apk")
     enable_keyboard()
+    run_upgrade()
     assert_enabled(expected_custom(), "custom survived 4435")
     shot_menu("plus-custom-after-4435")
     install("release-apks/sk-4436.apk")
     enable_keyboard()
+    run_upgrade()
     assert_enabled(expected_custom(), "custom survived 4436")
     shot_menu("plus-custom-after-4436")
 
