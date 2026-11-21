@@ -507,19 +507,20 @@ def tap_key_grid(letter: str) -> None:
         raise RuntimeError(f"keyboard window not found for {letter}")
     x1, y1, x2, y2 = frame
     width, height = x2 - x1, y2 - y1
-    key_top = y1 + int(height * 0.22)
+    # Fractions of the keyboard window, measured on the API 34 emulator.
+    # The suggestion strip is the top of that window, then three letter rows, then the bottom row.
     rows = {
-        "qwertyuiop": 0.18,
-        "asdfghjkl": 0.38,
-        "zxcvbnm": 0.58,
+        "qwertyuiop": 0.31,
+        "asdfghjkl": 0.47,
+        "zxcvbnm": 0.63,
     }
     wanted = letter.lower()
     if wanted == "space":
-        tap(x1 + width // 2, y1 + int(height * 0.82))
+        tap(x1 + width // 2, y1 + int(height * 0.85))
         time.sleep(0.15)
         return
     if wanted == "delete":
-        tap(x1 + int(width * 0.90), y1 + int(height * 0.58))
+        tap(x1 + int(width * 0.92), y1 + int(height * 0.63))
         time.sleep(0.15)
         return
     for letters, frac in rows.items():
@@ -535,7 +536,7 @@ def tap_key_grid(letter: str) -> None:
             x = x1 + int(width * 0.15) + int((width * 0.70) * (index + 0.5) / count)
         else:
             x = x1 + int(width * (index + 0.5) / count)
-        tap(x, key_top + int(height * frac))
+        tap(x, y1 + int(height * frac))
         time.sleep(0.15)
         return
     raise RuntimeError(f"no grid position for {letter}")
@@ -596,6 +597,7 @@ def webull_in(focus_tap: str | None, shot_name: str) -> None:
     type_letters("webull", shot_name)
     time.sleep(0.3)
     if not field_contains("webull"):
+        print(shot_name, "field texts:", visible_texts()[:30])
         raise RuntimeError(f"{shot_name}: webull was not in the field after typing")
     tap_key("space")
     time.sleep(0.4)
