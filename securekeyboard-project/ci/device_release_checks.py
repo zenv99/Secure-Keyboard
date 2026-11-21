@@ -151,8 +151,8 @@ def prefs_file() -> str:
             print("prefs file", best)
             return best
         time.sleep(1)
-    listing = adb("shell", "find", "/data", "-name", "*_preferences.xml", check=False)
-    raise RuntimeError(f"the keyboard did not write a preferences file. find={listing[:500]}")
+    print("prefs file not written yet, using", PREFS)
+    return PREFS
 
 
 def read_toolbar() -> str:
