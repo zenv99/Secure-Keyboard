@@ -415,28 +415,84 @@ def chrome_package() -> str:
     raise RuntimeError(f"Chrome is not on this image. Packages:\n{packages}")
 
 
+def dismiss_blockers() -> None:
+    for label in ("Close app", "Wait"):
+        box = bounds_of(label)
+        if box:
+            tap(*center(box))
+            time.sleep(0.8)
+
+
+def tap_editor() -> bool:
+    """Tap the focused field, or an address/search editor, so the keyboard is requested."""
+    try:
+        root = dump()
+    except Exception:
+        return False
+    fallback = None
+    for node in nodes(root):
+        cls = node.attrib.get("class", "")
+        rid = node.attrib.get("resource-id", "")
+        if "EditText" not in cls and "url_bar" not in rid and "search_box" not in rid:
+            continue
+        raw = node.attrib.get("bounds", "")
+        if not raw:
+            continue
+        box = parse_bounds(raw)
+        if box[2] <= box[0] or box[3] <= box[1]:
+            continue
+        if node.attrib.get("focused") == "true":
+            tap(*center(box))
+            return True
+        fallback = box
+    if fallback:
+        tap(*center(fallback))
+        return True
+    return False
+
+
 def ime_frame() -> tuple[int, int, int, int] | None:
-    text = adb("shell", "dumpsys", "input_method")
-    for pattern in (
+    text = adb("shell", "dumpsys", "input_method", check=False)
+    patterns = (
         r"mImeFrame=\[(\d+),(\d+)\]\[(\d+),(\d+)\]",
         r"mInputFrame=\[(\d+),(\d+)\]\[(\d+),(\d+)\]",
         r"imeFrame=\[(\d+),(\d+)\]\[(\d+),(\d+)\]",
-    ):
+        r"mImeFrame=Rect\((\d+),\s*(\d+)\s*-\s*(\d+),\s*(\d+)\)",
+    )
+    for pattern in patterns:
         match = re.search(pattern, text)
         if match:
-            return tuple(int(n) for n in match.groups())  # type: ignore[return-value]
+            box = tuple(int(n) for n in match.groups())
+            if box[2] - box[0] > 100 and box[3] - box[1] > 100:
+                return box  # type: ignore[return-value]
+    windows = adb("shell", "dumpsys", "window", "windows", check=False)
+    for match in re.finditer(
+        r"(?:InputMethod|helium314\.keyboard)[\s\S]{0,500}?mFrame=\[(\d+),(\d+)\]\[(\d+),(\d+)\]",
+        windows,
+    ):
+        box = tuple(int(n) for n in match.groups())
+        if box[2] - box[0] > 100 and box[3] - box[1] > 200:
+            return box  # type: ignore[return-value]
     return None
 
 
 def wait_for_keyboard() -> None:
     enable_keyboard()
-    deadline = time.time() + 12
+    dismiss_blockers()
+    deadline = time.time() + 20
     while time.time() < deadline:
         if ime_frame():
             return
-        time.sleep(0.5)
-    snippet = adb("shell", "dumpsys", "input_method", check=False)[:800].replace("\n", " ")
-    print("keyboard not shown:", snippet)
+        tap_editor()
+        time.sleep(1)
+    text = adb("shell", "dumpsys", "input_method", check=False)
+    interesting = [
+        line.strip() for line in text.splitlines()
+        if any(key in line for key in ("mCurMethodId", "mImeWindowVis", "mInputShown", "mServedView", "mImeFrame", "mInputFrame"))
+    ]
+    print("keyboard not shown:", " | ".join(interesting[:24]))
+    print(adb("shell", "logcat", "-d", "-t", "60", "*:E", check=False)[-2500:])
+    raise RuntimeError("keyboard window not found")
 
 
 def tap_key_grid(letter: str) -> None:
@@ -552,6 +608,7 @@ def webull_in(focus_tap: str | None, shot_name: str) -> None:
 
 def chrome_checks() -> None:
     enable_keyboard()
+    dismiss_blockers()
     chrome = chrome_package()
     page = Path("/tmp/sk-box.html")
     page.write_text("<html><body><textarea autofocus style='width:90%;height:40%'>type here</textarea></body></html>")

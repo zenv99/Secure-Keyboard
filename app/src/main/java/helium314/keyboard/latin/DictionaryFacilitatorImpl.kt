@@ -562,20 +562,21 @@ class DictionaryFacilitatorImpl : DictionaryFacilitator {
                 // A bare "start of sentence" flag was capitalizing corrections in the middle of a line.
                 // A typed capital is not a sentence boundary. applyCase still keeps that capital.
                 val sentenceStart = isSentenceBoundary(previousWord)
-                val corrected = helium314.keyboard.latin.glide.GlideTyping.proximityCorrection(
-                    main, typedForFuzzy, keyboard, sentenceStart, composedData.mInputPointers, previousWord
-                )
-                if (corrected != null) {
-                    // Already passed AOSP's normalized-score bar. Not a whitelist bypass.
-                    suggestionResults.add(SuggestedWordInfo(corrected, "", 700_000,
-                        SuggestedWordInfo.KIND_CORRECTION or SuggestedWordInfo.KIND_FLAG_APPROPRIATE_FOR_AUTO_CORRECTION,
-                        main, SuggestedWordInfo.NOT_AN_INDEX, SuggestedWordInfo.NOT_A_CONFIDENCE))
+                // A known bigram run ("on the") beats a lookalike single word ("other").
+                val merged = helium314.keyboard.latin.glide.GlideTyping.missingSpace(main, typedForFuzzy, keyboard)
+                if (merged != null) {
+                    // A run of known bigrams ("i am going"). AOSP promotes that omission.
+                    suggestionResults.add(SuggestedWordInfo(merged, "", SuggestedWordInfo.MAX_SCORE - 100,
+                        SuggestedWordInfo.KIND_WHITELIST, main, SuggestedWordInfo.NOT_AN_INDEX, SuggestedWordInfo.NOT_A_CONFIDENCE))
                 } else {
-                    val merged = helium314.keyboard.latin.glide.GlideTyping.missingSpace(main, typedForFuzzy, keyboard)
-                    if (merged != null) {
-                        // A run of known bigrams ("i am going"). AOSP promotes that omission.
-                        suggestionResults.add(SuggestedWordInfo(merged, "", SuggestedWordInfo.MAX_SCORE - 100,
-                            SuggestedWordInfo.KIND_WHITELIST, main, SuggestedWordInfo.NOT_AN_INDEX, SuggestedWordInfo.NOT_A_CONFIDENCE))
+                    val corrected = helium314.keyboard.latin.glide.GlideTyping.proximityCorrection(
+                        main, typedForFuzzy, keyboard, sentenceStart, composedData.mInputPointers, previousWord
+                    )
+                    if (corrected != null) {
+                        // Already passed AOSP's normalized-score bar. Not a whitelist bypass.
+                        suggestionResults.add(SuggestedWordInfo(corrected, "", 700_000,
+                            SuggestedWordInfo.KIND_CORRECTION or SuggestedWordInfo.KIND_FLAG_APPROPRIATE_FOR_AUTO_CORRECTION,
+                            main, SuggestedWordInfo.NOT_AN_INDEX, SuggestedWordInfo.NOT_A_CONFIDENCE))
                     }
                 }
             }
@@ -660,9 +661,10 @@ class DictionaryFacilitatorImpl : DictionaryFacilitator {
         } ?: return null
         // No previous word here. A capital is scored as a name unless the edit is strong.
         val sentenceStart = false
-        return helium314.keyboard.latin.glide.GlideTyping.proximityCorrection(
-            main, typed, keyboard, sentenceStart, null
-        ) ?: helium314.keyboard.latin.glide.GlideTyping.missingSpace(main, typed, keyboard)
+        return helium314.keyboard.latin.glide.GlideTyping.missingSpace(main, typed, keyboard)
+            ?: helium314.keyboard.latin.glide.GlideTyping.proximityCorrection(
+                main, typed, keyboard, sentenceStart, null
+            )
     }
 
     override fun spaceSlipCorrection(previous: String, fragment: String): String? {

@@ -634,12 +634,13 @@ f""", // no newline at the end
         assertEquals(listOf("1", "2", "3", "4", "5", "6", "7", "8", "9", "0"), labels(symbols[0]))
         assertEquals(listOf("-", "/", ":", ";", "(", ")", "$", "&", "@", "\""), labels(symbols[1]))
         assertEquals(listOf("#+=", ".", ",", "?", "!", "'", "delete_key"), labels(symbols[2]))
-        assertEquals(listOf("ABC", "emoji", "space_key"), labels(symbols[3]).take(3))
-        assertTrue(labels(symbols[3]).none { it == "." || it == "," })
+        assertEquals(listOf("ABC", "space_key"), labels(symbols[3]).take(2))
+        assertTrue(labels(symbols[3]).none { it == "emoji" || it == "." || it == "," })
         assertEquals(listOf("[", "]", "{", "}", "#", "%", "^", "*", "+", "="), labels(more[0]))
         assertEquals(listOf("_", "\\", "|", "~", "<", ">", "€", "£", "¥", "•"), labels(more[1]))
         assertEquals(listOf("123", ".", ",", "?", "!", "'", "delete_key"), labels(more[2]))
-        assertEquals(listOf("ABC", "emoji", "space_key"), labels(more[3]).take(3))
+        assertEquals(listOf("ABC", "space_key"), labels(more[3]).take(2))
+        assertTrue(labels(more[3]).none { it == "emoji" || it == "." || it == "," })
     }
 
     private fun labels(row: List<KeyParams>): List<String> =
