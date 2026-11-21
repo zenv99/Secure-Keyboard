@@ -216,8 +216,12 @@ def write_toolbar(serialized: str, path: str | None = None) -> None:
         xml = xml.replace("</map>", '    <int name="version_code" value="4434" />\n</map>\n')
     local = Path("/tmp/sk-prefs.xml")
     local.write_text(xml)
-    adb("shell", "mkdir", "-p", target.rsplit("/", 1)[0])
+    parent = target.rsplit("/", 1)[0]
+    adb("shell", "mkdir", "-p", parent)
     adb("push", str(local), target)
+    uid = adb("shell", "stat", "-c", "%u", f"/data/user_de/0/{PKG}", check=False).strip()
+    if uid.isdigit():
+        adb("shell", "chown", f"{uid}:{uid}", target)
     adb("shell", "chmod", "660", target)
     adb("shell", "am", "force-stop", PKG)
     time.sleep(1.5)
