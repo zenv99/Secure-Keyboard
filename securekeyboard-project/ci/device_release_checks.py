@@ -176,6 +176,8 @@ def write_toolbar(serialized: str) -> None:
     local.write_text(xml)
     adb("push", str(local), PREFS)
     adb("shell", "chmod", "660", PREFS)
+    adb("shell", "am", "force-stop", PKG)
+    time.sleep(0.4)
     check = adb("shell", "cat", PREFS, check=False)
     if serialized not in check:
         raise RuntimeError(f"toolbar pref did not stick: {check[:400]}")
@@ -311,7 +313,8 @@ def upgrade_checks() -> None:
     print("v1.0.6 version", version_code())
     # Known old built-in default. The next two updates must migrate it once.
     write_toolbar(menu_string(LEGACY))
-    shot_menu("plus-legacy-before")
+    # Do not start v1.0.6 here. A running process flushes its old prefs over the file.
+    shot("plus-legacy-before")
     install("release-apks/sk-4435.apk")
     enable_keyboard()
     run_upgrade()
@@ -343,7 +346,7 @@ def upgrade_checks() -> None:
     except Exception as exc:
         print("UI customize did not land, writing the same menu the dialog would save:", exc)
         write_toolbar(menu_string(expected_custom()))
-    shot_menu("plus-custom-before")
+    shot("plus-custom-before")
     assert_enabled(expected_custom(), "custom before update")
     install("release-apks/sk-4435.apk")
     enable_keyboard()
