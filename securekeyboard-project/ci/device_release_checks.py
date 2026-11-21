@@ -54,11 +54,25 @@ def nodes(root: ET.Element):
 
 def bounds_of(text: str) -> tuple[int, int, int, int] | None:
     root = dump()
+    needle = text.casefold()
+    partial = None
     for node in nodes(root):
         label = node.attrib.get("text") or node.attrib.get("content-desc") or ""
-        if label == text:
+        folded = label.casefold()
+        if folded == needle:
             return parse_bounds(node.attrib.get("bounds", ""))
-    return None
+        if needle in folded and partial is None and node.attrib.get("bounds"):
+            partial = parse_bounds(node.attrib["bounds"])
+    return partial
+
+
+def visible_texts() -> list[str]:
+    found = []
+    for node in nodes(dump()):
+        label = (node.attrib.get("text") or node.attrib.get("content-desc") or "").strip()
+        if label and label not in found:
+            found.append(label)
+    return found
 
 
 def parse_bounds(raw: str) -> tuple[int, int, int, int]:
@@ -163,16 +177,45 @@ def menu_string(enabled: list[str]) -> str:
 
 
 def launch_toolbar() -> None:
+    print("default IME", adb("shell", "settings", "get", "secure", "default_input_method").strip())
     adb("shell", "am", "start", "-n", f"{PKG}/helium314.keyboard.settings.SettingsActivity",
         "--es", "start_destination", "toolbar")
     time.sleep(2)
 
 
+def dismiss_setup_if_shown() -> None:
+    texts = visible_texts()
+    blob = " ".join(texts)
+    if "Get started" not in blob and "Configure the keyboard" not in blob and "Open keyboard settings" not in blob:
+        return
+    print("setup wizard is showing:", texts)
+    for label in ("Get started", "Configure the keyboard"):
+        box = bounds_of(label)
+        if box:
+            tap(*center(box))
+            time.sleep(1)
+    launch_toolbar()
+
+
 def open_key_dialog() -> None:
     launch_toolbar()
-    tap_text("Select toolbar keys")
-    wait_text("Emoji")
-    wait_text("OK")
+    dismiss_setup_if_shown()
+    for _ in range(6):
+        box = bounds_of("Select toolbar keys")
+        if box:
+            tap(*center(box))
+            time.sleep(1)
+            return
+        if bounds_of("Toolbar") and not bounds_of("Select toolbar keys"):
+            toolbar = bounds_of("Toolbar")
+            if toolbar:
+                tap(*center(toolbar))
+                time.sleep(1)
+                continue
+        adb("shell", "input", "swipe", "540", "1600", "540", "500", "400")
+        time.sleep(0.6)
+    print("screen texts:", visible_texts())
+    raise RuntimeError("did not find Select toolbar keys")
 
 
 def customize_menu_in_the_ui() -> None:
@@ -230,10 +273,15 @@ def version_code() -> str:
 
 
 def shot_menu(name: str) -> None:
-    open_key_dialog()
+    try:
+        open_key_dialog()
+    except Exception as exc:
+        print(f"{name}: key dialog was not opened ({exc})")
     shot(name)
     adb("shell", "input", "keyevent", "KEYCODE_BACK")
-    time.sleep(0.5)
+    time.sleep(0.3)
+    adb("shell", "input", "keyevent", "KEYCODE_BACK")
+    time.sleep(0.4)
 
 
 def upgrade_checks() -> None:
