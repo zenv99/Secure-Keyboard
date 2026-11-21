@@ -108,12 +108,12 @@ jobs:
             export SK_KEYSTORE_FILE="$RUNNER_TEMP/sk.jks"
             export SK_KEYSTORE_PASSWORD="$PW"
             export SK_VERSION_CODE=$((4300 + GITHUB_RUN_NUMBER))
-            # Published v1.0.5 is versionCode 4427. Stay above it so Obtainium and Android see an update.
-            if [ "$SK_VERSION_CODE" -le 4427 ]; then
-              export SK_VERSION_CODE=4428
+            # Published v1.0.6 is versionCode 4434. Stay above it.
+            if [ "$SK_VERSION_CODE" -le 4434 ]; then
+              export SK_VERSION_CODE=4435
             fi
-            # New release. Do not replace v1.0.5 or any older release.
-            export SK_VERSION_NAME="1.0.6"
+            # New release. Do not replace v1.0.6 or any older release.
+            export SK_VERSION_NAME="1.0.7"
             echo "SK_SIGNED=1" >> "$GITHUB_ENV"
             echo "SK_VERSION_NAME=$SK_VERSION_NAME" >> "$GITHUB_ENV"
             echo "SK_VERSION_CODE=$SK_VERSION_CODE" >> "$GITHUB_ENV"
@@ -263,14 +263,34 @@ jobs:
           export GH_REPO="$GITHUB_REPOSITORY"
           cp apk/*.apk release/SecureKeyboard.apk
           VERSION_NAME="$(tr -d '[:space:]' < buildinfo/version_name || true)"
-          if [ "$VERSION_NAME" = "1.0" ] || [ "$VERSION_NAME" = "1.0.1" ] || [ "$VERSION_NAME" = "1.0.2" ] || [ "$VERSION_NAME" = "1.0.3" ] || [ "$VERSION_NAME" = "1.0.4" ] || [ "$VERSION_NAME" = "1.0.5" ] || [ "$VERSION_NAME" = "1.0.6" ]; then
+          if [ "$VERSION_NAME" = "1.0" ] || [ "$VERSION_NAME" = "1.0.1" ] || [ "$VERSION_NAME" = "1.0.2" ] || [ "$VERSION_NAME" = "1.0.3" ] || [ "$VERSION_NAME" = "1.0.4" ] || [ "$VERSION_NAME" = "1.0.5" ] || [ "$VERSION_NAME" = "1.0.6" ] || [ "$VERSION_NAME" = "1.0.7" ]; then
             TAG="v${VERSION_NAME}"
           else
             TAG="v1.0.${GITHUB_RUN_NUMBER}"
           fi
           cp release/SecureKeyboard.apk "release/SecureKeyboard-${TAG}.apk"
           (cd release && sha256sum "SecureKeyboard-${TAG}.apk" > SHA256SUMS.txt)
-          if [ "$TAG" = "v1.0.6" ]; then
+          if [ "$TAG" = "v1.0.7" ]; then
+            cat > release/notes.md <<EOF
+          Secure Keyboard v1.0.7 (commit ${GITHUB_SHA:0:8}). Not yet independently audited.
+
+          What changed
+          - Autocorrect commits a word only when it clears the AOSP LatinIME normalized-score bar at HeliBoard's confidence setting. Dictionary words, names you capitalized, all-caps words, and words you took back with backspace stay as typed. Backspace restores the typed word and its capitals; the next space keeps that spelling.
+          - Typing hug, love, laugh, smile, fire, or thumbs offers the matching emoji in the suggestion strip. The list is from the Unicode CLDR English annotations (Unicode License). Tapping inserts the emoji. Space does not turn the word into an emoji.
+          - The emoji key next to the space bar is gone. The emoji button at the top left opens the same emoji panel. A period key sits to the right of the space bar. The big mic and Send button is unchanged.
+
+          Privacy
+          No INTERNET permission. No background location. Backup is off. Voice, emoji, and learned words stay on the device.
+
+          License
+          Secure Keyboard is free software under the GNU General Public License v3.0. It is a modified version of HeliBoard (copyright Helium314 and contributors), which is based on OpenBoard and the Android Open Source Keyboard (Apache License 2.0). Emoji keywords are from the Unicode CLDR annotations, Unicode License. This is not the official HeliBoard.
+
+          Signing certificate SHA-256
+          33eacd63355ee1b19abca1f997ea25a7946960bbf934411691273dde053c78d4
+
+          Install: download SecureKeyboard-v1.0.7.apk, then enable Secure Keyboard in Settings > System > Keyboard. Check the file against SHA256SUMS.txt before installing.
+          EOF
+          elif [ "$TAG" = "v1.0.6" ]; then
             cat > release/notes.md <<EOF
           Secure Keyboard v1.0.6 (commit ${GITHUB_SHA:0:8}). Not yet independently audited.
 
@@ -433,7 +453,7 @@ jobs:
             exit 0
           fi
           # v1.0.6 is a full release. Older tags stay as they are and are never replaced.
-          if [ "$TAG" = "v1.0.6" ] || [ "$TAG" = "v1.0.5" ]; then
+          if [ "$TAG" = "v1.0.7" ] || [ "$TAG" = "v1.0.6" ] || [ "$TAG" = "v1.0.5" ]; then
             gh release create "$TAG" "release/SecureKeyboard-${TAG}.apk" release/SHA256SUMS.txt \
               --target "$GITHUB_SHA" --title "Secure Keyboard ${TAG}" --notes-file release/notes.md
           else

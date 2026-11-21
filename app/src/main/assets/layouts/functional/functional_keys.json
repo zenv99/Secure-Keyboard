@@ -7,16 +7,11 @@
   [
     { "label": "symbol_alpha", "width": 0.15 },
     { "$": "variation_selector",
-      "email":    { "label": "@", "labelFlags": 1073741824, "groupId": 1, "type": "function" },
-      "uri":      { "label": "/", "labelFlags": 1073741824, "groupId": 1, "type": "function" },
-      "default":  { "$": "keyboard_state_selector",
-        "alphabet": { "$": "keyboard_state_selector", "emojiKeyEnabled": { "label": "emoji", "width": 0.10 } },
-        "symbols": { "$": "keyboard_state_selector", "emojiKeyEnabled": { "label": "emoji", "width": 0.10 } },
-        "moreSymbols": { "$": "keyboard_state_selector", "emojiKeyEnabled": { "label": "emoji", "width": 0.10 } },
-        "default": { "label": "comma", "labelFlags": 1073741824 }
-      }
+      "email": { "label": "@", "labelFlags": 1073741824, "groupId": 1, "type": "function", "width": 0.10 },
+      "uri":   { "label": "/", "labelFlags": 1073741824, "groupId": 1, "type": "function", "width": 0.10 }
     },
     { "label": "space" },
+    { "label": "period", "width": 0.12, "groupId": 2, "labelFlags": 1073741824 },
     { "label": "action", "width": 0.22, "labelFlags": 1073741824 }
   ]
 ]

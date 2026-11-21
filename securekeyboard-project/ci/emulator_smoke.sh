@@ -32,7 +32,8 @@ for name in trackpad-left trackpad-right trackpad-up trackpad-down send-single s
   webull-chrome-bar-space webull-chrome-bar-backspace webull-chrome-bar-space-again \
   webull-chrome-page-key-1-w webull-chrome-page-key-2-e webull-chrome-page-key-3-b \
   webull-chrome-page-key-4-u webull-chrome-page-key-5-l webull-chrome-page-key-6-l \
-  webull-chrome-page-space webull-chrome-page-backspace webull-chrome-page-space-again; do
+  webull-chrome-page-space webull-chrome-page-backspace webull-chrome-page-space-again \
+  bottom-letters bottom-multiline bottom-web emoji-hug; do
   test -s "emulator-screenshots/sk-${name}.png"
 done
 find emulator-screenshots -type f -name '*.png' -print

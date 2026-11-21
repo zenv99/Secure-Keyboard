@@ -1,42 +1,40 @@
 // SPDX-License-Identifier: GPL-3.0-only
 package helium314.keyboard.latin.glide
 
-import java.io.File
+import android.app.Application
+import androidx.test.core.app.ApplicationProvider
+import helium314.keyboard.latin.suggestions.SuggestedWordInfo
+import helium314.keyboard.latin.utils.AutoCorrectionUtils
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
+/**
+ * Word to emoji comes from the bundled Unicode CLDR English annotations
+ * (Unicode License), via emoji_words.tsv. A tap inserts the emoji.
+ * Space must not commit it: the suggestion is not an autocorrection.
+ */
+@RunWith(RobolectricTestRunner::class)
+@Config(application = Application::class)
 class EmojiWordsTest {
-    private val words = load()
-
-    @Test fun sunIncludesFaceVariantInTheTopThree() {
-        val sun = words.getValue("sun")
-        assertTrue(sun.take(3).contains("🌞"), sun.toString())
-    }
-
-    @Test fun commonWordsMatchExpressiveEmoji() {
-        assertTrue(words.getValue("love").any { "❤" in it }, words.getValue("love").toString())
-        assertTrue(words.getValue("fire").first() == "🔥", words.getValue("fire").toString())
-        assertTrue(words.getValue("happy").any { it in SMILES }, words.getValue("happy").toString())
-        assertTrue(words.getValue("cat").take(3).contains("🐱"), words.getValue("cat").toString())
-    }
-
-    private fun load(): Map<String, List<String>> {
-        val file = listOf(
-            File("src/main/assets/emoji_words.tsv"),
-            File("app/src/main/assets/emoji_words.tsv"),
-        ).first { it.isFile }
-        val map = HashMap<String, List<String>>()
-        file.bufferedReader().useLines { lines ->
-            for (line in lines) {
-                val tab = line.indexOf('\t')
-                if (tab <= 0) continue
-                map[line.substring(0, tab)] = line.substring(tab + 1).split(' ').filter { it.isNotEmpty() }
-            }
-        }
-        return map
-    }
-
-    companion object {
-        private val SMILES = setOf("😀", "😃", "😄", "😁", "😊", "🙂", "☺")
+    @Test fun commonWordsOfferTheIosEmojiAndDoNotAutocorrect() {
+        EmojiWords.init(ApplicationProvider.getApplicationContext())
+        assertEquals("🤗", EmojiWords.forWord("hug").first())
+        assertTrue(EmojiWords.forWord("love").any { it == "❤" || it == "❤️" })
+        assertTrue(EmojiWords.forWord("laugh").contains("😂"))
+        assertEquals("😊", EmojiWords.forWord("smile").first())
+        assertEquals("🔥", EmojiWords.forWord("fire").first())
+        assertTrue(EmojiWords.forWord("thumbs").contains("👍"))
+        val hug = SuggestedWordInfo(
+            "🤗", "", 900_000, SuggestedWordInfo.KIND_COMPLETION,
+            helium314.keyboard.latin.dictionary.Dictionary.DICTIONARY_HARDCODED,
+            SuggestedWordInfo.NOT_AN_INDEX, SuggestedWordInfo.NOT_A_CONFIDENCE,
+        )
+        assertFalse(hug.isAppropriateForAutoCorrection)
+        assertFalse(AutoCorrectionUtils.suggestionExceedsThreshold(hug, "hug", 0.15f))
     }
 }
