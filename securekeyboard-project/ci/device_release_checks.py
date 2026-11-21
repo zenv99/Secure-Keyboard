@@ -138,17 +138,21 @@ def enable_keyboard() -> None:
 def prefs_file() -> str:
     """The preferences file the running app last wrote."""
     root()
+    deadline = time.time() + 20
     best = ""
     best_time = -1
-    for path in PREF_FILES:
-        stamp = adb("shell", "stat", "-c", "%Y", path, check=False).strip()
-        if stamp.isdigit() and int(stamp) >= best_time:
-            best_time = int(stamp)
-            best = path
-    if not best:
-        raise RuntimeError("the keyboard did not write a preferences file")
-    print("prefs file", best)
-    return best
+    while time.time() < deadline:
+        for path in PREF_FILES:
+            stamp = adb("shell", "stat", "-c", "%Y", path, check=False).strip()
+            if stamp.isdigit() and int(stamp) >= best_time:
+                best_time = int(stamp)
+                best = path
+        if best:
+            print("prefs file", best)
+            return best
+        time.sleep(1)
+    listing = adb("shell", "find", "/data", "-name", "*_preferences.xml", check=False)
+    raise RuntimeError(f"the keyboard did not write a preferences file. find={listing[:500]}")
 
 
 def read_toolbar() -> str:
