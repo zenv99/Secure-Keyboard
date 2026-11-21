@@ -13,7 +13,11 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 
 PKG = "app.securekeyboard.keyboard"
-PREFS = f"/data/user_de/0/{PKG}/shared_prefs/{PKG}_preferences.xml"
+PREF_FILES = [
+    f"/data/user_de/0/{PKG}/shared_prefs/{PKG}_preferences.xml",
+    f"/data/data/{PKG}/shared_prefs/{PKG}_preferences.xml",
+]
+PREFS = PREF_FILES[0]
 LEGACY = [
     "SETTINGS", "CLIPBOARD", "EMOJI", "UNDO", "REDO", "SELECT_WORD",
     "COPY", "PASTE", "LEFT", "RIGHT",
@@ -133,13 +137,14 @@ def enable_keyboard() -> None:
 
 def read_toolbar() -> str:
     root()
-    xml = adb("shell", "cat", PREFS)
-    match = re.search(r'name="toolbar_keys"[^>]*>([^<]*)<', xml)
-    if not match:
-        match = re.search(r'name="toolbar_keys">([^<]*)<', xml)
-    if not match:
-        raise RuntimeError(f"toolbar_keys missing from prefs: {xml[:500]}")
-    return match.group(1)
+    found = []
+    for path in PREF_FILES:
+        xml = adb("shell", "cat", path, check=False)
+        found.append(f"{path}: {xml[:240].replace(chr(10), ' ')}")
+        match = re.search(r'name="toolbar_keys"[^>]*>([^<]*)<', xml)
+        if match:
+            return match.group(1)
+    raise RuntimeError("toolbar_keys missing from prefs: " + " | ".join(found))
 
 
 def enabled_keys(serialized: str) -> list[str]:
@@ -172,15 +177,19 @@ def write_toolbar(serialized: str) -> None:
             "</map>",
             f'    <string name="toolbar_keys">{serialized}</string>\n</map>\n',
         )
+    if 'name="version_code"' not in xml:
+        xml = xml.replace("</map>", '    <int name="version_code" value="4434" />\n</map>\n')
     local = Path("/tmp/sk-prefs.xml")
     local.write_text(xml)
-    adb("push", str(local), PREFS)
-    adb("shell", "chmod", "660", PREFS)
+    for path in PREF_FILES:
+        adb("shell", "mkdir", "-p", path.rsplit("/", 1)[0])
+        adb("push", str(local), path)
+        adb("shell", "chmod", "660", path)
     adb("shell", "am", "force-stop", PKG)
     time.sleep(0.4)
-    check = adb("shell", "cat", PREFS, check=False)
-    if serialized not in check:
-        raise RuntimeError(f"toolbar pref did not stick: {check[:400]}")
+    check = read_toolbar()
+    if check != serialized and serialized not in check:
+        raise RuntimeError(f"toolbar pref did not stick: {check}")
 
 
 def run_upgrade() -> None:
